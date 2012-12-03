@@ -113,12 +113,17 @@ POS_other={
 	12239: "Medium Intensive Refining Array",
 	12238: "Refining Array"
 	}
-
+POS_fuel={
+	"Gallente": 4312,
+	"Caldari": 4051,
+	"Minmatar": 4246,
+	"Amarr": 4247
+	}
 class Module (object):
 	
 	def __init__ (self,uniqueID,typeID):
-		self.contents = []			#return list of contents
-		#self.id = names(uniqueID)	#return unique name (if valid)
+		self.contents = {}			#return list of contents
+		#self.title = names(uniqueID)	#return unique name (if valid)
 		if typeID in POS_tower:
 			self.type="tower"
 			self.name=POS_tower[typeID]
@@ -140,5 +145,24 @@ class Module (object):
 		else:
 			self.type="ERROR"
 			self.name="ERROR"
+		self.uniqueID=uniqueID
+		self.typeID=typeID
 		
+class Tower (object):
+	#Set of objects to handle tower information
+	
+	def __init__ (self,uniqueID,typeID):
 		
+		temp_tower = Module(uniqueID,typeID)
+		race = temp_tower.name.split(' ',1)
+			##Fuel returns
+			## stront = remaining : max
+		if temp_tower.name.find("Small"):
+			self.stront = (math.floor(temp_tower.contents[16275]/100))+" : "+(math.floor(12500/3)/100)
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/10))+" : "(math.floor(35000/5)/10)
+		elif temp_tower.name.find("Medium"):
+			self.stront = (math.floor(temp_tower.contents[16275]/200))+" : "+(math.floor(25000/3)/200)
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/20))+" : "(math.floor(70000/5)/20)
+		else:
+			self.stront=(floor(temp_tower.contents[16275]/400))+":"+(floor(50000/3)/300)
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/40))+" : "(math.floor(140000/5)/40)
