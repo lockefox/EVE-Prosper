@@ -52,7 +52,7 @@ POS_research={
 	32245: "Hyasyoda Mobile Laboratory",
 	25305: "Drug Lab",
 	24567: "Experimental Laboratory",	
-}
+	}
 POS_moon={
 		##MOON MINING##
 	20175: "Simple Reactor Array",
@@ -66,7 +66,7 @@ POS_moon={
 	17982: "Coupling Array",
 	25280: "Hazardous Chemical Silo",
 	30655: "Hybrid Polymer Silo",
-}
+	}
 POS_weapon={
 		##WEAPONS##
 	17174: "Ion Field Projection Battery",
@@ -100,7 +100,7 @@ POS_weapon={
 	17404: "Small Blaster Battery",
 	17403: "Medium Blaster Battery",
 	17402: "Large Blaster Battery",
-}
+	}
 POS_other={
 		##OTHER###
 	17621: "Corporate Hangar Array",
@@ -112,7 +112,7 @@ POS_other={
 	19470: "Intensive Refining Array",
 	12239: "Medium Intensive Refining Array",
 	12238: "Refining Array"
-}
+	}
 
 class Module (object):
 	
