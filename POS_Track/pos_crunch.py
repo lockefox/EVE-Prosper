@@ -69,14 +69,7 @@ POS_moon={
 	}
 POS_weapon={
 		##WEAPONS##
-	17174: "Ion Field Projection Battery",
-	17175: "Phase Inversion Battery",
-	17176: "Spatial Destabilization Battery",
-	17177: "White Noise Generation Battery",
-	17178: "Stasis Webification Battery",
-	17180: "Sensor Dampening Battery",
-	17181: "Warp Disruption Battery",
-	17182: "Warp Scrambling Battery",
+
 	17167: "Small Beam Laser Battery",
 	17168: "Medium Beam Laser Battery",
 	16694: "Large Beam Laser Battery",
@@ -103,6 +96,14 @@ POS_weapon={
 	}
 POS_other={
 		##OTHER###
+	17174: "Ion Field Projection Battery",
+	17175: "Phase Inversion Battery",
+	17176: "Spatial Destabilization Battery",
+	17177: "White Noise Generation Battery",
+	17178: "Stasis Webification Battery",
+	17180: "Sensor Dampening Battery",
+	17181: "Warp Disruption Battery",
+	17182: "Warp Scrambling Battery",	
 	17621: "Corporate Hangar Array",
 	27673: "Cynosural Generator Array",
 	27674: "Cynosural System Jammer",
@@ -142,6 +143,8 @@ DRUG_intermediates={
 DRUG_consumables={
 
 	}
+	
+price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 class Module (object):
 	
 	def __init__ (self,uniqueID,typeID):
@@ -176,7 +179,7 @@ class Tower (object):
 	
 	def __init__ (self,uniqueID,typeID):
 		
-		temp_tower = Module(uniqueID,typeID)
+		temp_tower = Module(self,uniqueID,typeID)
 		race = temp_tower.name.split(' ',1)
 		fuelmod = 1		#to be added: Faction tower modifier
 		baymod = 1		#to be added: faction tower modifier
@@ -194,3 +197,16 @@ class Tower (object):
 			
 class Value (object):
 
+	def __init__ (self,typeID):
+		self.sell = price[typeID][2]
+		self.vol = price[typeID][3]
+		self.buy = price[typeID][0]
+		self.buyvol = price[typeID][1]
+		
+	def load(self):		#Queries eve-central and loads market dictionary
+		
+		
+class Moon (object):
+
+	def __init__ (self,uniqueID,typeID,parentID):
+		
