@@ -121,29 +121,6 @@ POS_fuel={
 	"Amarr": 4247
 	}
 	
-MOON_first={
-
-	}
-MOON_second={
-
-	}
-MOON_third={
-
-	}
-MOON_final={
-
-	}
-	
-DRUG_gas={
-
-	}
-DRUG_intermediates={
-
-	}
-DRUG_consumables={
-
-	}
-	
 price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 class Module (object):
 	
