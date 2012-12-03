@@ -155,14 +155,16 @@ class Tower (object):
 		
 		temp_tower = Module(uniqueID,typeID)
 		race = temp_tower.name.split(' ',1)
+		fuelmod = 1		#to be added: Faction tower modifier
+		baymod = 1		#to be added: faction tower modifier
 			##Fuel returns
 			## stront = remaining : max
 		if temp_tower.name.find("Small"):
-			self.stront = (math.floor(temp_tower.contents[16275]/100))+" : "+(math.floor(12500/3)/100)
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/10))+" : "(math.floor(35000/5)/10)
+			self.stront=(math.floor(temp_tower.contents[16275]/(100 * fuelmod)))+" : "+(math.floor((12500 * baymod)/3)/(100 * fuelmod))
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(10 * fuelmod)))+" : "+(math.floor((35000 * baymod)/5)/(10 * fuelmod))
 		elif temp_tower.name.find("Medium"):
-			self.stront = (math.floor(temp_tower.contents[16275]/200))+" : "+(math.floor(25000/3)/200)
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/20))+" : "(math.floor(70000/5)/20)
+			self.stront=(math.floor(temp_tower.contents[16275]/(200 * fuelmod)))+" : "+(math.floor((25000 * baymod)/3)/(200 * fuelmod))
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(20 * fuelmod)))+" : "+(math.floor((70000 * baymod)/5)/(20 * fuelmod))
 		else:
-			self.stront=(floor(temp_tower.contents[16275]/400))+":"+(floor(50000/3)/300)
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/40))+" : "(math.floor(140000/5)/40)
+			self.stront=(math.floor(temp_tower.contents[16275]/(400 * fuelmod)))+":"+(floor((50000 * baymod)/3)/(300 * fuelmod))
+			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(40 * fuelmod)))+" : "+(math.floor((140000 * baymod)/5)/(40 * fuelmod))
