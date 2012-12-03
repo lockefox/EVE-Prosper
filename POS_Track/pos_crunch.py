@@ -119,6 +119,29 @@ POS_fuel={
 	"Minmatar": 4246,
 	"Amarr": 4247
 	}
+	
+MOON_first={
+
+	}
+MOON_second={
+
+	}
+MOON_third={
+
+	}
+MOON_final={
+
+	}
+	
+DRUG_gas={
+
+	}
+DRUG_intermediates={
+
+	}
+DRUG_consumables={
+
+	}
 class Module (object):
 	
 	def __init__ (self,uniqueID,typeID):
@@ -168,3 +191,6 @@ class Tower (object):
 		else:
 			self.stront=(math.floor(temp_tower.contents[16275]/(400 * fuelmod)))+":"+(floor((50000 * baymod)/3)/(300 * fuelmod))
 			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(40 * fuelmod)))+" : "+(math.floor((140000 * baymod)/5)/(40 * fuelmod))
+			
+class Value (object):
+
