@@ -120,7 +120,7 @@ POS_fuel={
 	"Minmatar": 4246,
 	"Amarr": 4247
 	}
-#### REPLACING WITH JSON ###
+#### /REPLACING WITH JSON ###
 
 price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 class Module (object):
