@@ -12,7 +12,7 @@ corpCHAR = {
 	}
 	
 	
-#POSmods = {
+#### REPLACING WITH JSON ###
 POS_tower={
 		##CONTROL TOWERS##
 	12235: "Amarr Control Tower",
@@ -120,7 +120,8 @@ POS_fuel={
 	"Minmatar": 4246,
 	"Amarr": 4247
 	}
-	
+#### REPLACING WITH JSON ###
+
 price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 class Module (object):
 	
