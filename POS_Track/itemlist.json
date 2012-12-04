@@ -276,7 +276,18 @@
 			{"itemID":32832,"name":"Unrefined Solerium Reaction"},
 			{"itemID":32836,"name":"Unrefined Titanium Chromide Reaction"},
 			{"itemID":32830,"name":"Unrefined Vanadium Hafnite Reaction"},
-			{"itemID":17958,"name":"Vanadium Hafnite Reaction "}
+			{"itemID":17958,"name":"Vanadium Hafnite Reaction "},
+			{"itemID":17972,"name":"Fermionic Condensates Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17971,"name":"Ferrogel Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17970,"name":"Hypersynaptic Fibers Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17969,"name":"Nanotransistors Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17968,"name":"Phenolic Composites Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17967,"name":"Fulleride Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17966,"name":"Sylramic Fibers Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17965,"name":"Tungsten Carbide Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17964,"name":"Fernite Carbide Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17963,"name":"Crystalline Carbonide Reaction","class":2,"mats":"","product":"","refine":null},
+			{"itemID":17962,"name":"Titanium Carbide Reaction","class":2,"mats":"","product":"","refine":null}
 		]
 	}
 }}
