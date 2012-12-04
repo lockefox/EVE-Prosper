@@ -1,7 +1,10 @@
-#!/Python25/python.exe
+#!/Python27/python.exe
 
 from xml.dom.minidom import parse, parseString
+import json
 
+referenceFile = "itemlist.json"
+namesFile = "names.json"
 #####	GLOBALS	#####
 corpAPIs = {
 	573031: "gAgo5tcvXm3qwOjg3VFmY0h46CDazOU17RwyozSMw3N3qoleX6gmvwkbw235ipZG"	#HLIB
@@ -11,7 +14,12 @@ corpCHAR = {
 	573031: 168237945	#cyno moore
 	}
 	
-	
+reference_json = open(referenceFile)
+names_json = open (namesFile)
+
+reference = json.load(reference_json)
+names = json.load(names_json)
+
 #### REPLACING WITH JSON ###
 POS_tower={
 		##CONTROL TOWERS##
@@ -122,33 +130,24 @@ POS_fuel={
 	}
 #### /REPLACING WITH JSON ###
 
-price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
+#price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 class Module (object):
 	
 	def __init__ (self,uniqueID,typeID):
 		self.contents = {}			#return list of contents
 		#self.title = names(uniqueID)	#return unique name (if valid)
-		if typeID in POS_tower:
-			self.type="tower"
-			self.name=POS_tower[typeID]
-		elif typeID in POS_weapon:
-			self.type="weapon"
-			self.name=POS_weapon[typeID]
-		elif typeID in POS_moon:
-			self.type="moon"
-			self.name=POS_moon[typeID]
-		elif typeID in POS_research:
-			self.type="research"
-			self.name=POS_research[typeID]
-		elif typeID in POS_mfg:
-			self.type="mfg"
-			self.name=POS_mfg[typeID]
-		elif typeID in POS_other:
-			self.type="other"
-			self.name=POS_other[typeID]
-		else:
-			self.type="ERROR"
+		found= False
+		for x in reference["root"]["POSequipment"]["POSmods"]:
+			if reference["root"]["POSequipment"]["POSmods"][x]["typeID"] == typeID:
+				self.name = reference["root"]["POSequipment"]["POSmods"][x]["name"]
+				self.type = reference["root"]["POSequipment"]["POSmods"][x]["type"]
+				found=True
+				
+		if found == False:
 			self.name="ERROR"
+			self.type="ERROR"
+			
+
 		self.uniqueID=uniqueID
 		self.typeID=typeID
 		
@@ -182,9 +181,9 @@ class Value (object):
 		self.buyvol = price[typeID][1]
 		
 	def load(self):		#Queries eve-central and loads market dictionary
-		
+		self.derp=1
 		
 class Moon (object):
 
 	def __init__ (self,uniqueID,typeID,parentID):
-		
+		self.derp=1
