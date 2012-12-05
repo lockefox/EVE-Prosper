@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2012-12-05 15:57:06</currentTime>
+  <result>
+    <key accessMask="67108863" type="Corporation" expires="">
+      <rowset name="characters" key="characterID" columns="characterID,characterName,corporationID,corporationName">
+        <row characterID="168237945" characterName="Cyno Moore" corporationID="1882842989" corporationName="Hell's Librarians" />
+      </rowset>
+    </key>
+  </result>
+  <cachedUntil>2012-12-05 16:01:42</cachedUntil>
+</eveapi>

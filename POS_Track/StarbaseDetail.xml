@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2012-12-05 15:57:23</currentTime>
+  <result>
+    <state>4</state>
+    <stateTimestamp>2012-12-05 16:36:23</stateTimestamp>
+    <onlineTimestamp>2012-09-18 03:35:05</onlineTimestamp>
+    <generalSettings>
+      <usageFlags>1</usageFlags>
+      <deployFlags>0</deployFlags>
+      <allowCorporationMembers>1</allowCorporationMembers>
+      <allowAllianceMembers>0</allowAllianceMembers>
+    </generalSettings>
+    <combatSettings>
+      <useStandingsFrom ownerID="1882842989" />
+      <onStandingDrop standing="0" />
+      <onStatusDrop enabled="0" standing="0" />
+      <onAggression enabled="0" />
+      <onCorporationWar enabled="0" />
+    </combatSettings>
+    <rowset name="fuel" key="typeID" columns="typeID,quantity">
+      <row typeID="24593" quantity="275" />
+      <row typeID="4051" quantity="6160" />
+    </rowset>
+  </result>
+  <cachedUntil>2012-12-05 16:54:15</cachedUntil>
+</eveapi>

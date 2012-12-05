@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2012-12-05 15:57:15</currentTime>
+  <result>
+    <rowset name="starbases" key="itemID" columns="itemID,typeID,locationID,moonID,state,stateTimestamp,onlineTimestamp,standingOwnerID">
+      <row itemID="234733677" typeID="16213" locationID="30001689" moonID="40107338" state="1" stateTimestamp="2012-01-22 22:00:38" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+      <row itemID="1127928560" typeID="20061" locationID="30001689" moonID="40107339" state="1" stateTimestamp="2012-01-24 01:20:59" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+      <row itemID="230823375" typeID="16213" locationID="30002798" moonID="40177518" state="4" stateTimestamp="2012-12-05 16:36:23" onlineTimestamp="2012-09-18 03:35:05" standingOwnerID="1882842989" />
+      <row itemID="603123936" typeID="16213" locationID="30002798" moonID="40177561" state="1" stateTimestamp="2012-09-18 02:24:37" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+      <row itemID="1007873603506" typeID="20061" locationID="30002798" moonID="40177563" state="1" stateTimestamp="2012-09-18 02:56:02" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+      <row itemID="1007938728473" typeID="20061" locationID="30002798" moonID="40177560" state="1" stateTimestamp="2012-09-18 01:24:30" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+      <row itemID="1007939527650" typeID="16213" locationID="30002798" moonID="40177562" state="1" stateTimestamp="2012-09-18 02:36:42" onlineTimestamp="0001-01-01 00:00:00" standingOwnerID="1882842989" />
+    </rowset>
+  </result>
+  <cachedUntil>2012-12-05 21:54:15</cachedUntil>
+</eveapi>
