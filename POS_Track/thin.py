@@ -21,3 +21,5 @@ for x in reference["root"]["POSequipment"]["POSmods"]:
 if found == False:
 	print "did not find ID"
 	
+	
+
