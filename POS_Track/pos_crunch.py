@@ -24,7 +24,7 @@ names = json.load(names_json)
 
 #price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
 
-def contents (APIfile_assets,uniqueID):
+#def contents (APIfile_assets,uniqueID):
 	#Takes unique ID and returns list-of-dict with contents
 	# EX: ({"itemID":###,"name"="string","qty":###})
 

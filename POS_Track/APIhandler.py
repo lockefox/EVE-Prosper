@@ -39,7 +39,7 @@ def APIvalid (domcall, type, mask):
 	
 	if info.type != type:
 		result = False
-	if (info.mask & mask) != mask:
+	if (int(info.mask) & int(mask)) != mask:
 		result = False
 	
 	return result
@@ -59,19 +59,20 @@ class APIcorp(object):
 		
 		#return for bool expired.  Empty = false, <current date = false, else true
 		
-def POS_list(domlist,key,vcode):
-	#returns list of tower objects per corp ID
-	index=0
-	towerlist[]
-	for dom_row in domcall.getElementsByTagName('row'):
-		towerinfo = Tower(dom_row,key,vcode)
-		towerlist[index]=towerinfo
-		index++
-	
-	return towerlist
+#def POS_list(domlist,key,vcode):
+#	#returns list of tower objects per corp ID
+#	index=0
+#	towerlist
+#	for dom_row in domcall.getElementsByTagName('row'):
+#		towerinfo = Tower(dom_row,key,vcode)
+#		towerlist[index]=towerinfo
+#		index += 1
+#	
+#	return towerlist
 
 			
 API_debug = minidom.parse("APIKeyInfo.xml")
 debugobj = APIcorp(API_debug)
-
-print debugobj.mask
+debug_valid = APIvalid(API_debug,"Corporation", validMask)
+#print debugobj.type
+print debug_valid
