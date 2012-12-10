@@ -2,6 +2,7 @@
 
 from xml.dom.minidom import parse, parseString
 import json
+import APIhandler
 
 referenceFile = "itemlist.json"
 namesFile = "names.json"
@@ -22,11 +23,17 @@ names = json.load(names_json)
 
 
 #price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
+
+def contents (APIfile_assets,uniqueID):
+	#Takes unique ID and returns list-of-dict with contents
+	# EX: ({"itemID":###,"name"="string","qty":###})
+
 class Module (object):
+	#builds module object.  Towers are a collection of MODULE objects
 	
 	def __init__ (self,uniqueID,typeID):
-		self.contents = {}			#return list of contents
-		#self.title = names(uniqueID)	#return unique name (if valid)
+		self.contents = contents (uniqueID)			#return list of contents
+		#self.title = names(uniqueID)				#return unique name (if valid)
 		found= False
 		for x in reference["root"]["POSequipment"]["POSmods"]:
 			if x["typeID"] == typeID:
@@ -38,9 +45,10 @@ class Module (object):
 			self.name="ERROR"
 			self.type="ERROR"
 			
-
 		self.uniqueID=uniqueID
 		self.typeID=typeID
+		
+		
 		
 class Tower (object):
 	#Set of objects to handle tower information
