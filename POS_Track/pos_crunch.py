@@ -52,24 +52,30 @@ class Module (object):
 		
 class Tower (object):
 	#Set of objects to handle tower information
-	
-	def __init__ (self,uniqueID,typeID):
-		
-		temp_tower = Module(self,uniqueID,typeID)
-		race = temp_tower.name.split(' ',1)
-		fuelmod = 1		#to be added: Faction tower modifier
-		baymod = 1		#to be added: faction tower modifier
-			##Fuel returns
-			## stront = remaining : max
-		if temp_tower.name.find("Small"):
-			self.stront=(math.floor(temp_tower.contents[16275]/(100 * fuelmod)))+" : "+(math.floor((12500 * baymod)/3)/(100 * fuelmod))
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(10 * fuelmod)))+" : "+(math.floor((35000 * baymod)/5)/(10 * fuelmod))
-		elif temp_tower.name.find("Medium"):
-			self.stront=(math.floor(temp_tower.contents[16275]/(200 * fuelmod)))+" : "+(math.floor((25000 * baymod)/3)/(200 * fuelmod))
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(20 * fuelmod)))+" : "+(math.floor((70000 * baymod)/5)/(20 * fuelmod))
+	#takes a "row" object from 
+	detailURL="https://api.eveonline.com/corp/StarbaseDetail.xml.asp"
+	def __init__ (self,dom_row,urlcall):
+		self.uniqueID=dom_row.getAttribute("itemID")
+		self.typeID=dom_row.getAttribute("typeID")
+		self.itemname = Module(uniqueID,typeID).name
+		self.locationID = dom_row.getAttribute("locationID")
+		self.location = reference ["root"]["itemDB"]["systemIDs"][locationID]
+		self.moonID = dom_row.getAttribute("moonID")
+		temp_state = dom_row.getAttribute("state")
+		self.timer=null
+		if temp_state == 0:
+			self.state = "unanchored"
+		elif temp_state == 1:
+			self.state = "offline"
+		elif temp_state == 2:
+			self.state = "onlining"
+			self.timer = dom_row.getAttribute("stateTimestamp")
+		elif temp_state == 3:
+			self.state = "reinforced"
+			self.timer = dom_row.getAttribute("stateTimestamp")
 		else:
-			self.stront=(math.floor(temp_tower.contents[16275]/(400 * fuelmod)))+":"+(floor((50000 * baymod)/3)/(300 * fuelmod))
-			self.fuel = (math.floor(temp_tower.contents[POS_fuel[race]]/(40 * fuelmod)))+" : "+(math.floor((140000 * baymod)/5)/(40 * fuelmod))
+			self.state = "online"
+		
 			
 class Value (object):
 
