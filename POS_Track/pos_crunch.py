@@ -2,7 +2,7 @@
 
 from xml.dom.minidom import parse, parseString
 import json
-import APIhandler
+#import APIhandler
 
 referenceFile = "itemlist.json"
 namesFile = "names.json"
@@ -54,7 +54,7 @@ class Tower (object):
 	#Set of objects to handle tower information
 	#takes a "row" object from 
 	detailURL="https://api.eveonline.com/corp/StarbaseDetail.xml.asp"
-	def __init__ (self,dom_row,urlcall):
+	def __init__ (self,dom_row,key,vcode):
 		self.uniqueID=dom_row.getAttribute("itemID")
 		self.typeID=dom_row.getAttribute("typeID")
 		self.itemname = Module(uniqueID,typeID).name
