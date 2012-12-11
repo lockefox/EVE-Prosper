@@ -62,7 +62,7 @@ class APIcorp(object):
 def POS_list(domlist,key,vcode):
 	#returns list of tower objects per corp ID
 	index=0
-	towerlist
+	towerlist=[]
 	for dom_row in domcall.getElementsByTagName('row'):
 		towerinfo = Tower(dom_row,key,vcode)
 		towerlist[index]=towerinfo
@@ -74,5 +74,6 @@ def POS_list(domlist,key,vcode):
 API_debug = minidom.parse("APIKeyInfo.xml")
 debugobj = APIcorp(API_debug)
 debug_valid = APIvalid(API_debug,"Corporation", validMask)
+debug_poslist = POS_list(API_debug,1,1)
 #print debugobj.type
-print debug_valid
+print debug_poslist
