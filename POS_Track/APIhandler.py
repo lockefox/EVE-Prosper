@@ -70,6 +70,12 @@ def POS_list(domlist,key,vcode):
 	
 	return towerlist
 
+def cachecheck(domcall):
+	
+	result = False
+	cache_time = domcall.getElementsByTagName('cachedUntil')[0].nodeValue
+	query_time = domcall.getElementsByTagName('currentTime')[0].nodeValue
+	now_time = time.gmttime(time.time())
 			
 API_debug = minidom.parse("APIKeyInfo.xml")
 debugobj = APIcorp(API_debug)

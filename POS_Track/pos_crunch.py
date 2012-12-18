@@ -6,7 +6,7 @@ import json
 
 referenceFile = "itemlist.json"
 namesFile = "names.json"
-#####	GLOBALS	#####
+#####	GLOBALS		#####
 corpAPIs = {
 	573031: "gAgo5tcvXm3qwOjg3VFmY0h46CDazOU17RwyozSMw3N3qoleX6gmvwkbw235ipZG"	#HLIB
 	1566483: "C85IQwscb7B7sqCCq3cniyF4cdmveTcvi7LdvzFJD3pMSTo0BmsI1PVw4Mp0G4FA"	#QCATS
@@ -14,6 +14,7 @@ corpAPIs = {
 
 corpCHAR = {
 	573031: 168237945	#cyno moore
+						#qcats dude
 	}
 	
 reference_json = open(referenceFile)
@@ -21,6 +22,8 @@ names_json = open (namesFile)
 
 reference = json.load(reference_json)
 names = json.load(names_json)
+
+#####	CONTROL		#####
 
 
 #price{}		#typeID:(buy-price, buy-volume, sell-price, sell-volume)
@@ -63,7 +66,7 @@ class Tower (object):
 		self.location = reference ["root"]["itemDB"]["systemIDs"][locationID]
 		self.moonID = dom_row.getAttribute("moonID")
 		temp_state = dom_row.getAttribute("state")
-		self.timer=null
+		self.timer=None
 		if temp_state == 0:
 			self.state = "unanchored"
 		elif temp_state == 1:
@@ -78,27 +81,43 @@ class Tower (object):
 			self.state = "online"
 		POSdetails_URL= "%s?KeyID=%s&vCode=%s&itemID=%s" % detailURL,key,vcode,uniqueID
 		details_dom = minidom.parse(urllib.urlopen(POSdetails_URL))
-		for fuelinbay in details_dom.getElementsByTagName('row'):
-			item = fuelinbay.getAttribute("typeID")
-			for x in reference["root"]["itemDB"]["fuel"]:
-				if item == x["itemID"]:
-					self.fuelID=item
-					self.fuelname=x["name"]
-					self.fuelrace=x["race"]
-					self.fuelqty=int(fuelinbay.getAttribute("quantity"))
-			if item == "16275":
-				self.stront = fuelinbay.getAttribute("quantity")
-				
-		if stront == null 
-		for fuelbay in reference["root"]["POSequipment"]["TOWERresources"]:
-			if fuelbay["itemid"] == typeID:
-				self.size = fuelbay["size"]
-				self.race = fuelbay["race"]
-				self.fuel_baysize = fuelbay["fuelbay"]
-				self.stront_baysize = fuelbay["strontbay"]
-				self.fueltime = fuelqty/fuelbay["fuel"]		#returns HOURS fuel remaining
-				self.stronttime=stront/fuelbay["stront"]	#returns HOURS stront remaining
-
+		if state == "online":
+			for fuelinbay in details_dom.getElementsByTagName('row'):
+				item = fuelinbay.getAttribute("typeID")
+				for x in reference["root"]["itemDB"]["fuel"]:
+					if item == x["itemID"]:
+						self.fuelID=item
+						self.fuelname=x["name"]
+						self.fuelrace=x["race"]
+						self.fuel=int(fuelinbay.getAttribute("quantity"))
+				if item == "16275":
+					self.stront = int(fuelinbay.getAttribute("quantity"))
+					
+			if stront == None:
+				self.stront=0
+	
+			for fuelbay in reference["root"]["POSequipment"]["TOWERresources"]:
+				if fuelbay["itemid"] == typeID:
+					self.size = fuelbay["size"]
+					self.race = fuelbay["race"]
+					self.fuel_baysize = fuelbay["fuelbay"]
+					self.stront_baysize = fuelbay["strontbay"]
+					self.fueltime = fuel/fuelbay["fuel"]		#returns HOURS fuel remaining
+					self.stronttime=stront/fuelbay["stront"]	#returns HOURS stront remaining
+	
+		else:		#if not online, don't care about fuel/stront values
+			self.fuelID=None
+			self.fuelname=None
+			self.fuelrace=None
+			self.fuel=None
+			self.stront=None
+			self.size = None
+			self.race = None
+			self.fuel_baysize = None
+			self.stront_baysize = None
+			self.fueltime = None	#returns HOURS fuel remaining
+			self.stronttime=None	#returns HOURS stront remaining
+			
 	modules = []	#list of Module() objects.  To be loaded by ASSET def
 
 			
