@@ -77,7 +77,31 @@ class Tower (object):
 			self.timer = dom_row.getAttribute("stateTimestamp")
 		else:
 			self.state = "online"
-		
+		POSdetails_URL= "%s?KeyID=%s&vCode=%s&itemID=%s" % detailURL,key,vcode,uniqueID
+		details_dom = minidom.parse(urllib.urlopen(POSdetails_URL))
+		for fuelinbay in details_dom.getElementsByTagName('row'):
+			item = fuelinbay.getAttribute("typeID")
+			for x in reference["root"]["itemDB"]["fuel"]:
+				if item == x["itemID"]:
+					self.fuelID=item
+					self.fuelname=x["name"]
+					self.fuelrace=x["race"]
+					self.fuelqty=int(fuelinbay.getAttribute("quantity"))
+			if item == "16275":
+				self.stront = fuelinbay.getAttribute("quantity")
+				
+		if stront == null 
+		for fuelbay in reference["root"]["POSequipment"]["TOWERresources"]:
+			if fuelbay["itemid"] == typeID:
+				self.size = fuelbay["size"]
+				self.race = fuelbay["race"]
+				self.fuel_baysize = fuelbay["fuelbay"]
+				self.stront_baysize = fuelbay["strontbay"]
+				self.fueltime = fuelqty/fuelbay["fuel"]		#returns HOURS fuel remaining
+				self.stronttime=stront/fuelbay["stront"]	#returns HOURS stront remaining
+
+	modules = []	#list of Module() objects.  To be loaded by ASSET def
+
 			
 class Value (object):
 

@@ -145,10 +145,10 @@
 	},
 	"itemDB":{
 		"fuel":[
-			{"itemID":4312,"race":"Gallente"},
-			{"itemID":4051,"race":"Caldari"},
-			{"itemID":4246,"race":"Minmatar"},
-			{"itemID":4247,"race":"Amarr"}
+			{"itemID":4312,"race":"Gallente","name":"Gallente Fuel Block"},
+			{"itemID":4051,"race":"Caldari","name":"Caldari Fuel Block"},
+			{"itemID":4246,"race":"Minmatar","name":"Minmatar Fuel Block"},
+			{"itemID":4247,"race":"Amarr","name":"Amarr Fuel Block"}
 		],
 		"MOONgoo":[
 			{"itemID":16634,"name":"Atmospheric Gas","class":1,"size":1},
