@@ -6,17 +6,13 @@ import json
 
 referenceFile = "itemlist.json"
 namesFile = "names.json"
+keysFile= "keys.json"
 #####	GLOBALS		#####
-corpAPIs = {
-	573031: "gAgo5tcvXm3qwOjg3VFmY0h46CDazOU17RwyozSMw3N3qoleX6gmvwkbw235ipZG"	#HLIB
-	1566483: "C85IQwscb7B7sqCCq3cniyF4cdmveTcvi7LdvzFJD3pMSTo0BmsI1PVw4Mp0G4FA"	#QCATS
-	1589151: "2VPACVxFzgUU9b4Ej1vtUJkqsy00uuhiAOU0zWKYNVtJz1lrByr3oiAYOJlGjbG9"	#@ECICIDOL
-	}
 
-corpCHAR = {
-	573031: 168237945	#cyno moore
-						#qcats dude
-	}
+##OFFLOAD APIkeys to keys.json
+##	DO NOT GIT ADD keys.json.  For project security
+
+
 	
 reference_json = open(referenceFile)
 names_json = open (namesFile)
