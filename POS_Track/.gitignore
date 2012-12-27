@@ -1,0 +1,10 @@
+#	Private Files	#
+#####################
+*EcicIdol*
+names.json
+keys.json
+
+#	Untracked Files	#
+#####################
+*.pyc
+*.debug
