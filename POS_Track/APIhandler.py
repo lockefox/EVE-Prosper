@@ -17,7 +17,68 @@ validMask=2|131072|524288	#Valid API's required for all calls requested
 ##	General data structures for handling multiple API calls to multiple entities
 
 
-
+def APIvalidator (domcall, which, what):
+	#Returns TRUE if both the API mask is valid AND not past expiry date
+	
+	#API Masks: http://wiki.eve-id.net/APIv2_Page_Index
+	INDI_mask={		#All valid individual API masks
+		"Account Balance":	1,
+		"Assets":			2,
+		"Calendar":			4|1048576,
+		"Char Sheet":		8,
+		"Contacts":			16|32,
+		"Contracts":		67108864,
+		"FW":				64,		
+		"Kills":			256,
+		"Locations":		134217728,
+		"Mail Bodies":		512,
+		"Mail Lists":		1024,
+		"Mail Heads":		2048,
+		"Orders":			4096,
+		"Medals":			8192,
+		"Notifications":	16384|32768,
+		"Skill Queue":		131072|262144,
+		"Standings":		524288,
+		"Wallet Journal":	2097152,
+		"Transactions":		4194304,
+		#Custom masks -- OR together required masks
+		"Trade":			2097152|4194304|4096|67108864,
+		"Mail":				512|1024|2048|16384|32768,
+		"Industry":			128|65536,
+		"Skills":			8|131072|262144
+	}
+	CORP_mask={		#All valid Corp API masks
+		"Wallets":			1,
+		"Assets":			2,
+		"Contacts":			16,
+		"Containers":		32,
+		"Contracts":		8388608,
+		"Info":				8,
+		"FW":				64,
+		"Industry":			128,
+		"Kills":			256,
+		"Locations":		16777216,
+		"Orders":			4096,
+		"Medals":			8192,
+		"Member Medals":	4,
+		"Member Titles":	512,
+		"Member Log":		1024,
+		"Member Track":		2048,
+		"Outpost List":		16384,
+		"Outpost Service":	32768,
+		"Shareholders":		65536,
+		"Standings":		262144,
+		"POS Detail":		131072,
+		"POS LIST":			524288,
+		"Titles":			4194304,
+		"Wallet Journal":	1048576,
+		"Transactions":		2097152,
+		#Custom masks -- OR together required masks
+		"POS":				131072|524288|2,
+		"Member":			4|512|1024|2048|4194304,
+		"Trade":			1|4096|1048576|2097152
+	}
+	
 def APIload (APIdict, CHARdic):
 	for key in APIdict:
 		keyinfoURL = "%s%s?keyID=%s&vCode=%s" % basepath,keyinfo,key,APIdict[key]
