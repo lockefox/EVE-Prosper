@@ -165,10 +165,11 @@ class APIcorp(object):
 		else:
 			self.containers = APIvalidator (APIinfo_dom, "Corporation", "Containers", limit_mask)
 		
-		if APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask):
-			self.contracts = minidom.parse(urllib.urlopen("%s/corp/Contracts.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
-		else:
-			self.contracts = APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask)
+		##	Contracts Parsing Needs to be Specialized.  Will revisit later ##
+		#if APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask):
+		#	self.contracts = minidom.parse(urllib.urlopen("%s/corp/Contracts.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		#else:
+		#	self.contracts = APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask)
 			
 		if 	APIvalidator (APIinfo_dom, "Corporation", "Info", limit_mask):
 			self.info = minidom.parse(urllib.urlopen("%s/corp/CorporationSheet.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
