@@ -161,16 +161,12 @@ class APIcorp(object):
 			self.contacts = APIvalidator (APIinfo_dom, "Corporation", "Contacts", limit_mask)
 			
 		if APIvalidator (APIinfo_dom, "Corporation", "Containers", limit_mask):
-			self.containers = minidom.parse(urllib.urlopen("%s/corp/ContainerLog.xml.aspx?keyID=%s&vCode=%s&characterID=%d" % basepath,key,vcode,charID)" % basepath,key,vcode))
+			self.containers = minidom.parse(urllib.urlopen("%s/corp/ContainerLog.xml.aspx?keyID=%s&vCode=%s&characterID=%d" % basepath,key,vcode,charID))
 		else:
 			self.containers = APIvalidator (APIinfo_dom, "Corporation", "Containers", limit_mask)
 		
 		##	Contracts Parsing Needs to be Specialized.  Will revisit later ##
-		#if APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask):
-		#	self.contracts = minidom.parse(urllib.urlopen("%s/corp/Contracts.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
-		#else:
-		#	self.contracts = APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask)
-			
+	
 		if 	APIvalidator (APIinfo_dom, "Corporation", "Info", limit_mask):
 			self.info = minidom.parse(urllib.urlopen("%s/corp/CorporationSheet.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
 		else:
@@ -195,10 +191,69 @@ class APIcorp(object):
 			self.locations = minidom.parse(urllib.urlopen("%s/corp/Locations.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
 		else:
 			self.locations = APIvalidator (APIinfo_dom, "Corporation", "Locations", limit_mask)
+			
+		if APIvalidator (APIinfo_dom, "Corporation", "Orders", limit_mask):
+			self.orders = minidom.parse(urllib.urlopen("%s/corp/MarketOrders.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.orders = APIvalidator (APIinfo_dom, "Corporation", "Orders", limit_mask)
+			
+		if APIvalidator (APIinfo_dom, "Corporation", "Medals", limit_mask):
+			self.medals = minidom.parse(urllib.urlopen("%s/corp/Medals.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.medals = APIvalidator (APIinfo_dom, "Corporation", "Medals", limit_mask)
+		
+		##	Members -- Need to write special cruncher to combine member data	##
+		
+		## Outposts -- Will revisit soon(tm).  Outposts don't need special tracking for POS_Track	##
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Shareholders", limit_mask):
+			self.shareholders = minidom.parse(urllib.urlopen("%s/corp/Shareholders.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.shareholders = APIvalidator (APIinfo_dom, "Corporation", "Shareholders", limit_mask)
+			
+		if APIvalidator (APIinfo_dom, "Corporation", "Standings", limit_mask):
+			self.standings = minidom.parse(urllib.urlopen("%s/corp/Standings.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.standings = APIvalidator (APIinfo_dom, "Corporation", "Standings", limit_mask)
+		
+		##	POS returns list of doms.  [0]=starbase list, [1...]=individual starbase doms
+		if APIvalidator (APIinfo_dom, "Corporation", "POS LIST", limit_mask) and APIvalidator (APIinfo_dom, "Corporation", "POS Detail", limit_mask):
+			self.POS = POS_Loader(minidom.parse(urllib.urlopen("%s/corp/StarbaseList.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode)))
+		else:
+			self.POS = "POS List:%s\nPOS Details:%s" % APIvalidator (APIinfo_dom, "Corporation", "POS LIST", limit_mask),APIvalidator (APIinfo_dom, "Corporation", "POS Detail", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Titles", limit_mask):
+			self.titles = minidom.parse(urllib.urlopen("%s/corp/Titles.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.titles = APIvalidator (APIinfo_dom, "Corporation", "Titles", limit_mask)
+			
+		if APIvalidator (APIinfo_dom, "Corporation", "Wallet Journal", limit_mask):
+			self.journal = minidom.parse(urllib.urlopen("%s/corp/WalletJournal.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.journal = APIvalidator (APIinfo_dom, "Corporation", "Wallet Journal", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Transactions", limit_mask):
+			self.transactions = minidom.parse(urllib.urlopen("%s/corp/WalletTransactions.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.transactions = APIvalidator (APIinfo_dom, "Corporation", "Transactions", limit_mask)
+			
+			
+	def POS_Loader(TowerList_DOM):
+		#Returns array of doms.  
+		#	[0]=tower list (or no POS error)
+		#	[1]=tower 1
+		
+		#Need to add empty Tower List error message
+		results [0] = TowerList_DOM
+		for tower in TowerList_DOM.getElemetnsByTagName('row'):
+			towerID = tower.getAttribute('itemID')
+			results.append(minidom.parse(urllib.urlopen("%s/corp/StarbaseDetail.xml.aspx?keyID=%s&vCode=%s&itemID=%s" % basepath,key,vcode,towerID)))
+		
+		return results
 API_debug = minidom.parse("APIKeyInfo.xml")
 #debugobj = APIcorp(API_debug)
 #debug_valid = APIvalid(API_debug,"Corporation", validMask)
-debug_valid = APIvalidator(API_debug, "Corporation", "POS")
+debug_valid = APIvalidator(API_debug, "Corporation", "POS", 0)
 print debug_valid
 #debug_poslist = POS_list(API_debug,1,1)
 #print debugobj.type
