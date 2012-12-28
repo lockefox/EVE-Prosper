@@ -170,7 +170,30 @@ class APIcorp(object):
 		else:
 			self.contracts = APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask)
 			
+		if 	APIvalidator (APIinfo_dom, "Corporation", "Info", limit_mask):
+			self.info = minidom.parse(urllib.urlopen("%s/corp/CorporationSheet.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.info = APIvalidator (APIinfo_dom, "Corporation", "Info", limit_mask)
 			
+		if APIvalidator (APIinfo_dom, "Corporation", "FW", limit_mask):
+			self.FW = minidom.parse(urllib.urlopen("%s/corp/FacWarStats.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.FW = APIvalidator (APIinfo_dom, "Corporation", "FW", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Industry", limit_mask):
+			self.industry = minidom.parse(urllib.urlopen("%s/corp/IndustryJobs.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.industry = APIvalidator (APIinfo_dom, "Corporation", "Industry", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Kills", limit_mask):
+			self.kills = minidom.parse(urllib.urlopen("%s/corp/Killlog.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.kills = APIvalidator (APIinfo_dom, "Corporation", "Kills", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Locations", limit_mask):
+			self.locations = minidom.parse(urllib.urlopen("%s/corp/Locations.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.locations = APIvalidator (APIinfo_dom, "Corporation", "Locations", limit_mask)
 API_debug = minidom.parse("APIKeyInfo.xml")
 #debugobj = APIcorp(API_debug)
 #debug_valid = APIvalid(API_debug,"Corporation", validMask)
