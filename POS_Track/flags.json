@@ -1,5 +1,12 @@
 {
-"walletKeys":{
+"accountKey":{
+	"1000":"Main Wallet",
+	"1001":"Division 1",
+	"1002":"Division 2",
+	"1003":"Division 3",
+	"1004":"Division 4",
+	"1005":"Division 5",
+	"1006":"Division 6"
 },
 
 }

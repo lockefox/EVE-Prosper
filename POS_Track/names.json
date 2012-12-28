@@ -1,3 +1,17 @@
-{"root":{
+{"walletDivision":{
+	"Main Wallet":"",
+	"Division 1":"",
+	"Division 2":"",
+	"Division 3":"",
+	"Division 4":"",
+	"Division 5":"",
+	"Division 6":""
+},
+"Tower List":[
+	{"Name":"","Type":"","Location":"","TowerID":""}
+],
+	
+}
+	
 	
 }}
