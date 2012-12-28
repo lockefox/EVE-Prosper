@@ -19,7 +19,8 @@ validMask=2|131072|524288	#Valid API's required for all calls requested
 ##	General data structures for handling multiple API calls to multiple entities
 
 
-def APIvalidator (domcall, which, mask):
+def APIvalidator (domcall, which, mask, limit_mask):
+	#	ARGS=(which, mask, limit_mask)
 	#Accepts domcall from APIinfo
 	#Returns TRUE if both the API mask is valid AND not past expiry date
 	
@@ -81,13 +82,13 @@ def APIvalidator (domcall, which, mask):
 		"Member":			4|512|1024|2048|4194304,
 		"Trade":			1|4096|1048576|2097152
 	}
-	
+		#query APIinfo#
 	type = domcall.getElementsByTagName('key')[0].getAttribute("type")
 	CAKmask = int(domcall.getElementsByTagName('key')[0].getAttribute("accessMask"))
 	expiry = domcall.getElementsByTagName('key')[0].getAttribute("expires")
 	
 	if expiry != "":
-		expire_time=time.strptime(expiry,"%Y-%m-%d %H:%M:%S")
+		expire_time=time.strptime(expiry,"%Y-%m-%d %H:%M:%S")	#http://www.tutorialspoint.com/python/time_strptime.htm
 		UTC_now= time.gmtime()
 		if expire_time < UTC_now:
 			return "ERR: API Key Expired"
@@ -99,12 +100,13 @@ def APIvalidator (domcall, which, mask):
 		altwhich = ""
 	if type == which or type == altwhich:
 		if type == "Corporation":
-			if (CAKmask & CORP_mask[mask])== CORP_mask[mask]:
+			if (CAKmask & CORP_mask[mask])== CORP_mask[mask] and (CAKmask & limit_mask)== limit_mask:
 				return True
+
 			else:
-				return "ERR: Missmatch Mask.  Expected %d, API key is %d" % (CORP_mask[mask],CAKmask)
+				return "ERR: Missmatch Mask.  Expected %d, API key is %d" % (CORP_mask[mask],CAKmask)	#Touple for numbers
 		else:	#character
-			if (CAKmask & INDI_mask[mask])== INDI_mask[mask]:
+			if (CAKmask & INDI_mask[mask])== INDI_mask[mask] and (CAKmask & limit_mask)== limit_mask:
 				return True
 
 			else:
@@ -122,62 +124,56 @@ def APIload (APIdict, CHARdic):
 		if APIvalid (API_keyinfo, "Corporation", validMask) and not (APIcorp(API_keyinfo).corpName in APIlist):
 			stuff
 
-def APIvalid (domcall, type, mask):
-	#Returns TRUE or FALSE for the API call sent
-	#API: /account/APIKeyInfo.xml.aspx
-	#Type: Account, Character, Corporation
-	#Mask: Desired CAK Access Mask
-	#Expired: checks if given API is expired
-	#IF all members match, TRUE
-	#ELSE FALSE
-	result = True
-	info = APIcorp(domcall)
-	
-	if info.type != type:
-		result = False
-	if (info.mask & mask) != mask:
-		result = False
-	
-	return result
+
 	
 class APIcorp(object):
-	#handles some basic corp info from queries
-	
-	def __init__ (self, domcall):
+	#Collect all relevant domcall objects 
+	limit_mask=0
+	def __init__ (self, *args):
+			#	ARGS: key, vcode, limit_mask (optional)
+		arg_list = list(args)
+		if len(arg_list) > 3:
+			limit_mask=arg_list[2]
+		key = arg_list[0]
+		vcode=arg_list[1]
+		APIinfo_dom = minidom.parse(urllib.urlopen("%s/account/APIKeyInfo.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		self.charID = int(APIinfo_dom.getElementsByTagName('row')[0].getAttribute("characterID"))
+		self.character=APIinfo_dom.getElementsByTagName('row')[0].getAttribute("characterName")
+		self.corp = APIinfo_dom.getElementsByTagName('row')[0].getAttribute("corporationName")
+		self.corpID=int(APIinfo_dom.getElementsByTagName('row')[0].getAttribute("corporationID"))
 		
-		self.corpName	=domcall.getElementsByTagName('row')[0].getAttribute("corporationName")
-		self.corpID		=int(domcall.getElementsByTagName('row')[0].getAttribute("corporationID"))
-		self.charID 	=int(domcall.getElementsByTagName('row')[0].getAttribute("characterID"))
-		self.charName	=domcall.getElementsByTagName('row')[0].getAttribute("characterName")
-		self.mask		=int(domcall.getElementsByTagName('key')[0].getAttribute("accessMask"))
-		self.type		=domcall.getElementsByTagName('key')[0].getAttribute("type")
-		expire			=domcall.getElementsByTagName('key')[0].getAttribute("expires")
+	#APIcorp holds dom objects for all corp APIs.  Queried at object call.
+	#limit_mask can be added to only query certain APIs (and leave the rest untouched.  Default = 0
+	#each API type (wallet, assets, etc) will either have the dom object or error message
+		if APIvalidator (APIinfo_dom, "Corporation", "Wallet", limit_mask):
+			self.wallet = minidom.parse(urllib.urlopen("%s/corp/AccountBalance.xml.aspx?keyID=%s&vCode=%s&characterID=%d" % basepath,key,vcode,charID))
+		else:
+			self.wallet = APIvalidator (APIinfo_dom, "Corporation", "Wallet", limit_mask)
 		
-		#return for bool expired.  Empty = false, <current date = false, else true
+		if APIvalidator (APIinfo_dom, "Corporation", "Assets", limit_mask):
+			self.assets = minidom.parse(urllib.urlopen("%s/corp/AssetList.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.assets = APIvalidator (APIinfo_dom, "Corporation", "Assets", limit_mask)
 		
-def POS_list(domlist,key,vcode):
-	#returns list of tower objects per corp ID
-	index=0
-	towerlist=[]
-	for dom_row in domlist.getElementsByTagName('row'):
-		towerinfo = Tower(dom_row,key,vcode)
-		towerlist[index]=towerinfo
-		index += 1
-	
-	return towerlist
-
-def cachecheck(domcall):
-	
-	result = False
-	cache_time = domcall.getElementsByTagName('cachedUntil')[0].nodeValue
-	query_time = domcall.getElementsByTagName('currentTime')[0].nodeValue
-	now_time = time.gmttime(time.time())
-
-	
+		if APIvalidator (APIinfo_dom, "Corporation", "Contacts", limit_mask):
+			self.contacts = minidom.parse(urllib.urlopen("%s/corp/ContactList.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.contacts = APIvalidator (APIinfo_dom, "Corporation", "Contacts", limit_mask)
+			
+		if APIvalidator (APIinfo_dom, "Corporation", "Containers", limit_mask):
+			self.containers = minidom.parse(urllib.urlopen("%s/corp/ContainerLog.xml.aspx?keyID=%s&vCode=%s&characterID=%d" % basepath,key,vcode,charID)" % basepath,key,vcode))
+		else:
+			self.containers = APIvalidator (APIinfo_dom, "Corporation", "Containers", limit_mask)
+		
+		if APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask):
+			self.contracts = minidom.parse(urllib.urlopen("%s/corp/Contracts.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
+		else:
+			self.contracts = APIvalidator (APIinfo_dom, "Corporation", "Contracts", limit_mask)
+			
 			
 API_debug = minidom.parse("APIKeyInfo.xml")
-debugobj = APIcorp(API_debug)
-debug_valid = APIvalid(API_debug,"Corporation", validMask)
+#debugobj = APIcorp(API_debug)
+#debug_valid = APIvalid(API_debug,"Corporation", validMask)
 debug_valid = APIvalidator(API_debug, "Corporation", "POS")
 print debug_valid
 #debug_poslist = POS_list(API_debug,1,1)
