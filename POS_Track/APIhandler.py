@@ -250,6 +250,8 @@ class APIcorp(object):
 			results.append(minidom.parse(urllib.urlopen("%s/corp/StarbaseDetail.xml.aspx?keyID=%s&vCode=%s&itemID=%s" % basepath,key,vcode,towerID)))
 		
 		return results
+		
+	
 API_debug = minidom.parse("APIKeyInfo.xml")
 #debugobj = APIcorp(API_debug)
 #debug_valid = APIvalid(API_debug,"Corporation", validMask)

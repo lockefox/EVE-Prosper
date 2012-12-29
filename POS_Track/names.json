@@ -7,11 +7,20 @@
 	"Division 5":"",
 	"Division 6":""
 },
+"corpOffices":{
+	"Office Slot 1":"",
+	"Office Slot 2":"",
+	"Office Slot 3":"",
+	"Office Slot 4":"",
+	"Office Slot 5":"",
+	"Office Slot 6":"",
+	"Office Slot 7":""
+}
 "Tower List":[
 	{"Name":"","Type":"","Location":"","TowerID":""}
 ],
 	
-}
+
 	
 	
 }}
