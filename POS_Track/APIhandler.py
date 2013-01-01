@@ -194,6 +194,8 @@ class APIcorp(object):
 			self.locations = minidom.parse(urllib.urlopen("%s/corp/Locations.xml.aspx?keyID=%s&vCode=%s" % basepath,key,vcode))
 		else:
 			self.locations = APIvalidator (APIinfo_dom, "Corporation", "Locations", limit_mask)
+			
+			
 API_debug = minidom.parse("APIKeyInfo.xml")
 #debugobj = APIcorp(API_debug)
 #debug_valid = APIvalid(API_debug,"Corporation", validMask)
