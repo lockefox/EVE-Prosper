@@ -6,7 +6,7 @@ import json
 
 referenceFile = "itemlist.json"
 namesFile = "names.json"
-keysFile= "keys.json"
+#keysFile= "keys.json"
 #####	GLOBALS		#####
 
 ##OFFLOAD APIkeys to keys.json
