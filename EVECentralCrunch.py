@@ -1,5 +1,24 @@
-#!/Python25/python.exe
+#!/Python27/python.exe
 
-import re, string, sys, csv
+import csv
 
-print "hello world"
+
+data   = csv.reader(open("test.dump"))
+
+fields = data.next()
+
+	#Loads dump file into dictionary of dictionary
+	#AllTheThings[<orderid>]=[orderid:##,regionid:##,systemid:##..
+allTheThings = {}
+for row in data:
+	items = zip(fields, row)
+	item = {}
+
+	for (name,value) in items:
+		item[name] = value.strip()
+	allTheThings[item["orderid"]]=item
+
+##Filter Set##
+SystemFilter = "30000142"
+
+cleanList = {}
