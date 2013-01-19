@@ -17,13 +17,13 @@ def lineproc (line):
 		if float(line["price"]) < cleanList[item][type]["min"]:
 			cleanList[item][type]["min"] = float(line["price"])
 		
-			#total data metrics built by ONLINE ALGORITHM
-		cleanList[item][type]["vol"] += int(line["volremain"])
-		delta = float(line["price"]) - cleanList[item][type]["mean"]
-		cleanList[item][type]["mean"] = cleanList[item][type]["mean"] + delta/cleanList[item][type]["vol"]
-		cleanList[item][type]["M2"] = cleanList[item][type]["M2"] + delta * (float(line["price"])-cleanList[item][type]["mean"])
-		cleanList[item][type]["variance"] = cleanList[item][type]["M2"]/(cleanList[item][type]["vol"]-1)
-		cleanList[item][type]["stdev"] = math.sqrt(cleanList[item][type]["variance"])
+			#total data metrics built by WEIGHTED INCREMENTAL ALGORITHM
+		#cleanList[item][type]["vol"] += int(line["volremain"])
+		#delta = float(line["price"]) - cleanList[item][type]["mean"]
+		#cleanList[item][type]["mean"] = cleanList[item][type]["mean"] + delta/cleanList[item][type]["vol"]
+		#cleanList[item][type]["M2"] = cleanList[item][type]["M2"] + delta * (float(line["price"])-cleanList[item][type]["mean"])
+		#cleanList[item][type]["variance"] = cleanList[item][type]["M2"]/(cleanList[item][type]["vol"]-1)
+		#cleanList[item][type]["stdev"] = math.sqrt(cleanList[item][type]["variance"])
 		
 	else:
 		#new entry case
