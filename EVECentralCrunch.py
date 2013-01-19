@@ -3,7 +3,7 @@
 import csv, sys, math
 def lineproc (line):
 	type = ""
-	if line["bid"] is "1":
+	if int(line["bid"]) == 1:
 		type = "buy"
 	else:
 		type = "sell"
@@ -16,6 +16,15 @@ def lineproc (line):
 			cleanList[item][type]["max"] = float(line["price"])
 		if float(line["price"]) < cleanList[item][type]["min"]:
 			cleanList[item][type]["min"] = float(line["price"])
+		
+		
+		temp = cleanList[item][type]["vol"] + int(line["volremain"])
+		delta = float(line["price"]) - cleanList[item][type]["mean"]
+		R = delta * (int(line["volremain"])/temp)
+		cleanList[item][type]["mean"] = cleanList[item][type]["mean"] + R
+		cleanList[item][type]["M2"] = cleanList[item][type]["M2"] + (cleanList[item][type]["vol"] * delta * R)
+		cleanList[item][type]["vol"] = temp
+		cleanList[item][type]["variance"] = cleanList[item][type]["M2"]/cleanList[item][type]["vol"]
 		
 			#total data metrics built by WEIGHTED INCREMENTAL ALGORITHM
 		#cleanList[item][type]["vol"] += int(line["volremain"])
