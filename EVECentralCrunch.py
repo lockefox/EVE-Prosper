@@ -55,7 +55,7 @@ def lineproc (line):
 		
 
 dumpfile = "/central_dumps"		#Download all the raw files intended for crunch
-data   = csv.reader(open("2012-01-01.dump"))
+data   = csv.reader(open("Jita_trit_sell.dump.csv"))
 
 fields = data.next()
 
@@ -72,9 +72,9 @@ for row in data:
 
 print "processed datafile"
 ##Filter Set##
-SystemFilter = 30000142
+SystemFilter = "30000142"
 
-cleanList = {}
+cleanlist = {}
 #cleanlist {itemID:{buy:{max:,min:,avg:,...},sell:{max:,min:,avg:...}}}
 
 if SystemFilter is "":
@@ -82,10 +82,80 @@ if SystemFilter is "":
 	print "global case"
 else:
 	for orderid,data in allTheThings.iteritems():
-		#print data["systemid"]
-		if int(data["systemid"]) == SystemFilter:
-			lineproc(data)
+		buy_or_sell = "sell"
+		if int(data["bid"]) == 1:
+			buy_or_sell = "buy"
 		
-
-print cleanList	["34"]
+		if data["typeid"] in cleanlist:
+			if data["systemid"] in cleanlist[data["typeid"]]:
+				if buy_or_sell in cleanlist[data["typeid"]][data["systemid"]]:
+						#existing entry case
+						#general data values
+					if float(data["price"]) > cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"]:
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"]=float(data["price"])
+					if float(data["price"]) < cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"]:
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"]=float(data["price"])
+						
+					temp = cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] + int(data["volenter"])
+					delta = float(data["price"]) - cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"]
+					R = delta * (int(data["volenter"])/temp)
+					
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] += R
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] += (cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] * delta * R)
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] += long(data["volenter"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"]/cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"]
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = math.sqrt(cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"])
+					
+					print "+%s\t=%d" %(data["volenter"],cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"])
+				else:
+					#typeid AND system exist, but not buy/sell key
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]={}
+					
+						#initialize general data values#
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+					
+						#initialize running-average values#
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+			else:
+					#typeid exists, but not for this system
+				cleanlist[data["typeid"]][data["systemid"]]={}
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]={}
+				
+					#initialize general data values#
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+				
+					#initialize running-average values#
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+		else:
+				#initialize totally new key
+			cleanlist[data["typeid"]] = {}
+			cleanlist[data["typeid"]][data["systemid"]]={}
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]={}
+			
+				#initialize general data values#
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+			
+				#initialize running-average values#
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+			cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+			
+			print data["volenter"]
+print cleanlist	["34"][SystemFilter]
 

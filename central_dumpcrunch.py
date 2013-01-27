@@ -110,8 +110,9 @@ def main():
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
 				
+				
 		#print output
-	print cleanlist["34"][systemFilter]
+	print cleanlist["39"][systemFilter]
 	
 def loadCSV(filename):
 	#accepts string filename and returns dict-dict object of requested file
@@ -124,7 +125,17 @@ def loadCSV(filename):
 
 		for (name,value) in items:
 			item[name] = value.strip()	#assigns values to dict using header as keys
-		parsed_dump[item["orderid"]]=item #builds return dict-dict object
+		if item["orderid"] in parsed_dump:
+				#repeated order case
+				#update samples to relevent edge
+			if item["price"] < parsed_dump[item["orderid"]]["price"] and parsed_dump[item["orderid"]]["bid"] is "1":
+					#SELL ORDERS: lowest price matters
+				parsed_dump[item["orderid"]]["price"]=item["price"]	
+			elif item["price"] > parsed_dump[item["orderid"]]["price"] and parsed_dump[item["orderid"]]["bid"] is "0":
+					#BUY ORDERS: highest price maters
+				parsed_dump[item["orderid"]]["price"]=item["price"]	
+		else:
+			parsed_dump[item["orderid"]]=item #builds return dict-dict object
 		
 	return parsed_dump
 	#parsed_dump[orderid]={orderid:###,regionid:###,...}
