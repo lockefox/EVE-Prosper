@@ -58,7 +58,7 @@ def main():
 						
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] += R
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] += (cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] * delta * R)
-						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = temp
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] += long(data["volenter"])
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"]/cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"]
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = math.sqrt(cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"])
 					else:
@@ -69,7 +69,7 @@ def main():
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
-						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 						
 							#initialize running-average values#
@@ -85,7 +85,7 @@ def main():
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
-					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 					
 						#initialize running-average values#
@@ -102,7 +102,7 @@ def main():
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
-				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 				
 					#initialize running-average values#
