@@ -2,8 +2,9 @@
 ##Try 2.0 for processing dump files for loading SQL file
 ##Designed for UNIX environment
 ##For win/DOS, install cygwin: http://www.cygwin.com/
+##Processes raw dump files from eve central: eve-central.com/dumps
 
-import csv, sys, math, os, gzip, getopt, subprocess
+import csv, sys, math, os, gzip, getopt, subprocess, math
 
 ##	Globals	##
 dumpfile = "/central_dumps"
@@ -13,6 +14,7 @@ SQL = 0							#default print = CSV
 pwd_raw = os.popen("pwd")
 pwd = (pwd_raw.read()).rstrip()
 cleanlist = {}
+globalist = {}
 systemFilter="30000142"
 
 def main():
@@ -36,9 +38,78 @@ def main():
 
 		#parse file
 		for order,data in raw_parse.iteritems():
-			#creates a dict of tuple:object
-			#(itemid,systemid,type):entry()
-
+			buy_or_sell = "sell"
+			if int(order["bid"]) == 1:
+				buy_or_sell = "buy"
+			
+			if data["itemid"] in cleanlist:
+				if data["systemid"] in cleanlist[data["itemid"]]:
+					if buy_or_sell in cleanlist[data["itemid"]][data["systemid"]]:
+							#existing entry case
+							#general data values
+						if int(data["price"]) > cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["max"]:
+							cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["max"]=float(data["price"])
+						if int(data["price"]) < cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["min"]:
+							cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["min"]=float(data["price"])
+							
+						temp = cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] + int(data["volenter"])
+						delta = float(data["price"]) - cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["avg"]
+						R = delta * (int(data["volenter"])/temp)
+						
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["avg"] += R
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["M2"] += (cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] * delta * R)
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] = temp
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["var"] = cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["M2"]/cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"]
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["stdev"] = math.sqrt(cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["var"])
+					else:
+						#itemID AND system exist, but not buy/sell key
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]={}
+						
+							#initialize general data values#
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+						
+							#initialize running-average values#
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["var"] = 0
+						cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+				else:
+						#itemID exists, but not for this system
+					cleanlist[data["itemid"]][data["systemid"]]={}
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]={}
+					
+						#initialize general data values#
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+					
+						#initialize running-average values#
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["var"] = 0
+					cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+			else:
+					#initialize totally new key
+				cleanlist[data["itemid"]] = {}
+				cleanlist[data["itemid"]][data["systemid"]]={}
+				cleanlist[data["itemid"]][data["systemid"][buy_or_sell]={}
+				
+					#initialize general data values#
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["vol"] = int(data["volenter"])
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
+				
+					#initialize running-average values#
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["M2"] = 0
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["var"] = 0
+				cleanlist[data["itemid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
+				
 		#print output
 	
 def loadCSV(filename):
