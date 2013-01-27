@@ -12,6 +12,8 @@ outfile = "result.csv"
 SQL = 0							#default print = CSV
 pwd_raw = os.popen("pwd")
 pwd = (pwd_raw.read()).rstrip()
+cleanlist = {}
+systemFilter="30000142"
 
 def main():
 	
@@ -31,9 +33,12 @@ def main():
 	for filezip in filelist:
 		rawdump = gzip.open(filezip)
 		raw_parse = loadCSV(rawdump)
-		print raw_parse
+
 		#parse file
-		
+		for order,data in raw_parse.iteritems():
+			#creates a dict of tuple:object
+			#(itemid,systemid,type):entry()
+
 		#print output
 	
 def loadCSV(filename):
@@ -77,6 +82,15 @@ def parseargs(argv):
 		else:
 			usage()
 			sys.exit(1)
+
+class Entry (object):
+	#stores the various values and running tallies for each vector key
+	def __init__ (self,data):	#takes dict.  data from main iterator
+		self.min
+		self.max
+		self.vol
+		self.avg
+		self.stdev
 			
 if __name__ == "__main__":
 	parseargs(argv=sys.argv)
