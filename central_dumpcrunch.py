@@ -36,7 +36,6 @@ def main():
 		rawdump = gzip.open(filezip)
 		raw_parse = loadCSV(rawdump)
 
-		print date
 		#parse file
 		for order,data in raw_parse.iteritems():
 			buy_or_sell = "sell"
@@ -129,7 +128,8 @@ def main():
 	#print cleanlist["39"][systemFilter]	#prints whole price object for [type][location]
 	
 	outlist = list_izer(cleanlist, filezip)
-	
+	for line in range (0,15):
+		print outlist[line]
 	
 def list_izer(resultList, filepath):
 	#takes cleanlist{} and returns a list-list-... array
@@ -137,16 +137,18 @@ def list_izer(resultList, filepath):
 	#Used for CSV output (ill advised)
 	
 		#build Headder
-	list_out [0] = ("itemid","date","region","system","type","max","min","avg","stdev","other")
-
+	list_out = []
+	header = [["itemid"],["date"],["region"],["system"],["type"],["max"],["min"],["avg"],["stdev"],["other"]]
+	list_out.append(header)
 		#parse date from filename
 	(dump,filename) = filepath.split("%s/" % dumpfile)
 	(date,dump) = filename.split(".dump")
 	
-	for first_dict,itemid in resultList.iteritems():
-		for second_dict, system in first_dict.iteritems():
-			for root_dict, type in second_dict.iteritems():
-				entry = (itemid,date,root_dict["region"],type,root_dict["max"],root_dict["min"],root_dict["avg"],root_dict["stdev"],"")
+	for itemid,first_dict in resultList.iteritems():
+		for system,second_dict in first_dict.iteritems():
+			for type,root_dict in second_dict.iteritems():
+	
+				entry = [[itemid],[date],[root_dict["region"]],[type],[root_dict["max"]],[root_dict["min"]],[root_dict["avg"]],[root_dict["stdev"]],[""]]
 				list_out.append(entry)
 		
 	return list_out
