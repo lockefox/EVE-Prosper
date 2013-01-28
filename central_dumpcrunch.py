@@ -138,7 +138,7 @@ def list_izer(resultList, filepath):
 	
 		#build Headder
 	list_out = []
-	header = [["itemid"],["date"],["region"],["system"],["type"],["max"],["min"],["avg"],["stdev"],["other"]]
+	header = ["itemid","date","region","system","type","max","min","avg","stdev","other"]
 	list_out.append(header)
 		#parse date from filename
 	(dump,filename) = filepath.split("%s/" % dumpfile)
@@ -148,7 +148,7 @@ def list_izer(resultList, filepath):
 		for system,second_dict in first_dict.iteritems():
 			for type,root_dict in second_dict.iteritems():
 	
-				entry = [[itemid],[date],[root_dict["region"]],[type],[root_dict["max"]],[root_dict["min"]],[root_dict["avg"]],[root_dict["stdev"]],[""]]
+				entry = [itemid,date,root_dict["region"],system,type,root_dict["max"],root_dict["min"],root_dict["avg"],root_dict["stdev"],""]
 				list_out.append(entry)
 		
 	return list_out
