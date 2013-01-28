@@ -73,8 +73,12 @@ def main():
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 						
 							#initialize running-average values#
-						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
-						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+						temp = long(data["volenter"])
+						delta = float(data["price"])
+						R = delta * long(data["volenter"]) / temp
+						M2 = long(data["volenter"]) * delta * R
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = M2
+						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = M2/long(data["volenter"])
 						cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
 				else:
 						#typeid exists, but not for this system
@@ -89,8 +93,12 @@ def main():
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 					
 						#initialize running-average values#
-					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
-					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+					temp = long(data["volenter"])
+					delta = float(data["price"])
+					R = delta * long(data["volenter"]) / temp
+					M2 = long(data["volenter"]) * delta * R
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = M2
+					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = M2/long(data["volenter"])
 					cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
 			else:
 					#initialize totally new key
@@ -101,13 +109,18 @@ def main():
 					#initialize general data values#
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["max"] = float(data["price"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["min"] = float(data["price"])
-				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["avg"] = float(data["price"])	#o/
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["vol"] = long(data["volenter"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["region"] = int(data["regionid"])
 				
 					#initialize running-average values#
-				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = 0
-				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = 0
+
+				temp = long(data["volenter"])
+				delta = float(data["price"])
+				R = delta * long(data["volenter"]) / temp
+				M2 = long(data["volenter"]) * delta * R
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["M2"] = M2
+				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["var"] = M2/long(data["volenter"])
 				cleanlist[data["typeid"]][data["systemid"]][buy_or_sell]["stdev"] = 0
 				
 				
