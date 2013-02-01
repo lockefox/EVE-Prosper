@@ -131,6 +131,8 @@ def main():
 	for line in range (0,15):
 		print outlist[line]
 	
+	rawdump.close()
+	
 def list_izer(resultList, filepath):
 	#takes cleanlist{} and returns a list-list-... array
 	#filename needed to parse out date key
