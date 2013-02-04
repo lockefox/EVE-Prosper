@@ -2,11 +2,23 @@
 ##Try 2.0 for processing dump files for loading SQL file
 ##Designed for UNIX environment
 ##For win/DOS, install cygwin: http://www.cygwin.com/
+##	CYGWIN + MYSQLDB:
+##		--Install all the DB/Python modules for cygwin
+##		--run: easy_install mysql-python
+##		--Verify with python terminal: import MySQLdb
 ##Processes raw dump files from eve central: eve-central.com/dumps
 
 import csv, sys, math, os, gzip, getopt, subprocess, math
-
+import MySQLdb
+	#NOTES: http://thingsilearned.com/2009/05/03/simple-mysqldb-example/
+	#
 ##	Globals	##
+DATABASE_HOST = "localhost"
+DATABASE_USER = "root"
+DATABASE_NAME = "eve_marketdata"
+DATABASE_PASSWD = "bar"
+DATABASE_PORT = "3306"
+
 dumpfile = "/central_dumps"
 datafile = "2012-01-01.dump"	#default file for debug
 outfile = "result.csv"
