@@ -143,9 +143,9 @@ def main():
 	for line in range(1,15):
 		if outlist[line][-1] is "":
 			outlist[line][-1]="NULL"
-		#cursor.execute("INSERT INTO \'rawdata\' VALUES (%d, %s, %d, %d, %s, %d, %d, %d, %d, NULL)" %/ line)
-		#cursor.execute( "INSERT INTO \'rawdata\' (itemid,order_date,regionID,systemID,order_type,price_max_,price_min,price_avg,price_stdev) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % tuple(outlist[line]))
-		cursor.execute("INSERT INTO \'rawdata\' (itemid) VALUE (%s)" % outlist[line][0])
+		#cursor.execute("INSERT INTO \'rawdata\' VALUES (%d, %s, %d, %d, %s, %d, %d, %d, %d, NULL)" %/ line) (itemid,order_date,regionID,systemID,order_type,price_max_,price_min,price_avg,price_stdev) 
+		cursor.execute( "INSERT INTO rawdata (itemid,order_date,regionID,systemID,order_type,price_max_,price_min,price_avg,price_stdev) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % tuple(outlist[line]))
+		#cursor.execute("INSERT INTO rawdata (itemid) VALUE (%s)" % outlist[line][0])
 		#print outlist[line]
 	rawdump.close()
 	
@@ -223,9 +223,10 @@ def parseargs(argv):
 			usage()
 			sys.exit(1)
 def initDB():
-	db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT))
+	db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT), db=DATABASE_NAME)
 	cursor = db.cursor()
-	
+	#cursor.exectue("drop database %s; create database %s" % (DATABASE_NAME,DATABASE_NAME) )
+	#db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT) db=DATABASE_NAME)
 	return cursor
 class Entry (object):
 	#stores the various values and running tallies for each vector key
