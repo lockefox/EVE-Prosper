@@ -11,9 +11,9 @@
 import csv, sys, math, os, gzip, getopt, subprocess, math
 import MySQLdb
 	#NOTES: http://thingsilearned.com/2009/05/03/simple-mysqldb-example/
-	#
+
 ##	Globals	##
-DATABASE_HOST = "localhost"
+DATABASE_HOST = "127.0.0.1"
 DATABASE_USER = "root"
 DATABASE_NAME = "eve_marketdata"
 DATABASE_PASSWD = "bar"
@@ -140,9 +140,13 @@ def main():
 	#print cleanlist["39"][systemFilter]	#prints whole price object for [type][location]
 	
 	outlist = list_izer(cleanlist, filezip)
-	for line in range (0,15):
-		print outlist[line]
-	
+	for line in range(1,15):
+		if outlist[line][-1] is "":
+			outlist[line][-1]="NULL"
+		#cursor.execute("INSERT INTO \'rawdata\' VALUES (%d, %s, %d, %d, %s, %d, %d, %d, %d, NULL)" %/ line)
+		#cursor.execute( "INSERT INTO \'rawdata\' (itemid,order_date,regionID,systemID,order_type,price_max_,price_min,price_avg,price_stdev) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % tuple(outlist[line]))
+		cursor.execute("INSERT INTO \'rawdata\' (itemid) VALUE (%s)" % outlist[line][0])
+		#print outlist[line]
 	rawdump.close()
 	
 def list_izer(resultList, filepath):
@@ -218,7 +222,11 @@ def parseargs(argv):
 		else:
 			usage()
 			sys.exit(1)
-
+def initDB():
+	db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT))
+	cursor = db.cursor()
+	
+	return cursor
 class Entry (object):
 	#stores the various values and running tallies for each vector key
 	def __init__ (self,data):	#takes dict.  data from main iterator
@@ -230,4 +238,5 @@ class Entry (object):
 			
 if __name__ == "__main__":
 	parseargs(argv=sys.argv)
+	cursor=initDB()
 	main()
