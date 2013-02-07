@@ -42,6 +42,7 @@ def proginit():
 		print "Unable to query EVE-Central Dump repository at %s" % config.get("EVE_CENTRAL","central_path")
 		print er.code
 		sys.exit(4)
+		
 	try:	#zkillboard
 		urllib2.urlopen(urllib2.Request(config.get("TOASTER_CFG","toaster_path")))
 	except urllib2.URLError as e:
@@ -54,7 +55,7 @@ def proginit():
 		sys.exit(4)
 	#Verify DB connection
 	try:
-		con = MySQLdb.connect(host=config.get("GLOBALS","db_IP"), user=config.get("GLOBALS","db_username"), passwd=config.get("GLOBALS","db_pw"), port=int(config.get("GLOBALS","db_port")), db=config.get("GLOBALS","eve_marketdata"))
+		con = MySQLdb.connect(host=config.get("GLOBALS","db_IP"), user=config.get("GLOBALS","db_username"), passwd=config.get("GLOBALS","db_pw"), port=int(config.get("GLOBALS","db_port")), db=config.get("GLOBALS","root_dbname"))
 		cur = con.cursor()
 		cur.execute("SELECT VERSION()")
 		data = cur.fetchone()
