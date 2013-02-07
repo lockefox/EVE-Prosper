@@ -13,14 +13,17 @@ import sys,csv, sys, math, os, gzip, getopt, subprocess, math, datetime, time
 import ConfigParser
 import urllib2
 import MySQLdb
+import threading,Queue
 #####		GLOBALS		#####
 config_file = "config.ini"
 config = ConfigParser.ConfigParser()
 config.read(config_file)
 
-startdate=config.get("GLOBALS","startdate")
+startdate=datetime.strptime(config.get("GLOBALS","startdate"),"%Y-%m-%d")
 enddate=(datetime.datetime.now()).strftime("%Y-%m-%d")
-debug=0
+debug=config.get("DEBUG","debug")
+
+queue = Queue.Queue()
 
 def proginit():
 	#Tests outgoing connections for proper functioning.  Will abort program if any fail
@@ -74,7 +77,7 @@ def parseargs():
 				print "Invalid startdate date format.  Expected YYYY-MM-DD"
 				sys.exit(2)
 				
-			startdate=arg
+			startdate=datetime.strptime(arg,"%Y-%m-%d")
 		elif opt in ("-e", "--enddate"):
 			try:
 				time.strptime(arg, "%Y-%m-%d")
@@ -82,7 +85,7 @@ def parseargs():
 				print "Invalid enddate date format.  Expected YYYY-MM-DD"
 				sys.exit(2)
 			
-			enddate=arg
+			enddate=datetime.strptime(arg,"%Y-%m-%d")
 		
 		elif opt in ("-d","--debug"):
 			debug=1
@@ -106,6 +109,8 @@ def dbinit():
 	db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT), db=DATABASE_NAME)
 	cursor = db.cursor()
 	return cursor
+
+def main():
 	
 if __name__ == "__main__":
 	proginit()
