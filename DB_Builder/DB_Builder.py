@@ -34,20 +34,20 @@ def proginit():
 	#Verify internet connections#
 	try:	#eve-central
 		urllib2.urlopen(urllib2.Request(config.get("EVE_CENTRAL","central_path")))
-	#except urllib2.URLError as e:
-	#	print "Unable to query EVE-Central Dump repository at %s" % config.get("EVE_CENTRAL","central_path")
-	#	print e.reason
-	#	sys.exit(4)
+	except urllib2.URLError as e:
+		print "Unable to query EVE-Central Dump repository at %s" % config.get("EVE_CENTRAL","central_path")
+		print e.code
+		sys.exit(4)
 	except urllib2.HTTPError as er:
 		print "Unable to query EVE-Central Dump repository at %s" % config.get("EVE_CENTRAL","central_path")
 		print er.code
 		sys.exit(4)
 	try:	#zkillboard
 		urllib2.urlopen(urllib2.Request(config.get("TOASTER_CFG","toaster_path")))
-	#except urllib2.URLError as e:
-	#	print "Unable to query Killboard repository at %s" % config.get("TOASTER_CFG","toaster_path")
-	#	print e.reason
-	#	sys.exit(4)
+	except urllib2.URLError as e:
+		print "Unable to query Killboard repository at %s" % config.get("TOASTER_CFG","toaster_path")
+		print e.code
+		sys.exit(4)
 	except urllib2.HTTPError as er:
 		print "Unable to query Killboard repository at %s" % config.get("TOASTER_CFG","toaster_path")
 		print er.code
