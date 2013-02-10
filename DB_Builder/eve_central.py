@@ -1,11 +1,13 @@
 #!/Python27/python.exe
 
 import Queue,threading
+import gzip
 import urllib2
 import time,datetime
 import MySQLdb
 import ConfigParser
 import init
+import sys,csv, gzip, StringIO
 
 
 def datelist(start_date,end_date):
@@ -28,3 +30,28 @@ def datelist(start_date,end_date):
 			list_of_dates.remove(exist_date)
 	
 	return list_of_dates
+	
+def fetch_dump(date):
+	this_year = datetime.datetime.now().year
+	date_in = datetime.datetime.strptime(date,"%Y-%m-%d")
+	basepath = init.config.get("EVE_CENTRAL","central_path")
+	dump_url =""
+	CSV_file=None
+	
+	if date_in.year < this_year:
+		dump_url="%s%d/%s.dump.gz" % (basepath,date_in.year,date)
+	else:
+		dump_url="%s%d/%s.dump.gz" % (basepath,date)
+	
+		#http://www.diveintopython.net/http_web_services/gzip_compression.html
+	request = urllib2.Request(dump_url)
+	request.add_header('Accept-encoding', 'gzip')
+	opener = urllib2.build_opener()
+	raw_zip = opener.open(request)
+	dump_zip_stream = raw_zip.read()
+	dump_IOstream = StringIO.StringIO(dump_zip_stream)
+	
+	zipper = gzip.GzipFile(fileobj=dump_IOstream)
+
+	CSV_file  = csv.reader(zipper)
+	return CSV_file

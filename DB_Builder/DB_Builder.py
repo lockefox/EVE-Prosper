@@ -20,8 +20,15 @@ import init, eve_central
 
 def main():
 	print "main"
+	this_year = datetime.datetime.now().year
 	datelist = eve_central.datelist(init.startdate,init.enddate)
 	
+	for date in datelist:
+		dumpfile = eve_central.fetch_dump(date)
+		fields = dumpfile.next()
+		print fields
+		sys.exit(1)
+			
 	
 if __name__ == "__main__":
 	init.proginit()
