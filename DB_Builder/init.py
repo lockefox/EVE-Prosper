@@ -6,15 +6,20 @@ import urllib2
 import MySQLdb
 import threading,Queue
 
+#Config File Globals
 config_file = "config.ini"
 config = ConfigParser.ConfigParser()
 config.read(config_file)
 
 startdate=datetime.datetime.strptime(config.get("GLOBALS","startdate"),"%Y-%m-%d")
-enddate=(datetime.datetime.now()).strftime("%Y-%m-%d")
+enddate=(datetime.datetime.now())
 debug=config.get("DEBUG","debug")
 
+#Thread Globals
 queue = Queue.Queue()
+
+#DB Globals
+cursor=None
 
 def proginit():
 	#Tests outgoing connections for proper functioning.  Will abort program if any fail
@@ -55,7 +60,8 @@ def proginit():
 		print "Unable to connect to destination database"
 		print "ERROR %d: %s" % (e.args[0],e.args[1])
 		sys.exit(5)
-		
+	
+	print "Validated connections"
 	con.close()
 
 def parseargs():
@@ -89,7 +95,7 @@ def parseargs():
 			debug=1
 		else:
 			help()
-
+	print "parsed input arguments"
 		
 def help():
 	print """DB_Builder.py
@@ -104,6 +110,62 @@ def help():
 	sys.exit(1)
 	
 def dbinit():
-	db = MySQLdb.connect(host=DATABASE_HOST, user=DATABASE_USER, passwd=DATABASE_PASSWD, port=int(DATABASE_PORT), db=DATABASE_NAME)
+	db = MySQLdb.connect(host=config.get("GLOBALS","db_IP"), user=config.get("GLOBALS","db_username"), passwd=config.get("GLOBALS","db_pw"), port=int(config.get("GLOBALS","db_port")), db=config.get("GLOBALS","root_dbname"))
+	global cursor
 	cursor = db.cursor()
-	return cursor
+	
+	#create tables in database
+		#raw-price db (DEBUG ONLY)
+	cursor.execute ("CREATE TABLE IF NOT EXISTS `%s`\
+		(itemID INTEGER NOT NULL, \
+		order_date date NOT NULL, \
+		regionID INTEGER NOT NULL, \
+		systemID INTEGER NOT NULL, \
+		order_type VARCHAR(20) NOT NULL, \
+		price_max DECIMAL(12,2) NULL, \
+		price_min DECIMAL (12,2) NULL, \
+		price_avg DECIMAL (12,2) NULL, \
+		price_stdev DECIMAL (8,4) NULL, \
+		other DECIMAL (12,2) NULL, \
+		PRIMARY KEY (order_date))" % config.get("EVE_CENTRAL","raw_db"))
+		
+		#processed data (in PROSPER)
+	cursor.execute("CREATE TABLE IF NOT EXISTS %s\
+		(itemID INTEGER NOT NULL, \
+		order_date date NOT NULL, \
+		regionID INTEGER NOT NULL, \
+		systemID INTEGER NOT NULL, \
+		order_type VARCHAR(20) NOT NULL, \
+		price_max DECIMAL(12,2) NOT NULL, \
+		price_min DECIMAL (12,2) NOT NULL, \
+		price_avg DECIMAL (12,2) NOT NULL, \
+		price_stdev DECIMAL (8,4) NOT NULL, \
+		other DECIMAL (12,2) NULL, \
+		PRIMARY KEY (order_date) \
+		)" % config.get("EVE_CENTRAL","prosper_db"))
+		
+		#kill-data database (in PROSPER)
+	cursor.execute("CREATE TABLE IF NOT EXISTS %s\
+		(itemID INTEGER NOT NULL, \
+		kill_date date NOT NULL, \
+		destroyed_global INTEGER NOT NULL, \
+		destroyed_highsec INTEGER NOT NULL, \
+		destroyed_nullsec INTEGER NOT NULL, \
+		destroyed_wspace INTEGER NOT NULL, \
+		est_value DECIMAL (12,2) NOT NULL, \
+		PRIMARY KEY (kill_date)\
+		)" % config.get("TOASTER_CFG","kill_db"))
+		
+		#builder database (in PROSPER)
+	cursor.execute("CREATE TABLE IF NOT EXISTS %s\
+		(itemID INTEGER NOT NULL, \
+		order_date date NOT NULL, \
+		item_price DECIMAL(12,2) NOT NULL, \
+		build_now DECIMAL(12,2) NOT NULL, \
+		build_7d DECIMAL(12,2) NOT NULL, \
+		build_14d DECIMAL(12,2) NOT NULL, \
+		build_30d DECIMAL(12,2) NOT NULL, \
+		PRIMARY KEY (order_date)\
+		)" % config.get("BUILDER_CFG","builder_db"))
+		
+	print "Database tables configured"

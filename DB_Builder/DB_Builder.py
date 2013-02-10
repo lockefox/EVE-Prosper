@@ -14,14 +14,17 @@ import ConfigParser
 import urllib2
 import MySQLdb
 import threading,Queue
-import init
+import init, eve_central
 #####		GLOBALS		#####
 
 
 def main():
 	print "main"
+	datelist = eve_central.datelist(init.startdate,init.enddate)
+	
+	
 if __name__ == "__main__":
 	init.proginit()
 	init.parseargs()
-	dbinit()
+	init.dbinit()
 	main()
