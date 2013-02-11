@@ -9,7 +9,7 @@
 #############################
 
 #####		INITS		#####
-import sys,csv, sys, math, os, gzip, getopt, subprocess, math, datetime, time
+import sys,csv, sys, math, os,  subprocess, math, datetime, time
 import ConfigParser
 import urllib2
 import MySQLdb
@@ -25,8 +25,8 @@ def main():
 	
 	for date in datelist:
 		dumpfile = eve_central.fetch_dump(date)
-		fields = dumpfile.next()
-		print fields
+		orderlist = eve_central.csv_to_list(dumpfile)
+		
 		sys.exit(1)
 			
 	
