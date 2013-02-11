@@ -128,7 +128,17 @@ def dbinit():
 		price_stdev DECIMAL (8,4) NULL, \
 		other DECIMAL (12,2) NULL, \
 		PRIMARY KEY (order_date))" % config.get("EVE_CENTRAL","raw_db"))
-		
+		#processing SQL for daily dump data (DEBUG ONLY.  Should be empty after proc)
+	cursor.execute ("CREATE TABLE IF NOT EXISTS `%s`\
+		(orderID INTEGER NOT NULL, \
+		order_date date NOT NULL, \
+		regionid, INTEGER NOT NULL, \
+		systemid, INTEGER NOT NULL, \
+		typeid, INTEGER NOT NULL, \
+		order_type INTEGER NOT NULL, \
+		price DECIMAL(12,2) NULL, \
+		volenter INTEGER NOT NULL, \
+		PRIMARY KEY (order_date))" % config.get("EVE_CENTRAL","dumpproc_db"))
 		#processed data (in PROSPER)
 	cursor.execute("CREATE TABLE IF NOT EXISTS %s\
 		(itemID INTEGER NOT NULL, \
