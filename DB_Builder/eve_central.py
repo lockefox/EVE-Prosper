@@ -55,3 +55,29 @@ def fetch_dump(date):
 
 	CSV_file  = csv.reader(zipper)
 	return CSV_file
+	
+def csv_to_orderdict(CSV_file):
+	#takes CSV_file output from fetch_dump and returns a dict-of-dict
+	#returnDict["orderid"]=[//header keys:values//]
+	#Eliminates repeated orderid's by updating price
+	returnDict={}
+	
+	fields = CSV_file.next()
+	for row in CSV_file:
+		items = zip(fields, row)
+		item={}
+	for (name,value) in items:
+			item[name] = value.strip()	#assigns values to dict using header as keys
+		if item["orderid"] in returnDict:
+				#repeated order case
+				#update samples to relevent edge
+			if item["price"] < returnDict[item["orderid"]]["price"] and returnDict[item["orderid"]]["bid"] is "1":
+					#SELL ORDERS: lowest price matters
+				returnDict[item["orderid"]]["price"]=item["price"]	
+			elif item["price"] > returnDict[item["orderid"]]["price"] and returnDict[item["orderid"]]["bid"] is "0":
+					#BUY ORDERS: highest price maters
+				returnDict[item["orderid"]]["price"]=item["price"]	
+		else:
+			returnDict[item["orderid"]]=item #builds return dict-dict object
+	
+	return returnDict

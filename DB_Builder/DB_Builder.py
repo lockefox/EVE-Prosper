@@ -20,12 +20,11 @@ import init, eve_central
 
 def main():
 	print "main"
-	this_year = datetime.datetime.now().year
 	datelist = eve_central.datelist(init.startdate,init.enddate)
 	
 	for date in datelist:
-		dumpfile = eve_central.fetch_dump(date)
-		orderlist = eve_central.csv_to_list(dumpfile)
+		dumpfile = eve_central.fetch_dump(date)		#CSV object
+		orderlist = eve_central.csv_to_orderdict(dumpfile)
 		
 		sys.exit(1)
 			
