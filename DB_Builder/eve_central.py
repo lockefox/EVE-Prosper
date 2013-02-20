@@ -57,6 +57,7 @@ def fetch_dump(date):
 	return CSV_file
 	
 def csv_to_orderdict(CSV_file):
+	#FIRST PASS PROCESSING
 	#takes CSV_file output from fetch_dump and returns a dict-of-dict
 	#returnDict["orderid"]=[//header keys:values//]
 	#Eliminates repeated orderid's by updating price
@@ -81,3 +82,6 @@ def csv_to_orderdict(CSV_file):
 			returnDict[item["orderid"]]=item #builds return dict-dict object
 	
 	return returnDict
+
+def orderdict_proc(returnDict):
+	#SECOND PASS PROCESSING
