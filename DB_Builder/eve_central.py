@@ -61,27 +61,28 @@ def csv_to_orderdict(CSV_file):
 	#takes CSV_file output from fetch_dump and returns a dict-of-dict
 	#returnDict["orderid"]=[//header keys:values//]
 	#Eliminates repeated orderid's by updating price
-	returnDict={}
+	parsed_dump={}
 	
 	fields = CSV_file.next()
 	for row in CSV_file:
 		items = zip(fields, row)
 		item={}
-	for (name,value) in items:
+		for (name,value) in items:
 			item[name] = value.strip()	#assigns values to dict using header as keys
-		if item["orderid"] in returnDict:
+		if item["orderid"] in parsed_dump:
 				#repeated order case
 				#update samples to relevent edge
-			if item["price"] < returnDict[item["orderid"]]["price"] and returnDict[item["orderid"]]["bid"] is "1":
+			if item["price"] < parsed_dump[item["orderid"]]["price"] and parsed_dump[item["orderid"]]["bid"] is "1":
 					#SELL ORDERS: lowest price matters
-				returnDict[item["orderid"]]["price"]=item["price"]	
-			elif item["price"] > returnDict[item["orderid"]]["price"] and returnDict[item["orderid"]]["bid"] is "0":
+				parsed_dump[item["orderid"]]["price"]=item["price"]	
+			elif item["price"] > parsed_dump[item["orderid"]]["price"] and parsed_dump[item["orderid"]]["bid"] is "0":
 					#BUY ORDERS: highest price maters
-				returnDict[item["orderid"]]["price"]=item["price"]	
+				parsed_dump[item["orderid"]]["price"]=item["price"]	
 		else:
-			returnDict[item["orderid"]]=item #builds return dict-dict object
+			parsed_dump[item["orderid"]]=item #builds return dict-dict object
 	
-	return returnDict
+	return parsed_dump
 
 def orderdict_proc(returnDict):
 	#SECOND PASS PROCESSING
+	tmp=0
