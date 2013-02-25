@@ -28,7 +28,8 @@ def main():
 			#Final will look like file->proc->out to SQL
 		cleaned_orderlist = eve_central.csv_to_orderdict(dumpfile)	#returns cleaned output from CSV: csv_to_orderdict["orderid"]=[//header key:value dict//]
 		firstpass = eve_central.orderdict_proc(cleaned_orderlist)	#processes down orderDict to orderlist_proc["system-region-itemid-buy_or_sell"]=[(price,volume),...]
-		print firstpass
+		#secondpass= eve_central.
+		#print firstpass
 		print "added %s to %s" % (date, init.config.get("EVE_CENTRAL","raw_db"))
 		sys.exit(1)
 			

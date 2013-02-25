@@ -86,3 +86,24 @@ def csv_to_orderdict(CSV_file):
 def orderdict_proc(returnDict):
 	#SECOND PASS PROCESSING
 	tmp=0
+	second_pass={}
+	
+	for order,data in returnDict.iteritems():
+		#print data
+		buy_or_sell = "buy"
+		if data["bid"] is "1":
+			buy_or_sell="sell"
+		
+		entry_string = "%s:%s:%s:%s" % (data["systemid"],data["regionid"],data["typeid"],buy_or_sell)
+		#system:region:typeid:buy_or_sell
+		#print entry_string
+		if entry_string in second_pass:
+				#existing entry case
+			second_pass[entry_string].append([data["price"],data["volenter"]])
+		else:
+				#new entry case
+			second_pass[entry_string]=[]
+			second_pass[entry_string].append([data["price"],data["volenter"]])
+	
+	print second_pass["30000142:10000002:34:sell"]
+	return second_pass
