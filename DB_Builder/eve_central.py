@@ -108,7 +108,8 @@ def orderdict_proc(parsed_dump):
 	#print second_pass["30000142:10000002:34:sell"]
 	return second_pass
 	
-def wiskerbuilder(second_pass):
+def wiskerbuilder(entry_list):
 	#THIRD PASS PROCESSING
 	#Reduces weighted price lists to what is expected to go out to SQL
+	#Reduces inputs to max, min, avg, stdev, top-5, bottom-5
 	tmp=0
