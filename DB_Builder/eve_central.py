@@ -113,3 +113,24 @@ def wiskerbuilder(entry_list):
 	#Reduces weighted price lists to what is expected to go out to SQL
 	#Reduces inputs to max, min, avg, stdev, top-5, bottom-5
 	tmp=0
+	
+def unit_max(price_list):
+	#takes in the list-of-tuples and returns the max price value
+	
+def unit_min(price_list):
+	#takes in the list-of-tuples and returns the min price value
+	
+def unit_vol(price_list):
+	#takes in the list-of-tuples and returns the total units (volume)
+	
+def unit_avg(price_list):
+	#takes in the list-of-tuples and returns the average
+	#Uses pairs for weighted average calc
+	#return stdev from this funct?
+	
+def unit_percentile(price_list,percentile_factor):
+	#returns top and bottom percentile as given by percentile_factor
+	#Sloppy calc, will select value in whatever touple is in the desired percentile_factor
+	
+
+	

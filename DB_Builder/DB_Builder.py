@@ -31,6 +31,7 @@ def main():
 		toSQL={}
 		for key,entrylist in firstpass.iteritems():
 			toSQL[key]=eve_central.wiskerbuilder(entrylist)
+			
 
 		print "added %s to %s" % (date, init.config.get("EVE_CENTRAL","raw_db"))
 		sys.exit(1)
