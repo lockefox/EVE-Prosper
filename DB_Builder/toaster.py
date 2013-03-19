@@ -5,7 +5,7 @@ import init
 
 def tozKBtime(to_convert):
 	#takes to_convert as datetime 
-	stringtime = to_convert.datetime.strftime("%Y%m$d")
+	stringtime = to_convert.datetime.strftime("%Y%m%d")
 	zKBtime = "/starttime/%s0000/endtime/%s2359" % (stringtime,stringtime)
 	return zKBtime
 	
