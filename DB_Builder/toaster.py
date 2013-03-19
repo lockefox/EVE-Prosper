@@ -16,7 +16,7 @@ def query_range(daterange):
 	
 	
 class kills_query(object):
-
+		#query_string=defaultQuery/tozKBtime/groupID/#group
 	def __init__(self,query_string):
 		self.kill_pages=pageloader
 		self.query_string=query_string
@@ -24,8 +24,12 @@ class kills_query(object):
 	def pageloader(self):
 		#fetch page1
 		zKB_json=zKB_fetch(self.query_string)
+		pagecount=0	#start with 
 		
 		#if killID count = 200 (>199)
 		
 		#query new pages until count <200
 		
+		
+def zKB_fetch(query_string):
+	#takes default_path + query_string and returns the parsed JSON object
