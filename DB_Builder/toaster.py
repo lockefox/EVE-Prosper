@@ -26,14 +26,17 @@ class kills_query(object):
 		zKB_json=zKB_fetch(self.query_string)
 		pagecount=1	#start with 
 		kills_morepage = False
-		#if json_tmp kills count =200, set morepage True
+		if len(zKB_json.keys()) == 200:
+			kills_morepage=True
 		
 		while (kills_morepage):
 		#if killID count = 200 (>199)
 			page_mod="page/%d" % pagecount
 			mod_query = "%s%s" % (self.query_string,page_mod)
 			zKB_json_tmp = zKB_fetch (mod_query)
-			#if json_tmp kills count =200, set morepage True
+			if len(zKB_json_tmp.keys()) < 200:
+				kills_morepage=False
+			pagecount += 1
 		
 		
 def zKB_fetch(query_string):
