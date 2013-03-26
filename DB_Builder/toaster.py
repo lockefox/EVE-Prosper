@@ -99,6 +99,7 @@ def cooling_heels():	#Keeps count of zKB API call count and inserts delays to av
 	if zKB_calls >= pause_interval:
 		time.sleep(pause_length)
 		zKB_calls =0
+		toaster_strikes.decrement()	#lowers strike counter (to avoid collected fails)
 	
 	
 def toast_parseargs():	#For running standalone/debug

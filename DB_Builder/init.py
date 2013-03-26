@@ -28,6 +28,10 @@ class strikes:
 	def increment(self):
 		self.strike +=1
 		self.strike_out()
+	def decrement(self):
+		self.strike += -1
+		if self.strike < 0:
+			self.strike=0
 	def strike_out(self):
 		if self.strike > self.max_strikes:
 			print "Exceded retry fail limit for %s" % self.what
