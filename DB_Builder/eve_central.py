@@ -9,6 +9,9 @@ import ConfigParser
 import init
 import sys,csv, gzip, StringIO
 
+#strike_limit = init.config.get("GLOBALS","strikes")
+#strikes = 0;
+eve_central_strikes = init.strikes("eve_central")
 
 def datelist(start_date,end_date):
 	#takes startdate/enddate and checks against the existing db to populate a list of missing dates
@@ -46,7 +49,22 @@ def fetch_dump(date):
 		#http://www.diveintopython.net/http_web_services/gzip_compression.html
 	request = urllib2.Request(dump_url)
 	request.add_header('Accept-encoding', 'gzip')
-	opener = urllib2.build_opener()
+	for tries in range(0,init.config.get("GLOBALS","retry")+1):	#tries several 
+		try:
+			opener = urllib2.build_opener()
+		except HTTPError as e:
+			time.sleep(init.config.get("GLOBALS","retry_wait"))
+			continue
+		except URLError as er:
+			time.sleep(init.config.get("GLOBALS","retry_wait"))
+			continue
+		else:
+			break
+	else:
+		print "Could not fetch %s" % (date)
+		eve_central_strikes.increment()	#allows for number of fails, retry later
+		
+		
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)

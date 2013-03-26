@@ -20,7 +20,19 @@ queue = Queue.Queue()
 
 #DB Globals
 cursor=None
-
+class strikes:
+	def __init__(self, what):
+		self.strike = 0
+		self.max_strikes = config.get("GLOBALS","strikes")
+		self.what = what
+	def increment(self):
+		self.strike +=1
+		self.strike_out()
+	def strike_out(self):
+		if self.strike > self.max_strikes:
+			print "Exceded retry fail limit for %s" % self.what
+			sys.exit(2)
+			
 def proginit():
 	#Tests outgoing connections for proper functioning.  Will abort program if any fail
 	

@@ -1,5 +1,5 @@
 #!/Python27/python.exe
-import datetime, json, urllib2,gzip, StringIO, getopt
+import datetime, json, urllib2,gzip, StringIO, getopt, time
 import init
 #https://zkillboard.com/information/api/
 
@@ -10,10 +10,17 @@ systemlist = json.load(systemlist_json)
 shiplist_json = open("toaster_shiplist.json")
 shiplist = json.load(shiplist_json)
 
-debug = 0
 debug_samplefile = "zkb_example.json"
 debug_samplefile_json = open(debug_samplefile)
 debug_sample = json.load(debug_samplefile_json)
+
+##	TOASTER Global Variables	##
+debug = 0
+pause_interval = init.config.get("TOASTER_CFG","pause_interval")
+pause_length = init.config.get("TOASTER_CFG","pause_length")
+zKB_calls = 0	#counter for number of calls made to zKB up to pause_interval
+zKB_calls_tot=0	#counter for number of calls made to zKB total
+toaster_strikes = init.strikes("toaster")
 def tozKBtime(to_convert):
 	#takes to_convert as datetime 
 	stringtime = to_convert.datetime.strftime("%Y%m%d")
@@ -52,6 +59,7 @@ class kills_query(object):
 		
 def zKB_fetch(query_string):
 	#takes default_path + query_string and returns the parsed JSON object
+	cooling_heels()		#inserts a pause to allow connection to cool (avoid blacklist)
 	base_URL = init.config.get("TOASTER_CFG","query")
 	request_URL = "%s%s" % (base_URL,query_string)
 		
@@ -59,7 +67,21 @@ def zKB_fetch(query_string):
 	request = urllib2.Request(request_URL)
 	request.add_header('Accept-encoding', 'gzip')
 	request.add_header('User-Agent','eve-prosper.blogspot.com')	#requested header for zkb: https://zkillboard.com/information/api/
-	opener = urllib2.build_opener()
+	for tries in range (0,init.config.get("GLOBALS"),"retry")+1):
+		try
+			opener = urllib2.build_opener()
+		except HTTPError as e:
+			time.sleep(init.config.get("GLOBALS","retry_wait"))
+			continue
+		except URLError as er:
+			time.sleep(init.config.get("GLOBALS","retry_wait"))
+			continue
+		else:
+			break
+	else:
+		print "Could not fetch %s" % query_string
+		toaster_strikes.increment()
+		
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -69,6 +91,15 @@ def zKB_fetch(query_string):
 	JSON_obj = json.load(zipper)
 	
 	return JSON_obj
+
+def cooling_heels():	#Keeps count of zKB API call count and inserts delays to avoid blacklisting
+	zKB_calls += 1	
+	zKB_calls_tot +=1
+	
+	if zKB_calls >= pause_interval:
+		time.sleep(pause_length)
+		zKB_calls =0
+	
 	
 def toast_parseargs():	#For running standalone/debug
 	try:
