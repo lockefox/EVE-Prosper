@@ -47,21 +47,23 @@ def fetch_dump(date):
 		dump_url="%s%d/%s.dump.gz" % (basepath,date)
 	
 		#http://www.diveintopython.net/http_web_services/gzip_compression.html
-	request = urllib2.Request(dump_url)
-	request.add_header('Accept-encoding', 'gzip')
-	for tries in range(0,init.config.get("GLOBALS","retry")+1):	#tries several 
-		try:
-			opener = urllib2.build_opener()
-		except HTTPError as e:
-			time.sleep(init.config.get("GLOBALS","retry_wait"))
-			continue
-		except URLError as er:
-			time.sleep(init.config.get("GLOBALS","retry_wait"))
-			continue
-		else:
-			break
+request = urllib2.Request(dump_url)
+request.add_header('Accept-encoding', 'gzip')
+for tries in range(0,init.config.get("GLOBALS","retry")+1):	#tries several 
+	try:
+		opener = urllib2.build_opener()
+	except HTTPError as e:
+		time.sleep(init.config.get("GLOBALS","retry_wait"))
+		continue
+	except URLError as er:
+		time.sleep(init.config.get("GLOBALS","retry_wait"))
+		continue
 	else:
-		print "Could not fetch %s" % (date)
+		break
+else:
+	print "Could not fetch %s" % (date)
+	//place query back in queue//
+	//fail mode//
 		eve_central_strikes.increment()	#allows for number of fails, retry later
 		
 		
