@@ -20,7 +20,23 @@ queue = Queue.Queue()
 
 #DB Globals
 cursor=None
-
+class strikes:
+	def __init__(self, what):
+		self.strike = 0
+		self.max_strikes = config.get("GLOBALS","strikes")
+		self.what = what
+	def increment(self):
+		self.strike +=1
+		self.strike_out()
+	def decrement(self):
+		self.strike += -1
+		if self.strike < 0:
+			self.strike=0
+	def strike_out(self):
+		if self.strike > self.max_strikes:
+			print "Exceded retry fail limit for %s" % self.what
+			sys.exit(2)
+			
 def proginit():
 	#Tests outgoing connections for proper functioning.  Will abort program if any fail
 	
@@ -69,14 +85,14 @@ def parseargs():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"hs:ed:",["startdate=","enddate=","debug"])
 	except getopt.GetoptError:
-		print 'log2ppd.py -i <filepath>'
+		print 'DB_Builder.py -s YYYY-MM-DD'
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == '-h':
 			help()
 		elif opt in ("-s", "--startdate"):
 			try:
-				time.strptime(arg, "%Y-%m-%d")
+				datetime.strptime(arg, "%Y-%m-%d")
 			except ValueError:
 				print "Invalid startdate date format.  Expected YYYY-MM-DD"
 				sys.exit(2)
@@ -84,7 +100,7 @@ def parseargs():
 			startdate=datetime.strptime(arg,"%Y-%m-%d")
 		elif opt in ("-e", "--enddate"):
 			try:
-				time.strptime(arg, "%Y-%m-%d")
+				datetime.strptime(arg, "%Y-%m-%d")
 			except ValueError:
 				print "Invalid enddate date format.  Expected YYYY-MM-DD"
 				sys.exit(2)
