@@ -149,28 +149,33 @@ def EMD_proc():
 		progress[0]+=1
 		if len(item_query_group)==items_per_query or (progress[0] + items_per_query) > len(item_todo):
 			EMD_URL = "http://api.eve-marketdata.com/api/item_history2.json?char_name=Lockefox&region_ids=%s&type_ids=%s&days=%s" % (region_query,",".join(item_query_group),days_query)
+			print ",".join(item_query_group)
 			response = urllib2.urlopen(EMD_URL).read()
 			query_result = json.loads(response)
-			print query_result
-			sys.exit(1)
-			#for individual_item in item_query_group:	#write to SQL by individual item
-			#	hold_results = []
-			#	#hold_results[] = []
-			#	for row_ittr in query_result["emd"]["result"]
-			#		if int(row_attr["typeID"]) != int(individual_item):
-			#			continue
-			#		result_line = [row_ittr["date"],row_ittr["regionID"],lookup["types"][row_ittr["typeID"]],row_ittr["typeID"],"EMD",row_ittr["highPrice"],row_ittr["lowPrice"],row_ittr["avgPrice"],row_ittr["volume"],row_ittr["orders"],None,None]
-			#		hold_results.append(result_line)
-			#		print hold_results
-			#		sys.exit(1)
-	
-def EMD_fetch(items,region,days):
-	EMD_URL = "http://api.eve-marketdata.com/api/item_history2.json?char_name=Lockefox&region_ids=%s&type_ids=%s&days=%s" % (region,items,days)
-	response = urllib2.urlopen(EMD_URL).read()
-	#response_json = response.read()
-	#print response
-	json_return = json.loads(response)
-	return json_return
+			#print query_result["emd"]["result"]
+			hold_results=[]
+			real_results=[]
+			for individual_item in item_query_group:	#write to SQL by individual item
+				for row_ittr in query_result["emd"]["result"]:
+					if int(row_ittr["row"]["typeID"]) != int(individual_item):
+						continue
+					result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],lookup["types"][row_ittr["row"]["typeID"]],row_ittr["row"]["typeID"],"EMD",row_ittr["row"]["highPrice"],row_ittr["row"]["lowPrice"],row_ittr["row"]["avgPrice"],row_ittr["row"]["volume"],row_ittr["row"]["orders"],None,None]
+					#print result_line
+					hold_results.append(result_line)
+				date_indx=0
+				previous_entry=hold_results[0]
+				for result_ittr in hold_results:	#Clean up missing values
+					if result_ittr[0]== dates_todo[dateindx]:	#found value
+						date_indx++
+						previous_entry=result_ittr
+						continue
+					else:
+						
+				print hold_results
+				sys.exit(1)
+					
+
+
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
