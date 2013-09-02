@@ -21,10 +21,12 @@ sql_file="pricedata.sql"
 EMD_parse=1		#run EMD history pull
 EC_parse=0		#run EVE Central dump crunch
 days=1
-
+db_name=""
+db_schema=""
 def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
+		global db_name,db_cursor,db_schema
 		db_name="pricedata"
 		db_schema="sdretribution11"
 		db_IP="127.0.0.1"
@@ -152,7 +154,6 @@ def EMD_proc():
 			print ",".join(item_query_group)
 			response = urllib2.urlopen(EMD_URL).read()
 			query_result = json.loads(response)
-			#print query_result["emd"]["result"]
 			hold_results=[]
 			real_results=[]
 			for individual_item in item_query_group:	#write to SQL by individual item
@@ -163,19 +164,53 @@ def EMD_proc():
 					#print result_line
 					hold_results.append(result_line)
 				date_indx=0
-				previous_entry=hold_results[0]
+				previous_entry=hold_results[0] #IF T0 = null, then pass back earliest value to T0
 				for result_ittr in hold_results:	#Clean up missing values
-					if result_ittr[0]== dates_todo[dateindx]:	#found value
-						date_indx++
+					if result_ittr[0]== dates_todo[date_indx]:	#found value
+						real_results.append(result_ittr)
+						date_indx+=1
 						previous_entry=result_ittr
 						continue
-					else:
-						
-				print hold_results
+					else:										#Did not find value, use previous
+						real_results.append(previous_entry)
+						date_indx+=1
+						previous_entry=result_ittr
+				write_sql(real_results)
 				sys.exit(1)
 					
-
-
+def write_sql(result_list):
+	insert_string=""
+	result_indx=0
+	for line in result_list:
+		print_list=[]
+		if result_indx==0:
+			result_indx+=1
+			continue
+		for element in line:
+			if element == None:
+				print_list.append("NULL")
+			else:
+				print_list.append(element)
+		tmp_str="INSERT INTO %s.%s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_schema,db_name,\
+			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
+			print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
+			print_list[10], print_list[11])
+		
+		#print tmp_str
+		#db_cursor.execute(tmp_str)
+		#try:
+		#	db_cursor.execute(tmp_str)
+		#except MySQLdb.IntegrityError as e:
+		#	if (e[0] == 1062): #Table Already Exists
+		#		print "%s entry exists already" % db_name
+		#	else:
+		#		raise e		
+		insert_string += "INSERT INTO %s VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);\n" %(db_name,\
+			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
+			print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
+			print_list[10], print_list[11])
+	print insert_string
+	db_cursor.execute(insert_string)
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
