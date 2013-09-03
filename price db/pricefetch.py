@@ -43,13 +43,13 @@ def init():
 			db_cursor.execute("CREATE TABLE %s (\
 			`date` date NOT NULL,\
 			`locationID` int(8) NOT NULL,\
-			`typeName` varchar(45) NOT NULL,\
+			`typeName` varchar(100) NOT NULL,\
 			`typeID` int(8) NOT NULL,\
 			`source` varchar(8) NOT NULL,\
 			`priceMax` float(12,2) DEFAULT NULL,\
 			`priceMin` float(12,2) DEFAULT NULL,\
 			`priceAverage` float(12,2) DEFAULT NULL,\
-			`volume` int(16) DEFAULT NULL,\
+			`volume` int(32) DEFAULT NULL,\
 			`orders` int(16) DEFAULT NULL,\
 			`priceOpen` float(12,2) DEFAULT NULL,\
 			`priceClose` float(12,2) DEFAULT NULL,\
