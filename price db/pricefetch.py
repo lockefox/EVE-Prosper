@@ -23,10 +23,11 @@ EC_parse=0		#run EVE Central dump crunch
 days=1
 db_name=""
 db_schema=""
+db=None
 def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
-		global db_name,db_cursor,db_schema
+		global db_name,db_cursor,db_schema, db
 		db_name="pricedata"
 		db_schema="sdretribution11"
 		db_IP="127.0.0.1"
@@ -35,6 +36,7 @@ def init():
 		db_port=3306
 		
 		db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
+		#db.autocommit()
 		
 		db_cursor = db.cursor()
 		try:
@@ -151,21 +153,28 @@ def EMD_proc():
 		progress[0]+=1
 		if len(item_query_group)==items_per_query or (progress[0] + items_per_query) > len(item_todo):
 			EMD_URL = "http://api.eve-marketdata.com/api/item_history2.json?char_name=Lockefox&region_ids=%s&type_ids=%s&days=%s" % (region_query,",".join(item_query_group),days_query)
-			print ",".join(item_query_group)
+			#print ",".join(item_query_group)
 			response = urllib2.urlopen(EMD_URL).read()
 			query_result = json.loads(response)
 			hold_results=[]
 			real_results=[]
+			item_dict={}
 			for individual_item in item_query_group:	#write to SQL by individual item
+				
 				for row_ittr in query_result["emd"]["result"]:
 					if int(row_ittr["row"]["typeID"]) != int(individual_item):
 						continue
 					result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],lookup["types"][row_ittr["row"]["typeID"]],row_ittr["row"]["typeID"],"EMD",row_ittr["row"]["highPrice"],row_ittr["row"]["lowPrice"],row_ittr["row"]["avgPrice"],row_ittr["row"]["volume"],row_ittr["row"]["orders"],None,None]
 					#print result_line
 					hold_results.append(result_line)
+				#print hold_results
+				#print dates_todo
+				item_dic
 				date_indx=0
 				previous_entry=hold_results[0] #IF T0 = null, then pass back earliest value to T0
 				for result_ittr in hold_results:	#Clean up missing values
+					print result_ittr
+					print date_indx
 					if result_ittr[0]== dates_todo[date_indx]:	#found value
 						real_results.append(result_ittr)
 						date_indx+=1
@@ -175,10 +184,17 @@ def EMD_proc():
 						real_results.append(previous_entry)
 						date_indx+=1
 						previous_entry=result_ittr
-				write_sql(real_results)
-				sys.exit(1)
 					
+				write_sql(real_results)
+			item_query=""
+			display_progress(progress)
+def display_progress(progress_list):
+	progress_string = "%s of %s complete" % (progress_list[0], progress_list[1])
+	sys.stdout.write(progress_string)
+	sys.stdout.flush()
+	sys.stdout.write("\b" * len(progress_string))
 def write_sql(result_list):
+	global db_cursor, db
 	insert_string=""
 	result_indx=0
 	for line in result_list:
@@ -191,13 +207,12 @@ def write_sql(result_list):
 				print_list.append("NULL")
 			else:
 				print_list.append(element)
-		tmp_str="INSERT INTO %s.%s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_schema,db_name,\
+		tmp_str="REPLACE %s.%s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_schema,db_name,\
 			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
 			print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
 			print_list[10], print_list[11])
-		
-		#print tmp_str
-		#db_cursor.execute(tmp_str)
+		db_cursor.execute(tmp_str)
+		db.commit()
 		#try:
 		#	db_cursor.execute(tmp_str)
 		#except MySQLdb.IntegrityError as e:
@@ -205,12 +220,17 @@ def write_sql(result_list):
 		#		print "%s entry exists already" % db_name
 		#	else:
 		#		raise e		
-		insert_string += "INSERT INTO %s VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);\n" %(db_name,\
-			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
-			print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
-			print_list[10], print_list[11])
-	print insert_string
-	db_cursor.execute(insert_string)
+		#insert_string += "INSERT INTO %s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);\n" %(db_name,\
+		#	print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
+		#	print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
+		#	print_list[10], print_list[11])
+	#print insert_string
+	#db_cursor.execute(insert_string)
+	#db.commit()
+	#db_cursor.close()
+	#db_cursor=db.cursor()
+	
+
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
