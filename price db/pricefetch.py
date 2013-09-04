@@ -123,6 +123,7 @@ def parseargs():
 def EMD_proc():
 	item_todo=[]
 	region_todo=[]
+	item_progress={}
 	
 	## Set up todo lists ##
 	if itemlist==None:
@@ -140,6 +141,7 @@ def EMD_proc():
 				if item in crash_progress:
 					if crash_progress[item]==1:
 						item_todo.remove(item)
+						item_progress{item}=1	#allow for repeated crashes
 			pass#os.remove(crash_file)
 	except IOError:	
 		print "no crash log found.  Executing as normal"
@@ -164,7 +166,7 @@ def EMD_proc():
 	days_query=days
 	result_data=[]		#[row],[date,region,typeName,typeid,"EMD",priceMax,priceMin,priceAverage,volume,orders,None,None]
 	#result_data[]=[]
-	item_progress={}
+
 	for item in item_todo:
 		item_query_group.append(item)
 		progress[0]+=1
