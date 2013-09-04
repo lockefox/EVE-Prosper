@@ -29,7 +29,7 @@ def init():
 	if (csv_only==0 and sql_init_only==0):	
 		global db_name,db_cursor,db_schema, db
 		db_name="pricedata"
-		db_schema="odyssey-1.0-89097"
+		db_schema="sdretribution11"
 		db_IP="127.0.0.1"
 		db_user="root"
 		db_pw="bar"
@@ -46,13 +46,13 @@ def init():
 			`typeName` varchar(100) NOT NULL,\
 			`typeID` int(8) NOT NULL,\
 			`source` varchar(8) NOT NULL,\
-			`priceMax` float(12,2) DEFAULT NULL,\
-			`priceMin` float(12,2) DEFAULT NULL,\
-			`priceAverage` float(12,2) DEFAULT NULL,\
+			`priceMax` float(16,4) DEFAULT NULL,\
+			`priceMin` float(16,4) DEFAULT NULL,\
+			`priceAverage` float(16,4) DEFAULT NULL,\
 			`volume` int(32) DEFAULT NULL,\
 			`orders` int(16) DEFAULT NULL,\
-			`priceOpen` float(12,2) DEFAULT NULL,\
-			`priceClose` float(12,2) DEFAULT NULL,\
+			`priceOpen` float(16,4) DEFAULT NULL,\
+			`priceClose` float(16,4) DEFAULT NULL,\
 			PRIMARY KEY (`date`,`locationID`,`typeID`,`source`))\
 			ENGINE=InnoDB DEFAULT CHARSET=latin1" % db_name)
 		except MySQLdb.OperationalError as e:
@@ -245,7 +245,7 @@ def write_sql(result_list):
 				print_list.append(element)
 		tmp_str="REPLACE %s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
 			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
-			print_list[5], print_list[6], print_list[7], print_list[8], print_list[9],\
+			math.round(print_list[5],2), math.round(print_list[6],2), math.round(print_list[7],2), print_list[8], print_list[9],\
 			print_list[10], print_list[11])
 		db_cursor.execute(tmp_str)
 		db.commit()
