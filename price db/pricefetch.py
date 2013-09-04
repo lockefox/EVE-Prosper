@@ -31,7 +31,7 @@ def init():
 	if (csv_only==0 and sql_init_only==0):	
 		global db_name,db_cursor,db_schema, db
 		db_name="pricedata"
-		db_schema="odyssey-1.0-89097"
+		db_schema="odyssey-1.1-91288"
 		db_IP="127.0.0.1"
 		db_user="root"
 		db_pw="bar"
@@ -141,8 +141,8 @@ def EMD_proc():
 				if item in crash_progress:
 					if crash_progress[item]==1:
 						item_todo.remove(item)
-						item_progress{item}=1	#allow for repeated crashes
-			pass#os.remove(crash_file)
+						item_progress[item]=1	#allow for repeated crashes
+			pass
 	except IOError:	
 		print "no crash log found.  Executing as normal"
 		pass	
