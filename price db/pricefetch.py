@@ -245,7 +245,7 @@ def write_sql(result_list):
 				print_list.append(element)
 		tmp_str="REPLACE %s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
 			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
-			math.round(print_list[5],2), math.round(print_list[6],2), math.round(print_list[7],2), print_list[8], print_list[9],\
+			round(float(print_list[5]),2), round(float(print_list[6]),2), round(float(print_list[7]),2), print_list[8], print_list[9],\
 			print_list[10], print_list[11])
 		db_cursor.execute(tmp_str)
 		db.commit()
