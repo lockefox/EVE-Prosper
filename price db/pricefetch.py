@@ -1,6 +1,6 @@
 #!/Python27/python.exe
 
-import sys,csv, sys, math, os, getopt, subprocess, math, datetime, time, json
+import sys, math, os, getopt, subprocess, math, datetime, time, json
 import urllib2
 import MySQLdb
 
@@ -24,12 +24,14 @@ days=1
 db_name=""
 db_schema=""
 db=None
+crash_file = "crash.json"
+
 def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
 		global db_name,db_cursor,db_schema, db
 		db_name="pricedata"
-		db_schema="sdretribution11"
+		db_schema="odyssey-1.1-91288"
 		db_IP="127.0.0.1"
 		db_user="root"
 		db_pw="bar"
@@ -121,6 +123,7 @@ def parseargs():
 def EMD_proc():
 	item_todo=[]
 	region_todo=[]
+	item_progress={}
 	
 	## Set up todo lists ##
 	if itemlist==None:
@@ -128,7 +131,21 @@ def EMD_proc():
 		item_todo = lookup["types"].keys()
 	else:
 		item_todo = itemlist.split(',')
-		
+	
+	try:
+		with open(crash_file):
+			print "recovering from %s" % crash_file
+			crash_json=open(crash_file)
+			crash_progress=json.load(crash_json)
+			for item in item_todo:
+				if item in crash_progress:
+					if crash_progress[item]==1:
+						item_todo.remove(item)
+						item_progress[item]=1	#allow for repeated crashes
+			pass
+	except IOError:	
+		print "no crash log found.  Executing as normal"
+		pass	
 	if regionlist==None:
 		region_todo.append("10000002")
 	else:
@@ -149,10 +166,14 @@ def EMD_proc():
 	days_query=days
 	result_data=[]		#[row],[date,region,typeName,typeid,"EMD",priceMax,priceMin,priceAverage,volume,orders,None,None]
 	#result_data[]=[]
+
 	for item in item_todo:
 		item_query_group.append(item)
 		progress[0]+=1
+		item_progress[item]=0	#queried item
+
 		if len(item_query_group)==items_per_query or (progress[0] + items_per_query) > len(item_todo):
+			crash_handler(item_progress)
 			EMD_URL = "http://api.eve-marketdata.com/api/item_history2.json?char_name=Lockefox&region_ids=%s&type_ids=%s&days=%s" % (region_query,",".join(item_query_group),days_query)
 			print EMD_URL
 			print "----"
@@ -174,7 +195,7 @@ def EMD_proc():
 					item_dict[row_ittr["row"]["typeID"]]=[]
 					item_dict[row_ittr["row"]["typeID"]].append(result_line)
 				#key,value
-			for item,results in item_dict.iteritems():		#Backfill missing dates, and write out to SQL
+			for item_key,results in item_dict.iteritems():		#Backfill missing dates, and write out to SQL
 				#print results
 				real_results=[]
 				
@@ -195,35 +216,24 @@ def EMD_proc():
 						real_results.append(tmp_result)
 				
 				write_sql(real_results)
-						
-			#for individual_item in item_query_group:	#write to SQL by individual item
-			#	
-			#	for row_ittr in query_result["emd"]["result"]:
-			#		if int(row_ittr["row"]["typeID"]) != int(individual_item):
-			#			continue
-			#		result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],lookup["types"][row_ittr["row"]["typeID"]],row_ittr["row"]["typeID"],"EMD",row_ittr["row"]["highPrice"],row_ittr["row"]["lowPrice"],row_ittr["row"]["avgPrice"],row_ittr["row"]["volume"],row_ittr["row"]["orders"],None,None]
-			#		#print result_line
-			#		hold_results.append(result_line)
-			#	#print hold_results
-			#	#print dates_todo
-			#	date_indx=0
-			#	previous_entry=hold_results[0] #IF T0 = null, then pass back earliest value to T0
-			#	for result_ittr in hold_results:	#Clean up missing values
-			#		print result_ittr
-			#		print date_indx
-			#		if result_ittr[0]== dates_todo[date_indx]:	#found value
-			#			real_results.append(result_ittr)
-			#			date_indx+=1
-			#			previous_entry=result_ittr
-			#			continue
-			#		else:										#Did not find value, use previous
-			#			real_results.append(previous_entry)
-			#			date_indx+=1
-			#			previous_entry=result_ittr
-			#		
-			#	write_sql(real_results)
+				item_progress[item_key]=1	#Completed query
+			crash_handler(item_progress)
 			item_query_group=[]
 			display_progress(progress)
+def crash_handler(completed_work):
+	try:
+		with open(crash_file):
+			pass#os.remove(crash_file)
+	except IOError:	#want no file.  Create fresh each dump
+		pass
+	
+	crash_handle = open (crash_file,'w')
+	
+	crash_handle.write(json.dumps(completed_work))
+	crash_handle.close()
+
+	#sys.exit(1)
+			
 def display_progress(progress_list):
 	progress_string = "%s of %s complete" % (progress_list[0], progress_list[1])
 	sys.stdout.write(progress_string)
@@ -281,7 +291,12 @@ def main():
 	init()
 	if EMD_parse==1:
 		EMD_proc()
-	
+	print "EMD Data parsed successfully"
+	try:
+		with open(crash_file):
+			os.remove(crash_file)
+	except IOError:	#want no file.  Create fresh each dump
+		pass
 	
 if __name__ == "__main__":
 	main()
