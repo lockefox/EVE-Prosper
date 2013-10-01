@@ -6,11 +6,12 @@ import MySQLdb
 
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
-zkb_base="http://zkillboard.com/"
+zkb_base="https://zkillboard.com/api/losses/solo/"
 lookup_json = open(lookup_file)
 system_json = open(systemlist)
 lookup = json.load(lookup_json)
 systems= json.load(system_json)
+
 
 ########## GLOBALS ##########
 
@@ -80,14 +81,19 @@ def init():
 	print "DB Connection:\t\t\tGOOD"
 
 	try:	#EVE-Marketdata.com connection
-		urllib2.urlopen(urllib2.Request(zkb_base))
+		request = urllib2.Request(zkb_base)
+		request.add_header('Accept-encoding', 'gzip')
+		request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+		urllib2.urlopen(request)
 	except urllib2.URLError as e:
 		print "Unable to connect to zKB at %s" % zkb_base
 		print e.code
+		print e.headers
 		sys.exit(4)
 	except urllib2.HTTPError as er:
 		print "Unable to connect to zKB at %s" % zkb_base
 		print er.code
+		print er.headers
 		sys.exit(4)
 	print "zKillboard connection:\tGOOD"
 
