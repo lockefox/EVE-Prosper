@@ -46,19 +46,21 @@ def init():
 	if db_exists:
 		db_cursor.execute("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS`  WHERE `TABLE_SCHEMA`='%s' AND `TABLE_NAME`='%s'" % (db_schema,db_name))
 		existing_cols = db_cursor.fetchall()
+		existing_cols_list = []
+		for value in existing_cols:		#reduce fetchall() result to 1D list
+			existing_cols_list.append(value[0])
 		if (len(existing_cols)-4 != len(systems["systemlist"].keys())): #check if bin count lines up
 			db_cols_match=0
 			print "Number of columns in EXISTING table does not match bins in %s" % systemlist
 			print "please manually DROP %s from %s" % db_name,db_schema
 			
 			#CASE FOR DB exists, but BINS might have changed
-		#for bin,sys_list in systems["systemlist"].iteritems():
-		#	aug_bin = "('%s',)" % bin
-		#	if (aug_bin not in existing_cols):
-		#		db_cols_match=0
-		#		print "%s not found in existing db" % aug_bin
-		#		print "please manually DROP %s from %s" % db_name,db_schema
-		#		sys.exit(2)
+		for bin,sys_list in systems["systemlist"].iteritems():
+			if (bin not in existing_cols_list):
+				db_cols_match=0
+				print "%s not found in existing db" % aug_bin
+				print "please manually DROP %s from %s" % db_name,db_schema
+				sys.exit(2)
 	
 	else:	#Initialize DB
 		bin_str=""
@@ -78,8 +80,8 @@ def init():
 				print "%s table already created" % db_name
 			else:
 				raise e		
-	print "DB Connection:\t\t\tGOOD"
-
+	print "DB Connection:\t\tGOOD"
+	
 	try:	#EVE-Marketdata.com connection
 		request = urllib2.Request(zkb_base)
 		request.add_header('Accept-encoding', 'gzip')
