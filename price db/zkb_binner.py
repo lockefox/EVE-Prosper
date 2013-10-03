@@ -208,7 +208,19 @@ def kill_crawler(start_killID,group,groupName):
 		
 		print "INSERT INTO %s %s VALUES %s" % (db_name,table_line,value_line) #SHIP DATA
 		
+		cargo_report={}
+		for cargo_items in kill["items"]:
+			if cargo_items["qtyDestroyed"]>0:
+				if cargo_items[str("typeID")] in cargo_report:	#Duplicate destroyed item
+					cargo_report[str(cargo_items[str("typeID")])]+=cargo_items["qtyDestroyed"]
+				else:											#New destroyed item
+					cargo_report[str(cargo_items[str("typeID")])]=cargo_items["qtyDestroyed"]
 		
+		print cargo_report
+		for key,value in cargo_report.iteritems():
+			itemdata_line = ",".join([str(value)]*len(system_bins))
+			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["types"][key],"TBD",itemdata_line)
+			print "INSERT INTO %s %s VALUES %s" % (db_name,table_line,data_line)
 	return parsed_kills
 def main():
 	init()
