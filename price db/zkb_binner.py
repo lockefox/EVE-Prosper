@@ -162,7 +162,7 @@ def main():
 	parseargs()
 	
 	start_killID = feed_primer()
-	print start_killID
-	
+	print "start_killID=%s" % start_killID
+	print "%sapi/beforeKillID/%s/losses/%s" % (zkb_base,start_killID,zkb_default_args)
 if __name__ == "__main__":
 	main()
