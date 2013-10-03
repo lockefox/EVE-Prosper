@@ -19,7 +19,7 @@ csv_only=0								#output CSV instead of SQL
 sql_init_only=0							#output CSV CREATE file
 sql_file="pricedata.sql"
 
-days=1
+start_date="2013-01-01"
 db_name=""
 db_schema=""
 db=None
@@ -98,11 +98,35 @@ def init():
 		print er.headers
 		sys.exit(4)
 	print "zKillboard connection:\tGOOD"
-
+def parseargs():
+	try:
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","csv","items=","startdate="])
+	except getopt.GetoptError:
+		print "invalid arguments"
+		#help()
+		sys.exit(2)
+		
+	for opt, arg in opts:
+		if opt == "-h":
+			print "herp"
+		elif opt == "--csv":
+			global csv_only
+			csv_only=1
+			print "CSV function not supported yet"
+		elif opt == "--startdate":
+			global start_date
+			start_date=arg
+			try:	#Validate input
+				time.strptime(start_date,"%Y-%M-%d")
+			except ValueError as e:
+				print e
+				sys.exit(2)
+		else:
+			print "herp"
 def main():
 	#parseargs()
 	init()
-
+	parseargs()
 	
 	
 if __name__ == "__main__":
