@@ -122,7 +122,7 @@ def parseargs():
 			global start_date
 			start_date=arg
 			try:	#Validate input
-				time.strptime(start_date,"%Y-%M-%d")
+				time.strptime(start_date,"%Y-%m-%d")
 			except ValueError as e:
 				print e
 				sys.exit(2)
@@ -161,15 +161,60 @@ def feed_primer():	#initial fetch to initilaize crawler
 	return start_killID
 
 def kill_crawler(start_killID,group,groupName):
+	parsed_kills = 0
 	
-	return 0
+	zkb_primer_args = "losses/groupID/%s/limit/1/" % group
+	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_primer_args,zkb_default_args)
+	#print zkb_addr
+	request = urllib2.Request(zkb_addr)
+	request.add_header('Accept-encoding','gzip')
+	request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+	
+	try:
+		opener = urllib2.build_opener()
+		headers = urllib2.urlopen(request).headers
+	except urllib2.HTTPError as e:
+		print e
+		sys.exit(3)
+	except urllib2.URLError as er:
+		print er
+		sys.exit(3)
+
+	raw_zip = opener.open(request)
+	dump_zip_stream = raw_zip.read()
+	dump_IOstream = StringIO.StringIO(dump_zip_stream)
+	
+	zipper = gzip.GzipFile(fileobj=dump_IOstream)
+	
+	JSON_obj = json.load(zipper)
+	#print JSON_obj
+	print headers
+	
+	next_killID=start_killID
+	for kill in JSON_obj:
+		next_killID=kill["killID"]
+		ship_destroyed = kill["victim"]["shipTypeID"]
+		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
+		date_str = time.strftime("%Y-%m-%d",date_killed)
+		print date_str
+		system_bins=[]
+		for bin,system_list in systems["systemlist"].iteritems():
+			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
+				system_bins.append(bin)
+		bin_line = ",".join(system_bins)
+		table_line = "(date,typeID,typeName,typeCategory,%s)" % bin_line
+		data = ",".join(["1"]*len(system_bins))
+		value_line = "(%s,%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["types"][str(ship_destroyed)],"TBD",data)
+		
+		print "INSERT INTO %s %s VALUES %s" % (db_name,table_line,value_line) #SHIP DATA
+		
+		
+	return parsed_kills
 def main():
 	init()
 	parseargs()
-	
 	start_killID = feed_primer()
-	#print "start_killID=%s" % start_killID
-	#print ship_list["groupID"]
+	
 	for group,groupName in ship_list["groupID"].iteritems():
 		kills_parsed=kill_crawler(start_killID,group,groupName)
 		print "Parsed %s: %s" %( groupName,kills_parsed)
