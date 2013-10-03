@@ -84,7 +84,7 @@ def init():
 	
 	try:	#EVE-Marketdata.com connection
 		request = urllib2.Request(zkb_base)
-		request.add_header('Accept-encoding', 'gzip')
+		request.add_header('Accept-encoding','gzip')
 		request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
 		urllib2.urlopen(request)
 	except urllib2.URLError as e:
