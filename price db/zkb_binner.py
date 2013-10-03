@@ -206,7 +206,11 @@ def kill_crawler(start_killID,group,groupName):
 		data = ",".join(["1"]*len(system_bins))
 		value_line = "(%s,%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["types"][str(ship_destroyed)],"TBD",data)
 		
-		print "INSERT INTO %s %s VALUES %s" % (db_name,table_line,value_line) #SHIP DATA
+		duplicate_case=""
+		for bins in system_bins:
+			duplicate_case+="%s = %s + 1, " % (bins,bins)
+		duplicate_case = duplicate_case.rstrip(', ')
+		print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,value_line,duplicate_case) #SHIP DATA
 		
 		cargo_report={}
 		for cargo_items in kill["items"]:
@@ -220,14 +224,20 @@ def kill_crawler(start_killID,group,groupName):
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
 			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["types"][key],"TBD",itemdata_line)
-			print "INSERT INTO %s %s VALUES %s" % (db_name,table_line,data_line)
+			itemduplicate_case=""
+			for bins in system_bins:
+				itemduplicate_case+="%s = %s + %s, " % (bins,bins,value)
+			itemduplicate_case = itemduplicate_case.rstrip(', ')
+			print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,data_line,itemduplicate_case)
+		parsed_kills+=1
 	return parsed_kills
 def main():
 	init()
 	parseargs()
-	start_killID = feed_primer()
 	
+	print "Scraping zKB.  This may take a while"
 	for group,groupName in ship_list["groupID"].iteritems():
+		start_killID = feed_primer()
 		kills_parsed=kill_crawler(start_killID,group,groupName)
 		print "Parsed %s: %s" %( groupName,kills_parsed)
 		sys.exit(0)
