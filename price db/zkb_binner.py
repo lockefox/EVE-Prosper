@@ -6,12 +6,15 @@ import MySQLdb
 
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
+shiplist="toaster_shiplist.json"		#Allows stepping by groupID
 zkb_base="https://zkillboard.com/"
 zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
 system_json = open(systemlist)
+ships_json = open(shiplist)
 lookup = json.load(lookup_json)
 systems= json.load(system_json)
+ship_list=json.load(ships_json)
 
 
 ########## GLOBALS ##########
@@ -156,13 +159,20 @@ def feed_primer():	#initial fetch to initilaize crawler
 	
 	start_killID = JSON_obj[0]["killID"]	#"latest kill" in zKB
 	return start_killID
+
+def kill_crawler(start_killID,group,groupName):
 	
+	return 0
 def main():
 	init()
 	parseargs()
 	
 	start_killID = feed_primer()
-	print "start_killID=%s" % start_killID
-	print "%sapi/beforeKillID/%s/losses/%s" % (zkb_base,start_killID,zkb_default_args)
+	#print "start_killID=%s" % start_killID
+	#print ship_list["groupID"]
+	for group,groupName in ship_list["groupID"].iteritems():
+		kills_parsed=kill_crawler(start_killID,group,groupName)
+		print "Parsed %s: %s" %( groupName,kills_parsed)
+		sys.exit(0)
 if __name__ == "__main__":
 	main()
