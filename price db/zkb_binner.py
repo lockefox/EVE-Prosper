@@ -1,12 +1,13 @@
 #!/Python27/python.exe
 
-import sys,csv, sys, math, os, getopt, subprocess, math, datetime, time, json
+import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, datetime, time, json
 import urllib2
 import MySQLdb
 
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
-zkb_base="https://zkillboard.com/api/losses/solo/"
+zkb_base="https://zkillboard.com/"
+zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
 system_json = open(systemlist)
 lookup = json.load(lookup_json)
@@ -24,6 +25,7 @@ db_name=""
 db_schema=""
 db=None
 db_cursor=None
+
 
 def init():
 	global db_name,db_schema,db,db_cursor
@@ -123,11 +125,44 @@ def parseargs():
 				sys.exit(2)
 		else:
 			print "herp"
+
+def feed_primer():	#initial fetch to initilaize crawler
+	global start_killID
+	
+	zkb_primer_args = "losses/solo/limit/1/"
+	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_primer_args,zkb_default_args)
+	#print zkb_addr
+	request = urllib2.Request(zkb_addr)
+	request.add_header('Accept-encoding','gzip')
+	request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+	
+	try:
+		opener = urllib2.build_opener()
+		headers = urllib2.urlopen(request).headers
+	except urllib2.HTTPError as e:
+		print e
+		sys.exit(3)
+	except urllib2.URLError as er:
+		print er
+		sys.exit(3)
+
+	raw_zip = opener.open(request)
+	dump_zip_stream = raw_zip.read()
+	dump_IOstream = StringIO.StringIO(dump_zip_stream)
+	
+	zipper = gzip.GzipFile(fileobj=dump_IOstream)
+	
+	JSON_obj = json.load(zipper)
+	
+	start_killID = JSON_obj[0]["killID"]	#"latest kill" in zKB
+	return start_killID
+	
 def main():
-	#parseargs()
 	init()
 	parseargs()
 	
+	start_killID = feed_primer()
+	print start_killID
 	
 if __name__ == "__main__":
 	main()
