@@ -196,7 +196,7 @@ def kill_crawler(start_killID,group,groupName):
 		ship_destroyed = kill["victim"]["shipTypeID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
-		print date_str
+		print "killID %s:%s" % next_killID,date_str
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
@@ -220,7 +220,6 @@ def kill_crawler(start_killID,group,groupName):
 				else:											#New destroyed item
 					cargo_report[str(cargo_items[str("typeID")])]=cargo_items["qtyDestroyed"]
 		
-		print cargo_report
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
 			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["types"][key],"TBD",itemdata_line)
