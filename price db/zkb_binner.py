@@ -133,7 +133,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	global start_killID
 	
 	zkb_primer_args = "losses/solo/limit/1/"
-	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_primer_args,zkb_default_args)
+	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_default_args,zkb_primer_args)
 	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-encoding','gzip')
@@ -144,9 +144,11 @@ def feed_primer():	#initial fetch to initilaize crawler
 		headers = urllib2.urlopen(request).headers
 	except urllib2.HTTPError as e:
 		print e
+		print e.headers
 		sys.exit(3)
 	except urllib2.URLError as er:
 		print er
+		print er.headers
 		sys.exit(3)
 
 	raw_zip = opener.open(request)
@@ -163,8 +165,8 @@ def feed_primer():	#initial fetch to initilaize crawler
 def kill_crawler(start_killID,group,groupName):
 	parsed_kills = 0
 	
-	zkb_primer_args = "losses/groupID/%s/limit/1/" % group
-	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_primer_args,zkb_default_args)
+	zkb_primer_args = "losses/groupID/%s/" % group
+	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_default_args,zkb_primer_args)
 	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-encoding','gzip')
@@ -175,9 +177,11 @@ def kill_crawler(start_killID,group,groupName):
 		headers = urllib2.urlopen(request).headers
 	except urllib2.HTTPError as e:
 		print e
+		print e.headers
 		sys.exit(3)
 	except urllib2.URLError as er:
 		print er
+		print er.headers
 		sys.exit(3)
 
 	raw_zip = opener.open(request)
@@ -196,7 +200,7 @@ def kill_crawler(start_killID,group,groupName):
 		ship_destroyed = kill["victim"]["shipTypeID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
-		print "killID %s:%s" % next_killID,date_str
+		print "killID %s:%s" % (next_killID,date_str)
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
@@ -204,7 +208,7 @@ def kill_crawler(start_killID,group,groupName):
 		bin_line = ",".join(system_bins)
 		table_line = "(date,typeID,typeName,typeCategory,%s)" % bin_line
 		data = ",".join(["1"]*len(system_bins))
-		value_line = "(%s,%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["types"][str(ship_destroyed)],"TBD",data)
+		value_line = "(%s,%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],"TBD",data)
 		
 		duplicate_case=""
 		for bins in system_bins:
@@ -222,13 +226,14 @@ def kill_crawler(start_killID,group,groupName):
 		
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
-			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["types"][key],"TBD",itemdata_line)
+			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],"TBD",itemdata_line)
 			itemduplicate_case=""
 			for bins in system_bins:
 				itemduplicate_case+="%s = %s + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
 			print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,data_line,itemduplicate_case)
 		parsed_kills+=1
+		print "-------"
 	return parsed_kills
 def main():
 	init()
