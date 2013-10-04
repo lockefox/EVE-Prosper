@@ -26,6 +26,7 @@ sql_init_only=0							#output CSV CREATE file
 sql_file="pricedata.sql"
 
 start_date="2013-01-01"
+start_date_test=time.strptime(start_date,"%Y-%m-%d")
 db_name=""
 db_schema=""
 db=None
@@ -125,13 +126,14 @@ def parseargs():
 			csv_only=1
 			print "CSV function not supported yet"
 		elif opt == "--startdate":
-			global start_date
+			global start_date,start_date_test
 			start_date=arg
 			try:	#Validate input
 				time.strptime(start_date,"%Y-%m-%d")
 			except ValueError as e:
 				print e
 				sys.exit(2)
+			start_date_test=time.strptime(start_date,"%Y-%m-%d")
 		else:
 			print "herp"
 
@@ -174,8 +176,8 @@ def feed_primer():	#initial fetch to initilaize crawler
 		sys.exit(4)
 	return start_killID
 
-def kill_crawler(start_killID,group,groupName):
-	parsed_kills = 0
+def kill_crawler(start_killID,group,groupName,progress):
+	parsed_kills = [progress,start_killID,0]
 	
 	zkb_primer_args = "losses/groupID/%s/" % group
 	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_default_args,zkb_primer_args)
@@ -212,6 +214,9 @@ def kill_crawler(start_killID,group,groupName):
 		ship_destroyed = kill["victim"]["shipTypeID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
+		if date_killed<start_date_test:		#Only process to desired date
+			parsed_kills[2]=1
+			break
 		print "killID %s:%s" % (next_killID,date_str)
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
@@ -250,7 +255,7 @@ def kill_crawler(start_killID,group,groupName):
 			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s %s" % (db_name,table_line,data_line,value,itemduplicate_case))
 			db.commit()
 			
-		parsed_kills+=1
+		parsed_kills[0]+=1
 		print "-------"
 	return parsed_kills
 	
@@ -286,7 +291,9 @@ def main():
 	print "-----Scraping zKB.  This may take a while-----"
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID = feed_primer()
-		kills_parsed=kill_crawler(start_killID,group,groupName)
+		kills_parsed=[0,start_killID,0] #Progress,killID,done
+		while kills_parsed[2]==0:
+			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 		print "Parsed %s: %s" %( groupName,kills_parsed)
 		sys.exit(0)
 if __name__ == "__main__":
