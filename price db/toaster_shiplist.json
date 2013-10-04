@@ -39,10 +39,14 @@
 	"941":"Industrial Command Ship",
 	"963":"Strategic Cruiser",
 	"1022":"Prototype Exploration Ship",
-	"311":"Refining Array",
-	"363":"Ship Maintenance Array",
-	"364":"Mobile Storage",
 	"365":"Control Tower",
+	"1003":"Territorial Claim Units",
+	"1005":"Sovereignty Blockade Units",
+	"1012":"Infrastructure Hubs"
+},
+"skipped":{
+	"877":"Target Painting Battery",
+	"473":"Tracking Array",
 	"397":"Assembly Array",
 	"404":"Silo",
 	"413":"Mobile Laboratory",
@@ -61,21 +65,13 @@
 	"445":"Force Field Array",
 	"449":"Mobile Hybrid Sentry",
 	"471":"Corporate Hangar Array",
-	"473":"Tracking Array",
 	"480":"Stealth Emitter Array",
 	"707":"Jump Portal Array",
 	"709":"Scanner Array",
-	"710":"Logistics Array",
 	"837":"Energy Neutralizing Battery",
 	"838":"Cynosural Generator Array",
-	"839":"Cynosural System Jammer",
-	"840":"Structure Repair Array",
-	"877":"Target Painting Battery",
-	"1003":"Territorial Claim Units",
-	"1004":"Defense Bunkers",
-	"1005":"Sovereignty Blockade Units",
-	"1012":"Infrastructure Hubs"
-},
-"skipped":{
-
+	"839":"Cynosural System Jammer",	
+	"311":"Refining Array",
+	"363":"Ship Maintenance Array",
+	"364":"Mobile Storage",
 }}

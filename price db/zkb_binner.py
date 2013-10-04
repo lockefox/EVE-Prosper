@@ -207,7 +207,8 @@ def kill_crawler(start_killID,group,groupName,progress):
 	JSON_obj = json.load(zipper)
 	#print JSON_obj
 	print headers
-	
+	if len(JSON_obj)==0:
+		parsed_kills[2]=1
 	next_killID=start_killID
 	for kill in JSON_obj:
 		parsed_kills[1]=kill["killID"]
@@ -295,7 +296,8 @@ def main():
 		kills_parsed=[0,start_killID,0] #Progress,killID,done
 		while kills_parsed[2]==0:
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
-		print "Parsed %s: %s" %( groupName,kills_parsed)
-		sys.exit(0)
+			time.sleep(15)
+			print "Parsed %s: %s" %( groupName,kills_parsed)
+			
 if __name__ == "__main__":
 	main()
