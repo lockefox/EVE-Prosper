@@ -211,13 +211,14 @@ def kill_crawler(start_killID,group,groupName):
 		bin_line = ",".join(system_bins)
 		table_line = "(date,typeID,typeName,typeCategory,%s)" % bin_line
 		data = ",".join(["1"]*len(system_bins))
-		value_line = "(%s,%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],"TBD",data)
+		value_line = "('%s',%s,'%s',%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,data)
 		
 		duplicate_case=""
 		for bins in system_bins:
 			duplicate_case+="%s = %s + 1, " % (bins,bins)
 		duplicate_case = duplicate_case.rstrip(', ')
-		print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,value_line,duplicate_case) #SHIP DATA
+		db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
+		db.commit()
 		
 		cargo_report={}
 		for cargo_items in kill["items"]:
@@ -229,12 +230,17 @@ def kill_crawler(start_killID,group,groupName):
 		
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
-			data_line = "(%s,%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],"TBD",itemdata_line)
+			try:
+				data_line = "('%s',%s,'%s',%s,%s)" % (date_str,key,lookup["all_types"][key],0,itemdata_line)
+			except KeyError as e:	#If I don't have the key, it's not worth tracking
+				continue
 			itemduplicate_case=""
 			for bins in system_bins:
 				itemduplicate_case+="%s = %s + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
-			print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,data_line,itemduplicate_case)
+			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,data_line,itemduplicate_case))
+			db.commit()
+			
 		parsed_kills+=1
 		print "-------"
 	return parsed_kills
