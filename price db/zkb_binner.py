@@ -8,6 +8,7 @@ systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
 shiplist="toaster_shiplist.json"		#Allows stepping by groupID
 crash_file="binner_crash.json"			#tracks crashes for recovering gracefully
+log_file = "binner_log.txt"				#Logs useful run data.  Moves old verson?
 zkb_base="https://zkillboard.com/"
 zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
@@ -55,7 +56,7 @@ def init():
 		existing_cols_list = []
 		for value in existing_cols:		#reduce fetchall() result to 1D list
 			existing_cols_list.append(value[0])
-		if (len(existing_cols)-4 != len(systems["systemlist"].keys())): #check if bin count lines up
+		if (len(existing_cols)-6 != len(systems["systemlist"].keys())): #check if bin count lines up
 			db_cols_match=0
 			print "Number of columns in EXISTING table does not match bins in %s" % systemlist
 			print "please manually DROP %s from %s" % db_name,db_schema
@@ -78,6 +79,8 @@ def init():
 				`typeID` int(8) NOT NULL,\
 				`typeName` varchar(100) NOT NULL,\
 				`typeCategory` int(8) NOT NULL,\
+				`typeGroup` int(8) NOT NULL,\
+				`TotalDestroyed` bigint(32) NOT NULL,\
 				%s\
 				PRIMARY KEY (`date`,`typeID`))\
 				ENGINE=InnoDB DEFAULT CHARSET=latin1" % (db_name,bin_str))
@@ -162,7 +165,13 @@ def feed_primer():	#initial fetch to initilaize crawler
 	
 	JSON_obj = json.load(zipper)
 	
-	start_killID = JSON_obj[0]["killID"]	#"latest kill" in zKB
+	try:
+		start_killID = JSON_obj[0]["killID"]	#"latest kill" in zKB
+	except TypeError as e:
+		print "zKB API looks to be down"
+		print JSON_obj
+		print headers
+		sys.exit(4)
 	return start_killID
 
 def kill_crawler(start_killID,group,groupName):
@@ -209,15 +218,15 @@ def kill_crawler(start_killID,group,groupName):
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
 				system_bins.append(bin)
 		bin_line = ",".join(system_bins)
-		table_line = "(date,typeID,typeName,typeCategory,%s)" % bin_line
+		table_line = "(date,typeID,typeName,typeCategory,typeGroup,TotalDestroyed,%s)" % bin_line
 		data = ",".join(["1"]*len(system_bins))
-		value_line = "('%s',%s,'%s',%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,data)
+		value_line = "('%s',%s,'%s',%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,group,1,data)
 		
 		duplicate_case=""
 		for bins in system_bins:
 			duplicate_case+="%s = %s + 1, " % (bins,bins)
 		duplicate_case = duplicate_case.rstrip(', ')
-		db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
+		db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+1, %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
 		db.commit()
 		
 		cargo_report={}
@@ -231,14 +240,14 @@ def kill_crawler(start_killID,group,groupName):
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
 			try:
-				data_line = "('%s',%s,'%s',%s,%s)" % (date_str,key,lookup["all_types"][key],0,itemdata_line)
+				data_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],0,group,value,itemdata_line)
 			except KeyError as e:	#If I don't have the key, it's not worth tracking
 				continue
 			itemduplicate_case=""
 			for bins in system_bins:
 				itemduplicate_case+="%s = %s + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
-			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s" % (db_name,table_line,data_line,itemduplicate_case))
+			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s %s" % (db_name,table_line,data_line,value,itemduplicate_case))
 			db.commit()
 			
 		parsed_kills+=1
@@ -264,6 +273,7 @@ def crash_recover():
 		validate_delete = raw_input("Delete all entries to %s?  (Y/N)" % start_date)
 		if validate_delete.upper() == 'Y':
 			db_cursor.execute("DELETE FROM %s WHERE date>='%s'" % (db_name,start_date))
+			db.commit()
 			print "\tCleaning up ALL entries to %s" % start_date
 		else:
 			print "\tWARNING: values may be wrong without scrubbing duplicates"
