@@ -210,7 +210,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	
 	next_killID=start_killID
 	for kill in JSON_obj:
-		next_killID=kill["killID"]
+		parsed_kills[1]=kill["killID"]
 		ship_destroyed = kill["victim"]["shipTypeID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
@@ -225,7 +225,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		bin_line = ",".join(system_bins)
 		table_line = "(date,typeID,typeName,typeCategory,typeGroup,TotalDestroyed,%s)" % bin_line
 		data = ",".join(["1"]*len(system_bins))
-		value_line = "('%s',%s,'%s',%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,group,1,data)
+		value_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,group,1,data)
 		
 		duplicate_case=""
 		for bins in system_bins:
@@ -252,7 +252,8 @@ def kill_crawler(start_killID,group,groupName,progress):
 			for bins in system_bins:
 				itemduplicate_case+="%s = %s + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
-			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s %s" % (db_name,table_line,data_line,value,itemduplicate_case))
+			#print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
+			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
 			db.commit()
 			
 		parsed_kills[0]+=1
