@@ -7,6 +7,7 @@ import MySQLdb
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
 shiplist="toaster_shiplist.json"		#Allows stepping by groupID
+crash_file="binner_crash.json"			#tracks crashes for recovering gracefully
 zkb_base="https://zkillboard.com/"
 zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
@@ -28,7 +29,7 @@ db_name=""
 db_schema=""
 db=None
 db_cursor=None
-
+User_Agent = "not-Lockefox"
 
 def init():
 	global db_name,db_schema,db,db_cursor
@@ -89,8 +90,8 @@ def init():
 	
 	try:	#EVE-Marketdata.com connection
 		request = urllib2.Request(zkb_base)
-		request.add_header('Accept-encoding','gzip')
-		request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+		request.add_header('Accept-Encoding','gzip')
+		request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 		urllib2.urlopen(request)
 	except urllib2.URLError as e:
 		print "Unable to connect to zKB at %s" % zkb_base
@@ -103,6 +104,8 @@ def init():
 		print er.headers
 		sys.exit(4)
 	print "zKillboard connection:\tGOOD"
+	time.sleep(10)
+	
 def parseargs():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","csv","items=","startdate="])
@@ -134,10 +137,10 @@ def feed_primer():	#initial fetch to initilaize crawler
 	
 	zkb_primer_args = "losses/solo/limit/1/"
 	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_default_args,zkb_primer_args)
-	#print zkb_addr
+	print zkb_addr
 	request = urllib2.Request(zkb_addr)
-	request.add_header('Accept-encoding','gzip')
-	request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+	request.add_header('Accept-Encoding','gzip')
+	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
 	try:
 		opener = urllib2.build_opener()
@@ -169,8 +172,8 @@ def kill_crawler(start_killID,group,groupName):
 	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_default_args,zkb_primer_args)
 	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
-	request.add_header('Accept-encoding','gzip')
-	request.add_header('User-Agent','eve-prosper.blogspot.com')	#Don't forget request headders
+	request.add_header('Accept-Encoding','gzip')
+	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
 	try:
 		opener = urllib2.build_opener()
@@ -235,11 +238,36 @@ def kill_crawler(start_killID,group,groupName):
 		parsed_kills+=1
 		print "-------"
 	return parsed_kills
+	
+def crash_recover():
+	tidy_SQL_reset=0
+	try:
+		with open(crash_file):
+			print "recovering from %s" % crash_file
+			crash_json=open(crash_file)
+			crash_progress=json.load(crash_json)
+			tidy_SQL_reset=1
+			pass
+	except IOError:	
+		print "no crash log found.  Executing as normal"
+		pass
+	
+	if tidy_SQL_reset:
+		print "Cleaning up potential garbage"
+	else:
+		validate_delete = raw_input("Delete all entries to %s?  (Y/N)" % start_date)
+		if validate_delete.upper() == 'Y':
+			db_cursor.execute("DELETE FROM %s WHERE date>='%s'" % (db_name,start_date))
+			print "\tCleaning up ALL entries to %s" % start_date
+		else:
+			print "\tWARNING: values may be wrong without scrubbing duplicates"
+			time.sleep(5)
 def main():
 	init()
 	parseargs()
 	
-	print "Scraping zKB.  This may take a while"
+	crash_recover()
+	print "-----Scraping zKB.  This may take a while-----"
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID = feed_primer()
 		kills_parsed=kill_crawler(start_killID,group,groupName)
