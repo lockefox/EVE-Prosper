@@ -32,6 +32,7 @@ db_schema=""
 db=None
 db_cursor=None
 User_Agent = "not-Lockefox"
+crash_obj={}
 
 def init():
 	global db_name,db_schema,db,db_cursor
@@ -132,6 +133,7 @@ def parseargs():
 				time.strptime(start_date,"%Y-%m-%d")
 			except ValueError as e:
 				print e
+				print "Valid date format: YYYY-mm-dd"
 				sys.exit(2)
 			start_date_test=time.strptime(start_date,"%Y-%m-%d")
 		else:
@@ -262,20 +264,24 @@ def kill_crawler(start_killID,group,groupName,progress):
 	return parsed_kills
 	
 def crash_recover():
-	tidy_SQL_reset=0
+	global crash_obj
+	tidy_reset=0
 	try:
 		with open(crash_file):
 			print "recovering from %s" % crash_file
 			crash_json=open(crash_file)
 			crash_progress=json.load(crash_json)
-			tidy_SQL_reset=1
+			tidy_reset=1
 			pass
 	except IOError:	
 		print "no crash log found.  Executing as normal"
+		
 		pass
 	
-	if tidy_SQL_reset:
-		print "Cleaning up potential garbage"
+	if tidy_reset:
+		print "\tRestoring progress"
+		crash_json = open(crash_file)
+		crash_obj=json.load(crash_json)
 	else:
 		validate_delete = raw_input("Delete all entries to %s?  (Y/N)" % start_date)
 		if validate_delete.upper() == 'Y':
@@ -285,19 +291,46 @@ def crash_recover():
 		else:
 			print "\tWARNING: values may be wrong without scrubbing duplicates"
 			time.sleep(5)
+			
+def crash_handler(tracker_obj):
+	try:
+		with open(crash_file):
+			pass#os.remove(crash_file)
+	except IOError:	#want no file.  Create fresh each dump
+		pass
+	
+	crash_handle = open (crash_file,'w')
+	
+	crash_handle.write(json.dumps(tracker_obj))
+	crash_handle.close()
 def main():
+	global crash_obj
 	init()
 	parseargs()
 	
 	crash_recover()
 	print "-----Scraping zKB.  This may take a while-----"
+	crash_obj["parsed_data"]={}
 	for group,groupName in ship_list["groupID"].iteritems():
-		start_killID = feed_primer()
+		start_killID=0		
+		if group in crash_obj["parsed_data"]:
+			if crash_obj["parsed_data"][group] == "done":
+				continue
+			else:
+				start_killID = crash_obj["parsed_data"][group]
+		else:
+			start_killID = feed_primer()
 		kills_parsed=[0,start_killID,0] #Progress,killID,done
+		crash_obj["parsed_data"][group]=start_killID	#If fail first 
+		crash_handler(crash_obj)
+		
 		while kills_parsed[2]==0:
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
+			crash_obj["parsed_data"][group]=kills_parsed[1]
+			crash_handler(crash_obj)
 			time.sleep(15)
 			print "Parsed %s: %s" %( groupName,kills_parsed)
-			
+		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
+		crash_handler(crash_obj)
 if __name__ == "__main__":
 	main()
