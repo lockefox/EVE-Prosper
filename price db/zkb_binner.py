@@ -149,17 +149,25 @@ def feed_primer():	#initial fetch to initilaize crawler
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
-	try:
-		opener = urllib2.build_opener()
-		headers = urllib2.urlopen(request).headers
-	except urllib2.HTTPError as e:
-		print e
-		print e.headers
-		sys.exit(3)
-	except urllib2.URLError as er:
-		print er
-		print er.headers
-		sys.exit(3)
+	headers=[]
+	for tries in range (0,5):
+		time.sleep(5*tries)
+		try:
+			opener = urllib2.build_opener()
+			header_hold = urllib2.urlopen(request).headers
+			headers.append(header_hold)
+		except urllib2.HTTPError as e:
+			print e
+			print "retry %s: %s" %(zkb_addr,tries+1)
+		except urllib2.URLError as er:
+			print er
+			print "retry %s: %s" %(zkb_addr,tries+1)
+		else:
+			break
+	else:
+		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
+		print headers
+		sys.exit(4)
 
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -187,19 +195,26 @@ def kill_crawler(start_killID,group,groupName,progress):
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
+	headers=[]
+	for tries in range (0,5):
+		time.sleep(5*tries)
+		try:
+			opener = urllib2.build_opener()
+			header_hold = urllib2.urlopen(request).headers
+			headers.append(header_hold)
+		except urllib2.HTTPError as e:
+			print e
+			print "retry %s: %s" %(zkb_addr,tries+1)
+		except urllib2.URLError as er:
+			print er
+			print "retry %s: %s" %(zkb_addr,tries+1)
+		else:
+			break
+	else:
+		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
+		print headers
+		sys.exit(4)
 	
-	try:
-		opener = urllib2.build_opener()
-		headers = urllib2.urlopen(request).headers
-	except urllib2.HTTPError as e:
-		print e
-		print e.headers
-		sys.exit(3)
-	except urllib2.URLError as er:
-		print er
-		print er.headers
-		sys.exit(3)
-
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -291,6 +306,9 @@ def crash_recover():
 		else:
 			print "\tWARNING: values may be wrong without scrubbing duplicates"
 			time.sleep(5)
+			#Initialize crash_obj
+		crash_obj={}
+		crash_obj["parsed_data"]={}
 			
 def crash_handler(tracker_obj):
 	try:
@@ -310,14 +328,15 @@ def main():
 	
 	crash_recover()
 	print "-----Scraping zKB.  This may take a while-----"
-	crash_obj["parsed_data"]={}
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID=0		
 		if group in crash_obj["parsed_data"]:
 			if crash_obj["parsed_data"][group] == "done":
+				print "Group %s already complete" % groupName
 				continue
 			else:
 				start_killID = crash_obj["parsed_data"][group]
+
 		else:
 			start_killID = feed_primer()
 		kills_parsed=[0,start_killID,0] #Progress,killID,done
