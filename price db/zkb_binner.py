@@ -269,6 +269,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 			try:
 				data_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],0,0,value,itemdata_line)
 			except KeyError as e:	#If I don't have the key, it's not worth tracking
+				print "unable to find %s" % key
 				continue
 			itemduplicate_case=""
 			for bins in system_bins:
@@ -277,8 +278,10 @@ def kill_crawler(start_killID,group,groupName,progress):
 			#print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
 			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
 			db.commit()
-			
+			#31093574
+			#31093474
 		parsed_kills[0]+=1
+		sys.exit(0)
 		print "-------"
 	
 	return parsed_kills
