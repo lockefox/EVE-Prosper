@@ -239,7 +239,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
-		print "killID %s:%s" % (next_killID,date_str)
+		print "killID %s:%s" % (parsed_kills[1],date_str)
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
