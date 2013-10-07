@@ -281,7 +281,6 @@ def kill_crawler(start_killID,group,groupName,progress):
 			#31093574
 			#31093474
 		parsed_kills[0]+=1
-		sys.exit(0)
 		print "-------"
 	
 	return parsed_kills
