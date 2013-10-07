@@ -263,7 +263,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		for key,value in cargo_report.iteritems():
 			itemdata_line = ",".join([str(value)]*len(system_bins))
 			try:
-				data_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],0,group,value,itemdata_line)
+				data_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],0,0,value,itemdata_line)
 			except KeyError as e:	#If I don't have the key, it's not worth tracking
 				continue
 			itemduplicate_case=""
