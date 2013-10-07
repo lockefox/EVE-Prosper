@@ -159,9 +159,11 @@ def feed_primer():	#initial fetch to initilaize crawler
 		except urllib2.HTTPError as e:
 			print e
 			print "retry %s: %s" %(zkb_addr,tries+1)
+			continue
 		except urllib2.URLError as er:
 			print er
 			print "retry %s: %s" %(zkb_addr,tries+1)
+			continue
 		else:
 			break
 	else:
@@ -205,9 +207,11 @@ def kill_crawler(start_killID,group,groupName,progress):
 		except urllib2.HTTPError as e:
 			print e
 			print "retry %s: %s" %(zkb_addr,tries+1)
+			continue
 		except urllib2.URLError as er:
 			print er
 			print "retry %s: %s" %(zkb_addr,tries+1)
+			continue
 		else:
 			break
 	else:
@@ -276,6 +280,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 			
 		parsed_kills[0]+=1
 		print "-------"
+	
 	return parsed_kills
 	
 def crash_recover():
@@ -344,10 +349,10 @@ def main():
 		crash_handler(crash_obj)
 		
 		while kills_parsed[2]==0:
+			time.sleep(25)
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_handler(crash_obj)
-			time.sleep(15)
 			print "Parsed %s: %s" %( groupName,kills_parsed)
 		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
 		crash_handler(crash_obj)
