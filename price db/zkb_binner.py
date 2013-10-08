@@ -275,12 +275,13 @@ def kill_crawler(start_killID,group,groupName,progress):
 			for bins in system_bins:
 				itemduplicate_case+="%s = IFNULL(%s,0) + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
-			#print "INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
+			#print "\tINSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
 			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
 			db.commit()
 			#31093574
 			#31093474
 		parsed_kills[0]+=1
+		sys.exit(1)
 		print "-------"
 	
 	return parsed_kills
