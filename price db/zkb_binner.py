@@ -173,18 +173,14 @@ def feed_primer():	#initial fetch to initilaize crawler
 		print headers
 		sys.exit(4)
 	
-	print header_hold
-	
 	try:
 		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-		print call_sleep
 	except KeyError as e:
 		print "WARNING: X-Bin-Seconds-Between-Request key not found"
 		call_sleep = call_sleep_default
 		print header_hold
 		
 		
-	sys.exit(1)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -235,7 +231,6 @@ def kill_crawler(start_killID,group,groupName,progress):
 	
 	try:
 		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-		print call_sleep
 	except KeyError as e:
 		print "WARNING: X-Bin-Seconds-Between-Request key not found"
 		call_sleep = call_sleep_default
@@ -358,16 +353,16 @@ def main():
 	print "-----Scraping zKB.  This may take a while-----"
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID=0		
-		#if group in crash_obj["parsed_data"]:
-		#	if crash_obj["parsed_data"][group] == "done":
-		#		print "Group %s already complete" % groupName
-		#		continue
-		#	else:
-		#		start_killID = crash_obj["parsed_data"][group]
-        #
-		#else:
-		#	start_killID = feed_primer()
-		start_killID = feed_primer()
+		if group in crash_obj["parsed_data"]:
+			if crash_obj["parsed_data"][group] == "done":
+				print "Group %s already complete" % groupName
+				continue
+			else:
+				start_killID = crash_obj["parsed_data"][group]
+        
+		else:
+			start_killID = feed_primer()
+			
 		kills_parsed=[0,start_killID,0] #Progress,killID,done
 		crash_obj["parsed_data"][group]=start_killID	#If fail first 
 		crash_handler(crash_obj)
