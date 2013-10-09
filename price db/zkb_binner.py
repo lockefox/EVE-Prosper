@@ -33,6 +33,8 @@ db=None
 db_cursor=None
 User_Agent = "not-Lockefox"
 crash_obj={}
+call_sleep_default=25
+call_sleep = call_sleep_default
 
 def init():
 	global db_name,db_schema,db,db_cursor
@@ -141,7 +143,7 @@ def parseargs():
 
 def feed_primer():	#initial fetch to initilaize crawler
 	global start_killID
-	
+	global call_sleep
 	zkb_primer_args = "losses/solo/limit/1/"
 	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_default_args,zkb_primer_args)
 	print zkb_addr
@@ -172,6 +174,16 @@ def feed_primer():	#initial fetch to initilaize crawler
 		sys.exit(4)
 	
 	print header_hold
+	
+	try:
+		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
+		print call_sleep
+	except KeyError as e:
+		print "WARNING: X-Bin-Seconds-Between-Request key not found"
+		call_sleep = call_sleep_default
+		print header_hold
+		
+		
 	sys.exit(1)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -220,6 +232,14 @@ def kill_crawler(start_killID,group,groupName,progress):
 		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
 		print headers
 		sys.exit(4)
+	
+	try:
+		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
+		print call_sleep
+	except KeyError as e:
+		print "WARNING: X-Bin-Seconds-Between-Request key not found"
+		call_sleep = call_sleep_default
+		print header_hold
 	
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -314,7 +334,6 @@ def crash_recover():
 			print "\tCleaning up ALL entries to %s" % start_date
 		else:
 			print "\tWARNING: values may be wrong without scrubbing duplicates"
-			time.sleep(5)
 			#Initialize crash_obj
 		crash_obj={}
 		crash_obj["parsed_data"]={}
@@ -354,7 +373,7 @@ def main():
 		crash_handler(crash_obj)
 		
 		while kills_parsed[2]==0:
-			time.sleep(25)
+			time.sleep(call_sleep)
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_handler(crash_obj)
