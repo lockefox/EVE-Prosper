@@ -170,7 +170,9 @@ def feed_primer():	#initial fetch to initilaize crawler
 		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
 		print headers
 		sys.exit(4)
-
+	
+	print header_hold
+	sys.exit(1)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
