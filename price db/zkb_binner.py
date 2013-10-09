@@ -339,15 +339,16 @@ def main():
 	print "-----Scraping zKB.  This may take a while-----"
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID=0		
-		if group in crash_obj["parsed_data"]:
-			if crash_obj["parsed_data"][group] == "done":
-				print "Group %s already complete" % groupName
-				continue
-			else:
-				start_killID = crash_obj["parsed_data"][group]
-
-		else:
-			start_killID = feed_primer()
+		#if group in crash_obj["parsed_data"]:
+		#	if crash_obj["parsed_data"][group] == "done":
+		#		print "Group %s already complete" % groupName
+		#		continue
+		#	else:
+		#		start_killID = crash_obj["parsed_data"][group]
+        #
+		#else:
+		#	start_killID = feed_primer()
+		start_killID = feed_primer()
 		kills_parsed=[0,start_killID,0] #Progress,killID,done
 		crash_obj["parsed_data"][group]=start_killID	#If fail first 
 		crash_handler(crash_obj)
