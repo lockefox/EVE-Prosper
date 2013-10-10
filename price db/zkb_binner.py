@@ -38,7 +38,7 @@ call_sleep = call_sleep_default
 
 def init():
 	global db_name,db_schema,db,db_cursor
-	db_name="killdata"
+	db_name="destruction_data"
 	db_schema="odyssey-1.1-91288"
 	db_IP="127.0.0.1"
 	db_user="root"
@@ -74,20 +74,15 @@ def init():
 				sys.exit(2)
 	
 	else:	#Initialize DB
-		bin_str=""
-		for bin,sys_list in systems["systemlist"].iteritems():
-			bin_str+="`%s` int(16) DEFAULT NULL,"%(bin)
 		try:
 			db_cursor.execute( "CREATE TABLE %s (\
 				`date` date NOT NULL,\
 				`typeID` int(8) NOT NULL,\
-				`typeName` varchar(100) NOT NULL,\
-				`typeCategory` int(8) NOT NULL,\
 				`typeGroup` int(8) NOT NULL,\
-				`TotalDestroyed` bigint(32) NOT NULL,\
-				%s\
-				PRIMARY KEY (`date`,`typeID`))\
-				ENGINE=InnoDB DEFAULT CHARSET=latin1" % (db_name,bin_str))
+				`systemID` int(8) NOT NULL,\
+				`destroyed` int(16) DEFAULT 0,\
+				PRIMARY KEY (`date`,`typeID`,`systemID`))\
+				ENGINE=InnoDB DEFAULT CHARSET=latin1" % (db_name))
 		except MySQLdb.OperationalError as e:
 			if (e[0] == 1050): #Table Already Exists
 				print "%s table already created" % db_name
