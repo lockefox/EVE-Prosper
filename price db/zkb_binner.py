@@ -63,6 +63,7 @@ def init():
 		try:
 			db_cursor.execute( "CREATE TABLE %s (\
 				`date` date NOT NULL,\
+				`week` int(4) NOT NULL,\
 				`typeID` int(8) NOT NULL,\
 				`typeGroup` int(8) NOT NULL,\
 				`systemID` int(8) NOT NULL,\
