@@ -326,10 +326,11 @@ def snooze_setter(header):
 		print "WARNING: %s" % e
 		call_sleep = call_sleep_default
 		print header_hold
-	if conn_reqs_used > 1:
-		call_sleep = (conn_sleep_time/conn_allowance)*conn_reqs_used #slow down if using up some budget
-	elif (conn_reqs_used+1)==conn_allowance:
+	
+	if (conn_reqs_used+1)==conn_allowance:
 		call_sleep = conn_sleep_time #full back-off if allowance is out
+	elif conn_reqs_used > 1:
+		call_sleep = (conn_sleep_time/conn_allowance)*conn_reqs_used #slow down if using up some budget
 	else:
 		call_sleep = 1 #conn_sleep_time/5		#Go as fast as possible
 	print "X-Bin-Attempts-Allowed: %s" % conn_allowance
