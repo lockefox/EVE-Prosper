@@ -217,6 +217,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		call_sleep = call_sleep_default
 		print header_hold
 	
+	print header_hold
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -350,7 +351,7 @@ def main():
 		crash_handler(crash_obj)
 		
 		while kills_parsed[2]==0:
-			time.sleep(call_sleep)
+			#time.sleep(call_sleep)
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_handler(crash_obj)
