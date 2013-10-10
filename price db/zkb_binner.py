@@ -153,15 +153,15 @@ def feed_primer():	#initial fetch to initilaize crawler
 		print headers
 		sys.exit(4)
 	
-	try:
-		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-	except KeyError as e:
-		print "WARNING: X-Bin-Seconds-Between-Request key not found"
-		call_sleep = call_sleep_default
-		print header_hold
+	#try:
+	#	call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
+	#except KeyError as e:
+	#	print "WARNING: X-Bin-Seconds-Between-Request key not found"
+	#	call_sleep = call_sleep_default
+	#	print header_hold
 		
 	print header_hold
-	
+	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -210,14 +210,15 @@ def kill_crawler(start_killID,group,groupName,progress):
 		print headers
 		sys.exit(4)
 	
-	try:
-		call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-	except KeyError as e:
-		print "WARNING: X-Bin-Seconds-Between-Request key not found"
-		call_sleep = call_sleep_default
-		print header_hold
+	#try:
+	#	call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
+	#except KeyError as e:
+	#	print "WARNING: X-Bin-Seconds-Between-Request key not found"
+	#	call_sleep = call_sleep_default
+	#	print header_hold
 	
 	print header_hold
+	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -238,7 +239,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
-		print "killID %s:%s" % (parsed_kills[1],date_str)
+		#print "killID %s:%s" % (parsed_kills[1],date_str)
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
@@ -280,7 +281,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 			#31093574
 			#31093474
 		parsed_kills[0]+=1
-		print "-------"
+		#print "-------"
 	
 	return parsed_kills
 	
@@ -314,7 +315,22 @@ def crash_recover():
 			#Initialize crash_obj
 		crash_obj={}
 		crash_obj["parsed_data"]={}
-			
+
+def snooze_setter(header):
+	try:
+		conn_allowance = header["X-Bin-Attempts-Allowed"]
+		conn_reqs_used = header["X-Bin-Requests"]
+		conn_sleep_time= header["X-Bin-Seconds-Between-Request"]
+	except KeyError as e:
+		print "WARNING: %s" % e
+		call_sleep = call_sleep_default
+		print header_hold
+	if (conn_reqs_used+1)==conn_allowance:
+		call_sleep = conn_sleep_time + 5 	#back-off if allowance is out
+	else:
+		call_sleep = 1 #conn_sleep_time/5		#Go as fast as possible
+		
+		
 def crash_handler(tracker_obj):
 	try:
 		with open(crash_file):
@@ -351,11 +367,11 @@ def main():
 		crash_handler(crash_obj)
 		
 		while kills_parsed[2]==0:
-			#time.sleep(call_sleep)
+			time.sleep(call_sleep)
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_handler(crash_obj)
-			print "Parsed %s: %s" %( groupName,kills_parsed)
+			print "Parsed %s: %s sleep=%s" %( groupName,kills_parsed,call_sleep)
 		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
 		crash_handler(crash_obj)
 if __name__ == "__main__":
