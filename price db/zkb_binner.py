@@ -132,8 +132,8 @@ def feed_primer():	#initial fetch to initilaize crawler
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
 	headers=[]
-	for tries in range (0,1):
-		time.sleep(5*tries)
+	for tries in range (0,5):
+		time.sleep(10*tries)
 		try:
 			opener = urllib2.build_opener()
 			header_hold = urllib2.urlopen(request).headers
@@ -190,7 +190,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	headers=[]
 	for tries in range (0,5):
-		time.sleep(5*tries)
+		time.sleep(10*tries)
 		try:
 			opener = urllib2.build_opener()
 			header_hold = urllib2.urlopen(request).headers
