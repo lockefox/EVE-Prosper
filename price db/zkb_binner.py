@@ -128,7 +128,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	global call_sleep
 	zkb_primer_args = "losses/solo/limit/1/"
 	zkb_addr = "%sapi/%s%s" % (zkb_base,zkb_default_args,zkb_primer_args)
-	print zkb_addr
+	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
@@ -307,7 +307,7 @@ def snooze_setter(header):
 	#	call_sleep = (conn_sleep_time/conn_allowance)*conn_reqs_used #slow down if using up some budget
 	#############################################
 	else:
-		call_sleep = 1 #conn_sleep_time/5		#Go as fast as possible
+		call_sleep = 0 #conn_sleep_time/5		#Go as fast as possible
 	#print "X-Bin-Attempts-Allowed: %s" % conn_allowance
 	#print "X-Bin-Requests: %s" % conn_reqs_used
 	#print "X-Bin-Seconds-Between-Request: %s" % conn_sleep_time
