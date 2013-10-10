@@ -63,7 +63,7 @@ def init():
 		try:
 			db_cursor.execute( "CREATE TABLE %s (\
 				`date` date NOT NULL,\
-				`week` int(4) NOT NULL,\
+				`week` varchar(8) NOT NULL,\
 				`typeID` int(8) NOT NULL,\
 				`typeGroup` int(8) NOT NULL,\
 				`systemID` int(8) NOT NULL,\
@@ -156,14 +156,6 @@ def feed_primer():	#initial fetch to initilaize crawler
 		print headers
 		sys.exit(4)
 	
-	#try:
-	#	call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-	#except KeyError as e:
-	#	print "WARNING: X-Bin-Seconds-Between-Request key not found"
-	#	call_sleep = call_sleep_default
-	#	print header_hold
-		
-	#print header_hold
 	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -214,14 +206,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		print headers
 		sys.exit(4)
 	
-	#try:
-	#	call_sleep = header_hold["X-Bin-Seconds-Between-Request"]
-	#except KeyError as e:
-	#	print "WARNING: X-Bin-Seconds-Between-Request key not found"
-	#	call_sleep = call_sleep_default
-	#	print header_hold
-	
-	#print header_hold
+
 	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -238,27 +223,17 @@ def kill_crawler(start_killID,group,groupName,progress):
 	for kill in JSON_obj:
 		parsed_kills[1]=kill["killID"]
 		ship_destroyed = kill["victim"]["shipTypeID"]
+		system = kill["solarSystemID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
 		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),lookup["all_types"][str(ship_destroyed)],parsed_kills[1],date_str))
-		system_bins=[]
-		for bin,system_list in systems["systemlist"].iteritems():
-			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
-				system_bins.append(bin)
-		bin_line = ",".join(system_bins)
-		table_line = "(date,typeID,typeName,typeCategory,typeGroup,TotalDestroyed,%s)" % bin_line
-		data = ",".join(["1"]*len(system_bins))
-		value_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,ship_destroyed,lookup["all_types"][str(ship_destroyed)],0,group,1,data)
 		
-		duplicate_case=""
-		for bins in system_bins:
-			duplicate_case+="%s = IFNULL(%s,0) + 1, " % (bins,bins)
-		duplicate_case = duplicate_case.rstrip(', ')
-		#db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+1, %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
-		#db.commit()
+		value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),ship_destroyed,lookup["groups"][str(ship_destroyed)],system,1)
+		db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + 1" % (db_name,value_str))
+		db.commit()
 		
 		cargo_report={}
 		for cargo_items in kill["items"]:
@@ -269,21 +244,11 @@ def kill_crawler(start_killID,group,groupName,progress):
 					cargo_report[str(cargo_items[str("typeID")])]=cargo_items["qtyDestroyed"]
 		
 		for key,value in cargo_report.iteritems():
-			itemdata_line = ",".join([str(value)]*len(system_bins))
-			try:
-				data_line = "('%s',%s,'%s',%s,%s,%s,%s)" % (date_str,key,lookup["all_types"][key],0,0,value,itemdata_line)
-			except KeyError as e:	#If I don't have the key, it's not worth tracking
-				print "unable to find %s" % key
-				continue
-			itemduplicate_case=""
-			for bins in system_bins:
-				itemduplicate_case+="%s = IFNULL(%s,0) + %s, " % (bins,bins,value)
-			itemduplicate_case = itemduplicate_case.rstrip(', ')
-			#print "\tINSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
-			#db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
-			#db.commit()
-			#31093574
-			#31093474
+			value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),key,lookup["groups"][str(key)],system,value)
+			db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + %s" % (db_name,value_str,value))
+			db.commit()
+
+
 		parsed_kills[0]+=1
 		#print "-------"
 	
