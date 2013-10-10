@@ -31,7 +31,7 @@ db_name=""
 db_schema=""
 db=None
 db_cursor=None
-User_Agent = "not-Lockefox"
+User_Agent = "lockefox"
 crash_obj={}
 call_sleep_default=25
 call_sleep = call_sleep_default
@@ -58,21 +58,7 @@ def init():
 		db_cursor.execute("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS`  WHERE `TABLE_SCHEMA`='%s' AND `TABLE_NAME`='%s'" % (db_schema,db_name))
 		existing_cols = db_cursor.fetchall()
 		existing_cols_list = []
-		for value in existing_cols:		#reduce fetchall() result to 1D list
-			existing_cols_list.append(value[0])
-		if (len(existing_cols)-6 != len(systems["systemlist"].keys())): #check if bin count lines up
-			db_cols_match=0
-			print "Number of columns in EXISTING table does not match bins in %s" % systemlist
-			print "please manually DROP %s from %s" % db_name,db_schema
 			
-			#CASE FOR DB exists, but BINS might have changed
-		for bin,sys_list in systems["systemlist"].iteritems():
-			if (bin not in existing_cols_list):
-				db_cols_match=0
-				print "%s not found in existing db" % aug_bin
-				print "please manually DROP %s from %s" % db_name,db_schema
-				sys.exit(2)
-	
 	else:	#Initialize DB
 		try:
 			db_cursor.execute( "CREATE TABLE %s (\
