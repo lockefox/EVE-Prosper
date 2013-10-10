@@ -318,9 +318,9 @@ def crash_recover():
 
 def snooze_setter(header):
 	try:
-		conn_allowance = header["X-Bin-Attempts-Allowed"]
-		conn_reqs_used = header["X-Bin-Requests"]
-		conn_sleep_time= header["X-Bin-Seconds-Between-Request"]
+		conn_allowance = int(header["X-Bin-Attempts-Allowed"])
+		conn_reqs_used = int(header["X-Bin-Requests"])
+		conn_sleep_time= int(header["X-Bin-Seconds-Between-Request"])
 	except KeyError as e:
 		print "WARNING: %s" % e
 		call_sleep = call_sleep_default
