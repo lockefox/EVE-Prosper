@@ -317,6 +317,7 @@ def crash_recover():
 		crash_obj["parsed_data"]={}
 
 def snooze_setter(header):
+	global call_sleep
 	try:
 		conn_allowance = int(header["X-Bin-Attempts-Allowed"])
 		conn_reqs_used = int(header["X-Bin-Requests"])
@@ -325,6 +326,7 @@ def snooze_setter(header):
 		print "WARNING: %s" % e
 		call_sleep = call_sleep_default
 		print header_hold
+	
 	if (conn_reqs_used+1)==conn_allowance:
 		call_sleep = conn_sleep_time + 5 	#back-off if allowance is out
 	else:
