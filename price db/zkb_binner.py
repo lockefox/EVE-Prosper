@@ -244,7 +244,11 @@ def kill_crawler(start_killID,group,groupName,progress):
 					cargo_report[str(cargo_items[str("typeID")])]=cargo_items["qtyDestroyed"]
 		
 		for key,value in cargo_report.iteritems():
-			value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),key,lookup["groups"][str(key)],system,value)
+			try:
+				key_group = lookup["groups"][str(key)]
+			except KeyError as e:
+				key_group = 0
+			value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),key,key_group,system,value)
 			db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + %s" % (db_name,value_str,value))
 			db.commit()
 
