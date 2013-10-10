@@ -46,7 +46,6 @@ def init():
 	db_port=3306
 	
 	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
-
 		
 	db_cursor = db.cursor()
 	
@@ -133,7 +132,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
 	headers=[]
-	for tries in range (0,5):
+	for tries in range (0,1):
 		time.sleep(5*tries)
 		try:
 			opener = urllib2.build_opener()
@@ -161,7 +160,8 @@ def feed_primer():	#initial fetch to initilaize crawler
 		call_sleep = call_sleep_default
 		print header_hold
 		
-		
+	print header_hold
+	
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -251,8 +251,8 @@ def kill_crawler(start_killID,group,groupName,progress):
 		for bins in system_bins:
 			duplicate_case+="%s = IFNULL(%s,0) + 1, " % (bins,bins)
 		duplicate_case = duplicate_case.rstrip(', ')
-		db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+1, %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
-		db.commit()
+		#db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+1, %s" % (db_name,table_line,value_line,duplicate_case)) #SHIP DATA
+		#db.commit()
 		
 		cargo_report={}
 		for cargo_items in kill["items"]:
@@ -274,8 +274,8 @@ def kill_crawler(start_killID,group,groupName,progress):
 				itemduplicate_case+="%s = IFNULL(%s,0) + %s, " % (bins,bins,value)
 			itemduplicate_case = itemduplicate_case.rstrip(', ')
 			#print "\tINSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case)
-			db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
-			db.commit()
+			#db_cursor.execute("INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE TotalDestroyed = TotalDestroyed+%s, %s" % (db_name,table_line,data_line,value,itemduplicate_case))
+			#db.commit()
 			#31093574
 			#31093474
 		parsed_kills[0]+=1
@@ -303,7 +303,7 @@ def crash_recover():
 		crash_json = open(crash_file)
 		crash_obj=json.load(crash_json)
 	else:
-		validate_delete = raw_input("Delete all entries to %s?  (Y/N)" % start_date)
+		validate_delete = raw_input("Delete all entries to %s in %s.%s?  (Y/N)" % (start_date,db_schema,db_name))
 		if validate_delete.upper() == 'Y':
 			db_cursor.execute("DELETE FROM %s WHERE date>='%s'" % (db_name,start_date))
 			db.commit()
@@ -331,6 +331,7 @@ def main():
 	parseargs()
 	
 	crash_recover()
+	
 	print "-----Scraping zKB.  This may take a while-----"
 	for group,groupName in ship_list["groupID"].iteritems():
 		start_killID=0		
