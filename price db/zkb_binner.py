@@ -141,11 +141,11 @@ def feed_primer():	#initial fetch to initilaize crawler
 			header_hold = urllib2.urlopen(request).headers
 			headers.append(header_hold)
 		except urllib2.HTTPError as e:
-			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), e)
+			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), e))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except urllib2.URLError as er:
-			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), er)
+			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		else:
@@ -199,11 +199,11 @@ def kill_crawler(start_killID,group,groupName,progress):
 			header_hold = urllib2.urlopen(request).headers
 			headers.append(header_hold)
 		except urllib2.HTTPError as e:
-			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), e)
+			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), e))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except urllib2.URLError as er:
-			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), er)
+			log_filehandle.write("%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		else:
@@ -242,7 +242,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
-		log_filehandle.write("%s:\tkillID %s:%s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()),parsed_kills[1],date_str)
+		log_filehandle.write("%s:\t%s killID %s:%s" % (time.strftime("%Y-%m-%d %H:%M:%S", gmtime()),lookup["all_types"][str(ship_destroyed)],parsed_kills[1],date_str)
 		system_bins=[]
 		for bin,system_list in systems["systemlist"].iteritems():
 			if str(kill["solarSystemID"]) in system_list:		#str() needed, parses as INT default
@@ -383,6 +383,7 @@ def main():
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_handler(crash_obj)
 			print "Parsed %s: %s sleep=%s" %( groupName,kills_parsed,call_sleep)
+			
 		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
 		crash_handler(crash_obj)
 if __name__ == "__main__":
