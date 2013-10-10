@@ -160,7 +160,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	#	call_sleep = call_sleep_default
 	#	print header_hold
 		
-	print header_hold
+	#print header_hold
 	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -217,7 +217,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	#	call_sleep = call_sleep_default
 	#	print header_hold
 	
-	print header_hold
+	#print header_hold
 	snooze_setter(header_hold)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
@@ -328,10 +328,12 @@ def snooze_setter(header):
 		print header_hold
 	
 	if (conn_reqs_used+1)==conn_allowance:
-		call_sleep = conn_sleep_time 	#back-off if allowance is out
+		call_sleep += conn_sleep_time/conn_sleep_time #back-off if allowance is out
 	else:
 		call_sleep = 1 #conn_sleep_time/5		#Go as fast as possible
-		
+	print "X-Bin-Attempts-Allowed: %s" % conn_allowance
+	print "X-Bin-Requests: %s" % conn_reqs_used
+	print "X-Bin-Seconds-Between-Request: %s" % conn_sleep_time
 		
 def crash_handler(tracker_obj):
 	try:
