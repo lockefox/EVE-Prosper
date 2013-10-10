@@ -328,7 +328,7 @@ def snooze_setter(header):
 		print header_hold
 	
 	if (conn_reqs_used+1)==conn_allowance:
-		call_sleep = conn_sleep_time + 5 	#back-off if allowance is out
+		call_sleep = conn_sleep_time 	#back-off if allowance is out
 	else:
 		call_sleep = 1 #conn_sleep_time/5		#Go as fast as possible
 		
