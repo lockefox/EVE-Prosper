@@ -201,7 +201,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
-		except socket.error as err:
+		except Socket.error as err:
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), err))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 		else:
