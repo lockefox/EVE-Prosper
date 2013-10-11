@@ -1,6 +1,6 @@
 #!/Python27/python.exe
 
-import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, datetime, time, json
+import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, datetime, time, json, socket
 import urllib2
 import MySQLdb
 
@@ -201,7 +201,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
-		except Socket.error as err:
+		except socket.error as err:
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), err))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 		else:
