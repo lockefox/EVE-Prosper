@@ -25,12 +25,13 @@ db_name=""
 db_schema=""
 db=None
 crash_file = "price_crash.json"
+region_fast=1	#controls region scrape method
 
 def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
 		global db_name,db_cursor,db_schema, db
-		db_name="pricedata"
+		db_name="EMDpricedata"
 		db_schema="odyssey-1.1-91288"
 		db_IP="127.0.0.1"
 		db_user="root"
@@ -45,7 +46,8 @@ def init():
 			db_cursor.execute("CREATE TABLE %s (\
 			`date` date NOT NULL,\
 			`locationID` int(8) NOT NULL,\
-			`typeName` varchar(100) NOT NULL,\
+			`systemID` int(8) DEFAULT NULL,\
+			`regionID` int(8) DEFUALT NULL,\
 			`typeID` int(8) NOT NULL,\
 			`source` varchar(8) NOT NULL,\
 			`priceMax` float(16,4) DEFAULT NULL,\
@@ -94,7 +96,7 @@ def init():
 	
 def parseargs():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","EMD","full","csv","items=","days="])
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","regionfast","itemfast","EMD","full","csv","items=","days="])
 	except getopt.GetoptError:
 		print "invalid arguments"
 		#help()
@@ -112,11 +114,15 @@ def parseargs():
 		elif opt == "--csv":
 			global csv_only
 			csv_only=1
-			print "function not fully supported yet"
+			print "function not supported yet"
 		elif opt == "--days":
 			global days
 			days=int(arg)
 			print days
+		elif opt == "--regionfast":
+			region_fast=1
+		elif opt == "--itemfast":
+			region_fast=0
 		else:
 			print "herp"
 
@@ -293,8 +299,7 @@ def main():
 		EMD_proc()
 	print "EMD Data parsed successfully"
 	try:
-		with open(crash_file):
-			os.remove(crash_file)
+		os.remove(crash_file)
 	except IOError:	#want no file.  Create fresh each dump
 		pass
 	
