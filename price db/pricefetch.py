@@ -188,6 +188,7 @@ def EMD_proc():
 				result_line=result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],None,row_ittr["row"]["regionID"],\
 					row_ittr["row"]["typeID"],"EMD",row_ittr["row"]["highPrice"],row_ittr["row"]["lowPrice"],row_ittr["row"]["avgPrice"],\
 					row_ittr["row"]["volume"],row_ittr["row"]["orders"],None,None]
+				#print result_line
 				if row_ittr["row"]["typeID"] in item_dict:
 					hold_line=item_dict[row_ittr["row"]["typeID"]]
 					hold_line.append(result_line)
@@ -207,15 +208,15 @@ def EMD_proc():
 					line_found=0
 					for line in results:
 						if line[0]==date:
-							tmp_result = [date,line[1],line[2],line[3],line[4],line[5],line[6],line[7],line[8],line[9],line[10],line[11]]
+							tmp_result = [date,line[1],line[2],line[3],line[4],line[5],line[6],line[7],line[8],line[9],line[10],line[11],line[12]]
 							real_results.append(tmp_result)
 							previous_line=line
 							line_found=1
 							break
 					if line_found==0:
-						tmp_result=[date,previous_line[1],previous_line[2],previous_line[3],"EMD_mod",previous_line[5],previous_line[6],previous_line[7],previous_line[8],previous_line[9],previous_line[10],previous_line[11]]
+						tmp_result=[date,previous_line[1],previous_line[2],previous_line[3],previous_line[4],"EMD_mod",previous_line[6],previous_line[7],previous_line[8],previous_line[9],previous_line[10],previous_line[11],previous_line[12]]
 						real_results.append(tmp_result)
-				
+				#print real_results
 				write_sql(real_results)
 				item_progress[item_key]=1	#Completed query
 			crash_handler(item_progress)
@@ -254,10 +255,15 @@ def write_sql(result_list):
 				print_list.append("NULL")
 			else:
 				print_list.append(element)
-		tmp_str="REPLACE %s (date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,%s,'%s',%s,%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
+		#print print_list
+		tmp_str="REPLACE %s (date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,%s,%s,%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
 			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
-			round(float(print_list[5]),2), round(float(print_list[6]),2), round(float(print_list[7]),2), print_list[8], print_list[9],\
-			print_list[10], print_list[11],print_list[12])
+			print_list[5], round(float(print_list[6]),2), round(float(print_list[7]),2), round(float(print_list[8]),2),\
+			print_list[9], print_list[10], print_list[11], print_list[12])
+			#date,locationID,systemID,regionID,typeID
+			#source,priceMax,priceMin,priceAverage
+			#volume,orders,priceOpen,priceClose
+		print tmp_str
 		db_cursor.execute(tmp_str)
 		db.commit()
 		#try:
