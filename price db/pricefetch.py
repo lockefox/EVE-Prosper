@@ -30,7 +30,7 @@ def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
 		global db_name,db_cursor,db_schema, db
-		db_name="pricedata"
+		db_name="EMDpricedata"
 		db_schema="odyssey-1.1-91288"
 		db_IP="127.0.0.1"
 		db_user="root"
@@ -45,7 +45,8 @@ def init():
 			db_cursor.execute("CREATE TABLE %s (\
 			`date` date NOT NULL,\
 			`locationID` int(8) NOT NULL,\
-			`typeName` varchar(100) NOT NULL,\
+			`systemID` int(8) DEFAULT NULL,\
+			`regionID` int(8) DEFAULT NULL,\
 			`typeID` int(8) NOT NULL,\
 			`source` varchar(8) NOT NULL,\
 			`priceMax` float(16,4) DEFAULT NULL,\
@@ -149,7 +150,7 @@ def EMD_proc():
 	if regionlist==None:
 		region_todo.append("10000002")
 	else:
-		region_todo = itemlist.split(',')
+		region_todo = regionlist.split(',')
 	dates_todo = days_2_dates(days)
 	query_size = len(region_todo) * days
 	max_query=5000
@@ -184,7 +185,7 @@ def EMD_proc():
 			#real_results=[]
 			item_dict={}
 			for row_ittr in query_result["emd"]["result"]:	#Parse json into organized object
-				result_line=result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],lookup["types"][row_ittr["row"]["typeID"]],\
+				result_line=result_line = [row_ittr["row"]["date"],row_ittr["row"]["regionID"],None,row_ittr["row"]["regionID"],\
 					row_ittr["row"]["typeID"],"EMD",row_ittr["row"]["highPrice"],row_ittr["row"]["lowPrice"],row_ittr["row"]["avgPrice"],\
 					row_ittr["row"]["volume"],row_ittr["row"]["orders"],None,None]
 				if row_ittr["row"]["typeID"] in item_dict:
@@ -253,10 +254,10 @@ def write_sql(result_list):
 				print_list.append("NULL")
 			else:
 				print_list.append(element)
-		tmp_str="REPLACE %s (date,locationID,typeName,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,'%s',%s,'%s',%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
+		tmp_str="REPLACE %s (date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose) VALUES('%s',%s,%s,'%s',%s,%s,%s,%s,%s,%s,%s,%s);" %(db_name,\
 			print_list[0], print_list[1], print_list[2], print_list[3], print_list[4],\
 			round(float(print_list[5]),2), round(float(print_list[6]),2), round(float(print_list[7]),2), print_list[8], print_list[9],\
-			print_list[10], print_list[11])
+			print_list[10], print_list[11],print_list[12])
 		db_cursor.execute(tmp_str)
 		db.commit()
 		#try:
