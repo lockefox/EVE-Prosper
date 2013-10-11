@@ -134,7 +134,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	
 	headers=[]
-	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), zkb_addr))
+	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), zkb_addr))
 	for tries in range (0,5):
 		time.sleep(10*tries)
 		try:
@@ -142,11 +142,11 @@ def feed_primer():	#initial fetch to initilaize crawler
 			header_hold = urllib2.urlopen(request).headers
 			headers.append(header_hold)
 		except urllib2.HTTPError as e:
-			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), e))
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except urllib2.URLError as er:
-			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), er))
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		else:
@@ -184,7 +184,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
 	headers=[]
-	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), zkb_addr))
+	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), zkb_addr))
 	for tries in range (0,5):
 		time.sleep(10*tries)
 		try:
@@ -194,15 +194,15 @@ def kill_crawler(start_killID,group,groupName,progress):
 			raw_zip = opener.open(request)
 			dump_zip_stream = raw_zip.read()
 		except urllib2.HTTPError as e:
-			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), e))
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except urllib2.URLError as er:
-			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), er))
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except socket.error as err:
-			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), err))
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), err))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 		else:
 			break
@@ -233,7 +233,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
-		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),lookup["all_types"][str(ship_destroyed)],parsed_kills[1],date_str))
+		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),lookup["all_types"][str(ship_destroyed)],parsed_kills[1],date_str))
 		
 		value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),ship_destroyed,lookup["groups"][str(ship_destroyed)],system,1)
 		db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + 1" % (db_name,value_str))
