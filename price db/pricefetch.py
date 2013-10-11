@@ -24,7 +24,7 @@ days=1
 db_name=""
 db_schema=""
 db=None
-crash_file = "crash.json"
+crash_file = "price_crash.json"
 
 def init():
 	##Initialize DB cursor##
