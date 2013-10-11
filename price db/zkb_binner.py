@@ -175,7 +175,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	return start_killID
 
 def kill_crawler(start_killID,group,groupName,progress):
-	parsed_kills = [progress,start_killID,0]
+	parsed_kills = [progress,start_killID,0,None]
 	
 	zkb_primer_args = "losses/groupID/%s/" % group
 	zkb_addr = "%sapi/beforeKillID/%s/%s%s" % (zkb_base,start_killID,zkb_default_args,zkb_primer_args)
@@ -191,6 +191,8 @@ def kill_crawler(start_killID,group,groupName,progress):
 			opener = urllib2.build_opener()
 			header_hold = urllib2.urlopen(request).headers
 			headers.append(header_hold)
+			raw_zip = opener.open(request)
+			dump_zip_stream = raw_zip.read()
 		except urllib2.HTTPError as e:
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), e))
 			print "retry %s: %s" %(zkb_addr,tries+1)
@@ -199,6 +201,9 @@ def kill_crawler(start_killID,group,groupName,progress):
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), er))
 			print "retry %s: %s" %(zkb_addr,tries+1)
 			continue
+		except socket.error as err:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()), err))
+			print "retry %s: %s" %(zkb_addr,tries+1)
 		else:
 			break
 	else:
@@ -208,8 +213,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	
 
 	snooze_setter(header_hold)
-	raw_zip = opener.open(request)
-	dump_zip_stream = raw_zip.read()
+
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
 	
 	zipper = gzip.GzipFile(fileobj=dump_IOstream)
