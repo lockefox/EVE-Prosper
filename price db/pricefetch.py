@@ -263,7 +263,7 @@ def write_sql(result_list):
 			#date,locationID,systemID,regionID,typeID
 			#source,priceMax,priceMin,priceAverage
 			#volume,orders,priceOpen,priceClose
-		print tmp_str
+		#print tmp_str
 		db_cursor.execute(tmp_str)
 		db.commit()
 		#try:
