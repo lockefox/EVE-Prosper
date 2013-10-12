@@ -233,7 +233,13 @@ def kill_crawler(start_killID,group,groupName,progress):
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
-		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),lookup["all_types"][str(ship_destroyed)],parsed_kills[1],date_str))
+		
+		try:
+			item_name=lookup["all_types"][str(ship_destroyed)]
+		except KeyError as e:
+			item_name=str(ship_destroyed)
+			
+		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),item_name,parsed_kills[1],date_str))
 		
 		value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),ship_destroyed,lookup["groups"][str(ship_destroyed)],system,1)
 		db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + 1" % (db_name,value_str))
