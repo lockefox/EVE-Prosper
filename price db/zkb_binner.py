@@ -9,6 +9,7 @@ lookup_file="lookup.json"				#ID->name conversion list
 shiplist="toaster_shiplist.json"		#Allows stepping by groupID
 crash_file="binner_crash.json"			#tracks crashes for recovering gracefully
 log_file = "binner_log.txt"				#Logs useful run data.  Moves old verson?
+rc_file = "zkbrc.json"					#Runtime Configs
 zkb_base="https://zkillboard.com/"
 zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
@@ -18,14 +19,20 @@ lookup = json.load(lookup_json)
 systems= json.load(system_json)
 ship_list=json.load(ships_json)
 
+try:
+	with open(rc_file):
+		rc_json = open(rc_file)
+		conf = json.load(rc_json)
+except IOError:
+	conf = {}
 
 ########## GLOBALS ##########
 
-csv_only=0								#output CSV instead of SQL
-sql_init_only=0							#output CSV CREATE file
+csv_only=conf.get("csv_only", 0)							#output CSV instead of SQL
+sql_init_only=conf.get("sql_init_only", 0)					#output CSV CREATE file
 sql_file="pricedata.sql"
 
-start_date="2013-01-01"
+start_date=conf.get("start_date", "2013-01-01")
 start_date_test=time.strptime(start_date,"%Y-%m-%d")
 db_name=""
 db_schema=""
@@ -39,12 +46,12 @@ log_filehandle = open(log_file, 'a+')
 
 def init():
 	global db_name,db_schema,db,db_cursor
-	db_name="destruction_data"
-	db_schema="odyssey-1.1-91288"
-	db_IP="127.0.0.1"
-	db_user="root"
-	db_pw="bar"
-	db_port=3306
+	db_name=conf.get("db_table", "destruction_data")
+	db_schema=conf.get("db_name", "odyssey-1.1-91288")
+	db_IP=conf.get("db_host", "127.0.0.1")
+	db_user=conf.get("db_user", "root")
+	db_pw=conf.get("db_pw", "bar")
+	db_port=conf.get("db_port", "3306")
 	
 	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
 		
