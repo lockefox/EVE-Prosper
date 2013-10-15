@@ -1,1 +1,5 @@
+.*.swp
 SQL/*.sql
+price db/zkb_local.ini
+price db/binner_crash.json
+price db/binner_log.txt
