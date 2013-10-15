@@ -37,7 +37,7 @@ db=None
 db_cursor=None
 User_Agent = "lockefox"
 crash_obj={}
-call_sleep_default=25
+call_sleep_default=conf.get("GLOBALS", "default_sleep")	
 call_sleep = call_sleep_default
 log_filehandle = open(log_file, 'a+')
 
@@ -140,7 +140,7 @@ def feed_primer():	#initial fetch to initilaize crawler
 	headers=[]
 	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), zkb_addr))
 	for tries in range (0,5):
-		time.sleep(10*tries)
+		time.sleep(call_sleep_default*tries)
 		try:
 			opener = urllib2.build_opener()
 			header_hold = urllib2.urlopen(request).headers
@@ -190,7 +190,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	headers=[]
 	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), zkb_addr))
 	for tries in range (0,5):
-		time.sleep(10*tries)
+		time.sleep(call_sleep_default*tries)
 		try:
 			opener = urllib2.build_opener()
 			header_hold = urllib2.urlopen(request).headers
