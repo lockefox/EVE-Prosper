@@ -37,7 +37,7 @@ db=None
 db_cursor=None
 User_Agent = "lockefox"
 crash_obj={}
-call_sleep_default=conf.get("GLOBALS", "default_sleep")	
+call_sleep_default=float(conf.get("GLOBALS", "default_sleep"))
 call_sleep = call_sleep_default
 log_filehandle = open(log_file, 'a+')
 
@@ -228,12 +228,19 @@ def kill_crawler(start_killID,group,groupName,progress):
 	if len(JSON_obj)==0:
 		parsed_kills[2]=1
 	next_killID=start_killID
+	earliest_killID=[time.localtime(),next_killID]
 	for kill in JSON_obj:
-		parsed_kills[1]=kill["killID"]
+		#parsed_kills[1]=kill["killID"]
 		ship_destroyed = kill["victim"]["shipTypeID"]
 		system = kill["solarSystemID"]
 		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
 		date_str = time.strftime("%Y-%m-%d",date_killed)
+		
+		#checks chronological order of kills returned.  Set parsed_kills[1] to earliest kill in set
+		if date_killed < earliest_killID[0]:
+			earliest_killID=[date_killed,kill["killID"]]
+			parsed_kills[1]=kill["killID"]
+		
 		if date_killed<start_date_test:		#Only process to desired date
 			parsed_kills[2]=1
 			break
