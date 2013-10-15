@@ -179,6 +179,8 @@ def feed_primer():	#initial fetch to initilaize crawler
 	return start_killID
 
 def kill_crawler(start_killID,group,groupName,progress):
+	global crash_obj
+	
 	parsed_kills = [progress,start_killID,0,None]
 	
 	zkb_primer_args = "losses/groupID/%s/" % group
@@ -250,7 +252,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		except KeyError as e:
 			item_name=str(ship_destroyed)
 			
-		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),item_name,parsed_kills[1],date_str))
+
 		
 		value_str = "'%s','%s',%s,%s,%s,%s" % (date_str,time.strftime("%Y-%U",date_killed),ship_destroyed,lookup["groups"][str(ship_destroyed)],system,1)
 		db_cursor.execute("INSERT INTO %s (date,week,typeID,typeGroup,systemID,destroyed) VALUES (%s) ON DUPLICATE KEY UPDATE destroyed = destroyed + 1" % (db_name,value_str))
@@ -275,6 +277,10 @@ def kill_crawler(start_killID,group,groupName,progress):
 
 
 		parsed_kills[0]+=1
+		log_filehandle.write("%s:\t%s killID %s:%s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),item_name,kill["killID"],date_str))
+		crash_obj["parsed_data"][group]=parsed_kills[1]
+		crash_obj["progress"][group]=parsed_kills[0]
+		crash_handler(crash_obj)
 		#print "-------"
 	parsed_kills[3]=date_str
 	return parsed_kills
@@ -309,6 +315,7 @@ def crash_recover():
 			#Initialize crash_obj
 		crash_obj={}
 		crash_obj["parsed_data"]={}
+		crash_obj["progress"]={}
 
 def snooze_setter(header):
 	global call_sleep
@@ -363,8 +370,11 @@ def main():
         
 		else:
 			start_killID = feed_primer()
+		km_progress=0
+		if group in crash_obj["progress"]:
+			km_progress=crash_obj["progress"][group]
 			
-		kills_parsed=[0,start_killID,0] #Progress,killID,done
+		kills_parsed=[km_progress,start_killID,0] #Progress,killID,done
 		crash_obj["parsed_data"][group]=start_killID	#If fail first 
 		crash_handler(crash_obj)
 		
@@ -372,6 +382,7 @@ def main():
 			time.sleep(call_sleep)
 			kills_parsed=kill_crawler(kills_parsed[1],group,groupName,kills_parsed[0]) #list allows passing by reference.  Control 3 return values
 			crash_obj["parsed_data"][group]=kills_parsed[1]
+			crash_obj["progress"][group]=kills_parsed[0]
 			crash_handler(crash_obj)
 			print "Parsed %s: %s sleep=%s" %( groupName,kills_parsed,call_sleep)
 			
