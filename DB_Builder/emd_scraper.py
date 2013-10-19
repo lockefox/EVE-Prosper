@@ -5,38 +5,41 @@ import urllib2
 import MySQLdb
 
 ########## INIT VARS ##########
-db_cursor=None
-EMD_base="http://eve-marketdata.com/"
-lookup_json=open("lookup.json")
-lookup=json.load(lookup_json)
+db_cursor = None
+db = None
+EMD_base = "http://eve-marketdata.com/"
+lookup_json = open("lookup.json")
+lookup = json.load(lookup_json)
+crash_file = "emd_scraper_crash.json"
+
+#Config File Globals
+conf = ConfigParser.ConfigParser()
+conf.read(["scraper.ini", "scraper_local.ini"])
 
 ########## GLOBALS ##########
-regionlist=None	#comma separated list of regions (for EMD history)
-systemlist=None	#comma separated list of systems (for EC history)
-itemlist=None	#comma separated list of items (default to full list)
-csv_only=0		#output CSV instead of SQL
-sql_init_only=0	#output CSV CREATE file
-region_fast=0	#Loop scheme: region-fast or item-fast
-days=1
-db_name=""
-db_schema=""
-db=None
-crash_file = "emd_scraper_crash.json"
-User_Agent = "lockefox"
+regionlist = None	#comma separated list of regions (for EMD history)
+systemlist = None	#comma separated list of systems (for EC history)
+itemlist = None		#comma separated list of items (default to full list)
+csv_only = conf.get("GLOBALS","csv_only")			#output CSV instead of SQL
+sql_init_only = conf.get("GLOBALS","sql_init_only")	#output CSV CREATE file
+region_fast = conf.get("EMD","region_fast")			#Loop scheme: region-fast or item-fast
+days = conf.get("EMD","default_days")
+
+db_table = conf.get("EMD","db_table")
+db_name = conf.get("GLOBALS","db_name")
+db_IP = conf.get("GLOBALS","db_host")
+db_user = conf.get("GLOBALS","db_user")
+db_pw = conf.get("GLOBALS","db_pw")
+db_port = conf.get("GLOBALS","db_port")
+
+User_Agent = conf.get("EMD","user_agent")
 
 def init():
 	##Initialize DB cursor##
 	if (csv_only==0 and sql_init_only==0):	
-		global db_name,db_cursor,db_schema, db
-		db_name="EMDpricedata"
-		db_schema="odyssey-1.1-91288"
-		db_IP="127.0.0.1"
-		db_user="root"
-		db_pw="bar"
-		db_port=3306
+		global db_cursor, db
 		
-		db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
-		#db.autocommit()
+		db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_name)
 		
 		db_cursor = db.cursor()
 		try:
@@ -55,10 +58,10 @@ def init():
 			`priceOpen` float(16,4) DEFAULT NULL,\
 			`priceClose` float(16,4) DEFAULT NULL,\
 			PRIMARY KEY (`date`,`locationID`,`typeID`,`source`))\
-			ENGINE=InnoDB DEFAULT CHARSET=latin1" % db_name)
+			ENGINE=InnoDB DEFAULT CHARSET=latin1" % db_table)
 		except MySQLdb.OperationalError as e:
 			if (e[0] == 1050): #Table Already Exists
-				print "%s table already created" % db_name
+				print "%s table already created" % db_table
 			else:
 				raise e		
 		print "DB Connection:\t\t\tGOOD"
