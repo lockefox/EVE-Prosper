@@ -8,8 +8,8 @@ import ConfigParser
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
 shiplist="toaster_shiplist.json"		#Allows stepping by groupID
-crash_file="binner_crash.json"			#tracks crashes for recovering gracefully
-log_file = "binner_log.txt"				#Logs useful run data.  Moves old verson?
+crash_file="zkb_scraper_crash.json"			#tracks crashes for recovering gracefully
+log_file = "zkb_scraper_log.txt"				#Logs useful run data.  Moves old verson?
 zkb_base="https://zkillboard.com/"
 zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
@@ -230,7 +230,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 	if len(JSON_obj)==0:
 		parsed_kills[2]=1
 	next_killID=start_killID
-	earliest_killID=[time.localtime(),next_killID]
+	earliest_killID=[time.gmtime(),next_killID]
 	for kill in JSON_obj:
 		#parsed_kills[1]=kill["killID"]
 		ship_destroyed = kill["victim"]["shipTypeID"]
@@ -385,7 +385,6 @@ def main():
 			crash_obj["progress"][group]=kills_parsed[0]
 			crash_handler(crash_obj)
 			print "Parsed %s: %s sleep=%s" %( groupName,kills_parsed,call_sleep)
-			
 		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
 		crash_handler(crash_obj)
 if __name__ == "__main__":
