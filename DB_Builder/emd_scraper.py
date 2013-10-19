@@ -18,12 +18,13 @@ csv_only=0		#output CSV instead of SQL
 sql_init_only=0	#output CSV CREATE file
 sql_file="pricedata.sql"
 EMD_parse=1		#run EMD history pull
-EC_parse=0		#run EVE Central dump crunch
+region_fast=0	#Loop scheme: region-fast or item-fast
 days=1
 db_name=""
 db_schema=""
 db=None
-crash_file = "crash.json"
+crash_file = "emd_scraper_crash.json"
+User_Agent = "lockefox"
 
 def init():
 	##Initialize DB cursor##
@@ -82,7 +83,7 @@ def init():
 	
 def parseargs():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","EMD","full","csv","items=","days="])
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","regionfast","itemfast","EMD","full","csv","items=","days="])
 	except getopt.GetoptError:
 		print "invalid arguments"
 		#help()
@@ -105,6 +106,10 @@ def parseargs():
 			global days
 			days=int(arg)
 			print days
+		elif opt =="--regionfast":
+			region_fast=1
+		elif opt =="--itemfast":	#default
+			region_fast=0
 		else:
 			print "herp"
 
