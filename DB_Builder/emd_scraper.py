@@ -7,7 +7,6 @@ import MySQLdb
 ########## INIT VARS ##########
 db_cursor=None
 EMD_base="http://eve-marketdata.com/"
-EC_base="http://eve-central.com/"
 lookup_json=open("lookup.json")
 lookup=json.load(lookup_json)
 
@@ -80,18 +79,6 @@ def init():
 			print er.code
 			sys.exit(4)
 		print "EVE-Marketdata connection:\tGOOD"
-	if EC_parse == 1:
-		try:	#EVE-Central.com connection
-			urllib2.urlopen(urllib2.Request(EC_base))
-		except urllib2.URLError as e:
-			print "Unable to connect to EVE-Central at %s" % EC_base
-			print e.code
-			sys.exit(4)
-		except urllib2.HTTPError as er:
-			print "Unable to connect to EVE-Central at %s" % EC_base
-			print er.code
-			sys.exit(4)
-		print "EVE-Central connection:\t\tGOOD"
 	
 def parseargs():
 	try:
