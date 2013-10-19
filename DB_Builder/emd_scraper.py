@@ -69,22 +69,21 @@ def init():
 		print "DB connection:\t\t\tSKIPPED"
 		
 	##TEST Internet connection and resource connection##
-	if EMD_parse == 1:
-		try:	#EVE-Marketdata.com connection
-			urllib2.urlopen(urllib2.Request(EMD_base))
-		except urllib2.URLError as e:
-			print "Unable to connect to EMD at %s" % EMD_base
-			print e.code
-			sys.exit(4)
-		except urllib2.HTTPError as er:
-			print "Unable to connect to EMD at %s" % EMD_base
-			print er.code
-			sys.exit(4)
-		print "EVE-Marketdata connection:\tGOOD"
+	try:	#EVE-Marketdata.com connection
+		urllib2.urlopen(urllib2.Request(EMD_base))
+	except urllib2.URLError as e:
+		print "Unable to connect to EMD at %s" % EMD_base
+		print e.code
+		sys.exit(4)
+	except urllib2.HTTPError as er:
+		print "Unable to connect to EMD at %s" % EMD_base
+		print er.code
+		sys.exit(4)
+	print "EVE-Marketdata connection:\tGOOD"
 	
 def parseargs():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","regionfast","itemfast","EMD","full","csv","items=","days="])
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","regionfast","itemfast","full","csv","items=","days="])
 	except getopt.GetoptError:
 		print "invalid arguments"
 		#help()
@@ -96,9 +95,6 @@ def parseargs():
 		elif opt in ("-r","--region"):
 			global regionlist
 			regionlist=arg
-		elif opt == "--EMD":
-			global EMD_parse
-			EMD_parse=1
 		elif opt == "--csv":
 			global csv_only
 			csv_only=1
