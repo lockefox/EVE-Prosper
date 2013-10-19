@@ -8,10 +8,9 @@ import ConfigParser
 systemlist="toaster_systemlist.json"	#system breakdown for destruction binning
 lookup_file="lookup.json"				#ID->name conversion list
 shiplist="toaster_shiplist.json"		#Allows stepping by groupID
-crash_file="zkb_scraper_crash.json"			#tracks crashes for recovering gracefully
-log_file = "zkb_scraper_log.txt"				#Logs useful run data.  Moves old verson?
+crash_file="zkb_scraper_crash.json"		#tracks crashes for recovering gracefully
+log_file = "zkb_scraper_log.txt"		#Logs useful run data.  Moves old verson?
 zkb_base="https://zkillboard.com/"
-zkb_default_args="api-only/no-attackers/"
 lookup_json = open(lookup_file)
 system_json = open(systemlist)
 ships_json = open(shiplist)
@@ -21,15 +20,15 @@ ship_list=json.load(ships_json)
 
 #Config File Globals
 conf = ConfigParser.ConfigParser()
-conf.read(["zkb.ini", "zkb_local.ini"])
+conf.read(["scraper.ini", "scraper_local.ini"])
 
 ########## GLOBALS ##########
 
 csv_only=conf.get("GLOBALS", "csv_only")							#output CSV instead of SQL
 sql_init_only=conf.get("GLOBALS", "sql_init_only")					#output CSV CREATE file
 sql_file="pricedata.sql"
-
-start_date=conf.get("GLOBALS", "startdate")
+zkb_default_args=conf.get("ZKB","default_args")
+start_date=conf.get("ZKB", "startdate")
 start_date_test=time.strptime(start_date,"%Y-%m-%d")
 db_name=""
 db_schema=""
@@ -37,7 +36,7 @@ db=None
 db_cursor=None
 User_Agent = "lockefox"
 crash_obj={}
-call_sleep_default=float(conf.get("GLOBALS", "default_sleep"))
+call_sleep_default=float(conf.get("ZKB", "default_sleep"))
 call_sleep = call_sleep_default
 log_filehandle = open(log_file, 'a+')
 

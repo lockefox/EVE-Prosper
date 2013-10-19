@@ -16,8 +16,6 @@ systemlist=None	#comma separated list of systems (for EC history)
 itemlist=None	#comma separated list of items (default to full list)
 csv_only=0		#output CSV instead of SQL
 sql_init_only=0	#output CSV CREATE file
-sql_file="pricedata.sql"
-EMD_parse=1		#run EMD history pull
 region_fast=0	#Loop scheme: region-fast or item-fast
 days=1
 db_name=""
@@ -288,9 +286,11 @@ def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (n
 def main():
 	parseargs()
 	init()
-	if EMD_parse==1:
-		EMD_proc()
-	print "EMD Data parsed successfully"
+	#if EMD_parse==1:
+	#	EMD_proc()
+	#print "EMD Data parsed successfully"
+	
+	
 	try:
 		with open(crash_file):
 			os.remove(crash_file)
