@@ -278,8 +278,40 @@ def write_sql(result_list):
 	#db_cursor=db.cursor()
 	
 def region_fast_scrape(region_string, region_number):
-	print "region_string: %s" % region_string
-	print "region_number: %s" % region_number
+	items_todo = []
+	item_str = ""
+	
+	if itemlist == None:	#use JSON
+		items_todo=lookup["types"].keys()
+	else:					#use user-input
+		item_todo=itemlist.split(',')
+		
+	##TODO crash handler
+	
+	dates_todo = days_2_dates(days)	#convert #days into list of dates
+	item_limit = math.floor(query_limit/(days*region_number))
+	
+	batch_item=[]
+	batch_count=0
+	EMD_return = {}
+	for item in items_todo:
+		batch_item.append(item)
+		batch_count += 1
+		if len(batch_item) == item_limit:
+			item_str = ",".join(batch_item)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s" % (EMD_base,User_Agent,region_string,item_str)
+			EMD_return = EMD_fetch(EMD_url)
+			batch_item=[]
+			continue
+		elif batch_count == region_count:
+			item_str = ",".join(batch_item)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s" % (EMD_base,User_Agent,region_string,item_str)
+			EMD_return = EMD_fetch(EMD_url)		
+			batch_item=[]
+			
+			
+def EMD_fetch(url):
+	print url
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
@@ -312,19 +344,19 @@ def main():
 		batch_count = 0
 		for region in region_todo:	#JSON has regions in array for "priority order"
 			batch_region.append(region)
-			batch_count +=1
+			batch_count += 1
 			
 			if len(batch_region)==region_limit:					#Batch regions so at least 1 item/query can run
 				region_str = ",".join(batch_region)
-				region_n=len(batch_region)
+				region_n = len(batch_region)
 				region_fast_scrape(region_str,region_n)	
-				batch_region=[]
+				batch_region = []
 				continue				
 			elif batch_count==region_count:	#clean up remainder in one pass
 				region_str = ",".join(batch_region)
-				region_n=len(batch_region)
+				region_n = len(batch_region)
 				region_fast_scrape(region_str,region_n)	
-				batch_region=[]
+				batch_region = []
 				#loop should finish here
 	else:		#Item Fast
 		print "feature incomplete.  --regionfast only"
