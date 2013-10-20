@@ -299,19 +299,40 @@ def region_fast_scrape(region_string, region_number):
 		batch_count += 1
 		if len(batch_item) == item_limit:
 			item_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s" % (EMD_base,User_Agent,region_string,item_str)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)
+			print EMD_return
+			sys.exit(1)
 			batch_item=[]
 			continue
-		elif batch_count == region_count:
+		elif batch_count == region_count:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s" % (EMD_base,User_Agent,region_string,item_str)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)		
 			batch_item=[]
 			
 			
 def EMD_fetch(url):
+	#queries EMD and returns the JSON
 	print url
+	
+	for tries in range (0,5):
+		time.sleep(10*tries)
+		try:
+			response = urllib2.urlopen(url).read()
+		except urllib2.HTTPError as e:
+			print "retry %s: %s" % (url,tries)
+			continue
+		except urllib2.URLError as er:
+			print "retry %s: %s" % (url,tries)
+			continue
+		else:
+			break
+	else:
+		print "unable to open %s after %s tries" % (url, tries)
+		sys.exit(4)
+	return json.loads(response)	
+	
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
