@@ -320,7 +320,7 @@ def main():
 				region_fast_scrape(region_str,region_n)	
 				batch_region=[]
 				continue				
-			elif (batch_count+region_limit) >= region_count:	#clean up remainder in one pass
+			elif batch_count==region_count:	#clean up remainder in one pass
 				region_str = ",".join(batch_region)
 				region_n=len(batch_region)
 				region_fast_scrape(region_str,region_n)	
