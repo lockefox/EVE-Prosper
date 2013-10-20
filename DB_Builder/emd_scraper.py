@@ -3,10 +3,9 @@
 import sys, math, os, getopt, subprocess, math, datetime, time, json
 import urllib2
 import MySQLdb
+import ConfigParser
 
 ########## INIT VARS ##########
-db_cursor = None
-db = None
 EMD_base = "http://eve-marketdata.com/"
 lookup_json = open("lookup.json")
 lookup = json.load(lookup_json)
@@ -20,20 +19,23 @@ conf.read(["scraper.ini", "scraper_local.ini"])
 regionlist = None	#comma separated list of regions (for EMD history)
 systemlist = None	#comma separated list of systems (for EC history)
 itemlist = None		#comma separated list of items (default to full list)
-csv_only = conf.get("GLOBALS","csv_only")			#output CSV instead of SQL
-sql_init_only = conf.get("GLOBALS","sql_init_only")	#output CSV CREATE file
-region_fast = conf.get("EMD","region_fast")			#Loop scheme: region-fast or item-fast
-days = conf.get("EMD","default_days")
-query_limit = conf.get("EMD","query_limit")
+csv_only = int(conf.get("GLOBALS","csv_only"))				#output CSV instead of SQL
+sql_init_only = int(conf.get("GLOBALS","sql_init_only"))	#output CSV CREATE file
+region_fast = int(conf.get("EMD","region_fast"))			#Loop scheme: region-fast or item-fast
+days = int(conf.get("EMD","default_days"))
+query_limit = int(conf.get("EMD","query_limit"))
+User_Agent = conf.get("EMD","user_agent")
 
+########## DB VARS ##########
 db_table = conf.get("EMD","db_table")
 db_name = conf.get("GLOBALS","db_name")
 db_IP = conf.get("GLOBALS","db_host")
 db_user = conf.get("GLOBALS","db_user")
 db_pw = conf.get("GLOBALS","db_pw")
-db_port = conf.get("GLOBALS","db_port")
+db_port = int(conf.get("GLOBALS","db_port"))
+db_cursor = None
+db = None
 
-User_Agent = conf.get("EMD","user_agent")
 
 def init():
 	##Initialize DB cursor##
@@ -105,8 +107,10 @@ def parseargs():
 			days=int(arg)
 			print days
 		elif opt =="--regionfast":
+			global region_fast
 			region_fast=1
 		elif opt =="--itemfast":	#default
+			global region_fast
 			region_fast=0
 		else:
 			print "herp"
@@ -274,7 +278,8 @@ def write_sql(result_list):
 	#db_cursor=db.cursor()
 	
 def region_fast_scrape(region_string, region_number):
-	
+	print "region_string: %s" % region_string
+	print "region_number: %s" % region_number
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
@@ -301,7 +306,7 @@ def main():
 		else: 					#user input
 			region_todo = regionlist.split(',')
 			
-		region_limit = floor(query_limit/days)
+		region_limit = math.floor(query_limit/days)
 		region_count = len(region_todo)
 		batch_region = []
 		batch_count = 0
@@ -310,16 +315,18 @@ def main():
 			batch_count +=1
 			
 			if len(batch_region)==region_limit:					#Batch regions so at least 1 item/query can run
-				region_str = ",".join(',')
+				region_str = ",".join(batch_region)
+				region_n=len(batch_region)
 				region_fast_scrape(region_str,region_n)	
 				batch_region=[]
-				continue
-				
+				continue				
 			elif (batch_count+region_limit) >= region_count:	#clean up remainder in one pass
-				region_str = ",".join(',')
+				region_str = ",".join(batch_region)
+				region_n=len(batch_region)
 				region_fast_scrape(region_str,region_n)	
 				batch_region=[]
-	else:
+				#loop should finish here
+	else:		#Item Fast
 		print "feature incomplete.  --regionfast only"
 	try:
 		with open(crash_file):
