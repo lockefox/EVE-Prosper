@@ -24,6 +24,7 @@ csv_only = conf.get("GLOBALS","csv_only")			#output CSV instead of SQL
 sql_init_only = conf.get("GLOBALS","sql_init_only")	#output CSV CREATE file
 region_fast = conf.get("EMD","region_fast")			#Loop scheme: region-fast or item-fast
 days = conf.get("EMD","default_days")
+query_limit = conf.get("EMD","query_limit")
 
 db_table = conf.get("EMD","db_table")
 db_name = conf.get("GLOBALS","db_name")
@@ -272,7 +273,8 @@ def write_sql(result_list):
 	#db_cursor.close()
 	#db_cursor=db.cursor()
 	
-
+def region_fast_scrape(region_string, region_number):
+	
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
@@ -289,7 +291,36 @@ def main():
 	#	EMD_proc()
 	#print "EMD Data parsed successfully"
 	
-	
+	if region_fast==1:
+		region_todo = []	#holds -region=str
+		region_n = 0		#helps calculate query limit
+		region_str = ""
+		
+		if regionlist == None:	#use JSON
+			region_todo = lookup["regions_scrape"]
+		else: 					#user input
+			region_todo = regionlist.split(',')
+			
+		region_limit = floor(query_limit/days)
+		region_count = len(region_todo)
+		batch_region = []
+		batch_count = 0
+		for region in region_todo:	#JSON has regions in array for "priority order"
+			batch_region.append(region)
+			batch_count +=1
+			
+			if len(batch_region)==region_limit:					#Batch regions so at least 1 item/query can run
+				region_str = ",".join(',')
+				region_fast_scrape(region_str,region_n)	
+				batch_region=[]
+				continue
+				
+			elif (batch_count+region_limit) >= region_count:	#clean up remainder in one pass
+				region_str = ",".join(',')
+				region_fast_scrape(region_str,region_n)	
+				batch_region=[]
+	else:
+		print "feature incomplete.  --regionfast only"
 	try:
 		with open(crash_file):
 			os.remove(crash_file)
