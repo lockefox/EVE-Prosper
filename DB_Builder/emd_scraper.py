@@ -287,7 +287,6 @@ def region_fast_scrape(region_string, region_number):
 		
 	##TODO crash handler
 	
-	
 	item_limit = math.floor(query_limit/(days*region_number))
 	
 	batch_item=[]
@@ -300,15 +299,14 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			#print EMD_url
-			print "----------"
 			EMD_return = EMD_fetch(EMD_url)
+			print "----------"
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean)
-			sys.exit(1)
 			batch_item=[]
 			continue
-		elif batch_count == region_count:	#Clean up odd remainders
+		elif batch_count == region_number:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			#print EMD_url
@@ -318,6 +316,7 @@ def region_fast_scrape(region_string, region_number):
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean)
 			batch_item=[]
+			
 def SQL_writer (results):
 	#Pushes data out to SQL
 	global db_cursor, db
@@ -334,7 +333,7 @@ def SQL_writer (results):
 				avgprice = results[region][typeid][date_indx][date]["avgPrice"]
 				volume = results[region][typeid][date_indx][date]["volume"]
 				orders = results[region][typeid][date_indx][date]["orders"]
-				openprice = "NULL" #results[region][typeid][date_indx][date]["openPrice"]
+				openprice = "NULL" #TODO: None to NULL conversion results[region][typeid][date_indx][date]["openPrice"]
 				closeprice = "NULL" #results[region][typeid][date_indx][date]["closePrice"]
 				source = results[region][typeid][date_indx][date]["source"]
 						#'date',locationID,systemID,regionID,typeID,'source',priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose
@@ -345,7 +344,7 @@ def SQL_writer (results):
 				date_indx+=1
 	commit_str = commit_str.rstrip(',') #clean up trailing comma
 	#print commit_str
-	db_cursor.execute(commit_str)
+	db_cursor.execute(commit_str)	#dumps whole EMD result into db at once
 	db.commit()
 				
 def result_process(results):
@@ -468,7 +467,47 @@ def EMD_fetch(url):
 	
 	return EMD_json["emd"]["result"]
 	
+def item_fast_scrape(item_string,item_number):
+	region_todo = []
+	region_str = ""
 	
+	if regionlist == None:	#use JSON
+		region_todo = lookup["regions_scrape"]
+	else: 					#user input
+		region_todo = regionlist.split(',')
+		
+	#TODO crash handler
+	
+	region_limit = math.floor(query_limit/(days*item_number))
+	
+	batch_region = []
+	batch_count = 0
+	EMD_return = {}
+	for region in region_todo:
+		batch_region.append(region)
+		batch_count += 1
+		if len(batch_region) == region_limit:
+			region_str = ",".join(batch_item)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_str,item_string,days)
+			#print EMD_url
+			EMD_return = EMD_fetch(EMD_url)
+			print "----------"
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_raw)
+			SQL_writer(results_clean)
+			batch_region=[]
+			continue
+		elif batch_count == item_number:
+			region_str = ",".join(batch_item)
+			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_str,item_string,days)
+			#print EMD_url
+			EMD_return = EMD_fetch(EMD_url)
+			print "----------"
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_raw)
+			SQL_writer(results_clean)
+			batch_region=[]
+			
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
 	start_date = datetime.datetime.utcnow()
@@ -515,9 +554,38 @@ def main():
 				batch_region = []
 				#loop should finish here
 	else:		#Item Fast
-		print "feature incomplete.  --regionfast only"
+		item_todo = []
+		item_n = 0
+		item_str = ""
+		
+		if itemlist == None:
+			item_todo = lookup["types"].keys()
+		else:
+			item_todo = itemlist.split(',')
+			
+		item_limit = math.floor(query_limit/days)
+		item_count = len(item_todo)
+		batch_item = []
+		batch_count = 0
+		for item in item_todo:
+			batch_item.append(item)
+			batch_count +=1
+			
+			if len(batch_item) == item_limit:
+				item_str = ",".join(batch_item)
+				item_n = len(batch_item)
+				item_fast_scrape(item_str,item_n)
+				batch_region = []
+				continue
+			elif batch_count == item_count
+				item_str = ",".join(batch_item)
+				item_n = len(batch_item)
+				item_fast_scrape(item_str,item_n)
+				batch_region = []
+				
 	try:
 		with open(crash_file):
+			crash_file.close()
 			os.remove(crash_file)
 	except IOError:	#want no file.  Create fresh each dump
 		pass
