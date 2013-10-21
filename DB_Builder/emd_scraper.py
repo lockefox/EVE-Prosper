@@ -288,7 +288,7 @@ def region_fast_scrape(region_string, region_number):
 		
 	##TODO crash handler
 	
-	dates_todo = days_2_dates(days)	#convert #days into list of dates
+	
 	item_limit = math.floor(query_limit/(days*region_number))
 	
 	batch_item=[]
@@ -301,17 +301,38 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)
-			print EMD_return
+			EMD_crunch(EMD_return)
+			#print EMD_return
 			sys.exit(1)
 			batch_item=[]
 			continue
 		elif batch_count == region_count:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
-			EMD_return = EMD_fetch(EMD_url)		
+			EMD_return = EMD_fetch(EMD_url)	
+			EMD_crunch(EMD_return)
 			batch_item=[]
 			
-			
+def EMD_crunch(EMD_JSON):
+	#Parses return object from EMD and conditions for writing to the DB
+	dates_todo = days_2_dates(days)	#convert #days into list of dates
+	
+	#results{region}{item}=[date:{hi,low,avg,vol,ord,date},date:{hi,low,avg,vol,ord,date}]
+	results={}
+	
+	for entry in EMD_JSON:
+		region = entry["row"]["regionID"]
+		typeid = entry["row"]["typeID"]
+		
+		#Initialize result structure before parsing
+		if results.get(region)==None:
+			results[region]={}
+		else:
+			if results[region].get(typeid)==None:
+				results[region][typeid]= []
+				for date in dates_todo:
+					results[region][typeid].append(date)
+	print results
 def EMD_fetch(url):
 	#queries EMD and returns the JSON
 	print url
@@ -331,7 +352,9 @@ def EMD_fetch(url):
 	else:
 		print "unable to open %s after %s tries" % (url, tries)
 		sys.exit(4)
-	return json.loads(response)	
+	EMD_json = json.loads(response)	
+	
+	return EMD_json["emd"]["result"]
 	
 	
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
