@@ -303,7 +303,7 @@ def region_fast_scrape(region_string, region_number):
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)
 			results_raw = EMD_crunch(EMD_return)
-			results_clean = result_process(results_clean)
+			results_clean = result_process(results_raw)
 			#print EMD_return
 			sys.exit(1)
 			batch_item=[]
@@ -313,9 +313,54 @@ def region_fast_scrape(region_string, region_number):
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)	
 			results_raw = EMD_crunch(EMD_return)
-			results_clean = result_process(results_clean)
+			results_clean = result_process(results_raw)
 			batch_item=[]
-			
+	
+def result_process(results):
+	#Takes result object and backfills missing values
+	for region,region_data in results.iteritems():
+		for typeid,item_data in region_data.iteritems():
+			date_indx = 0
+			for date_obj in item_data:
+				date = date_obj.keys()[0]
+				print results[region][typeid]
+				sys.exit(1)
+				if len(date_obj)<=1:	#if object is empty
+					if date_indx == 0:	#start of object is empty
+						results[region][typeid][date_indx][date]["regionID"] = region
+						results[region][typeid][date_indx][date]["typeID"] = typeid
+						results[region][typeid][date_indx][date]["date"] = date
+						results[region][typeid][date_indx][date]["lowPrice"] = 0
+						results[region][typeid][date_indx][date]["highPrice"] = 0
+						results[region][typeid][date_indx][date]["avgPrice"] = 0
+						results[region][typeid][date_indx][date]["volume"] = 0
+						results[region][typeid][date_indx][date]["orders"] = 0
+						results[region][typeid][date_indx][date]["openPrice"] = None
+						results[region][typeid][date_indx][date]["closePrice"] = None
+						results[region][typeid][date_indx][date]["source"] = "EMD_mod"
+					else:	#use previous entry otherwise (feed forward 0's)
+						prev_date = results[region][typeid][date_indx-1].keys()[0]
+						lowprice = results[region][typeid][date_indx-1][prev_date]["lowPrice"]
+						highprice = results[region][typeid][date_indx-1][prev_date]["highPrice"]
+						avgprice = results[region][typeid][date_indx-1][prev_date]["avgPrice"]
+						volume = results[region][typeid][date_indx-1][prev_date]["volume"]
+						orders = results[region][typeid][date_indx-1][prev_date]["orders"]
+						
+						results[region][typeid][date_indx][date]["regionID"] = region
+						results[region][typeid][date_indx][date]["typeID"] = typeid
+						results[region][typeid][date_indx][date]["date"] = date
+						results[region][typeid][date_indx][date]["lowPrice"] = lowprice
+						results[region][typeid][date_indx][date]["highPrice"] = highprice
+						results[region][typeid][date_indx][date]["avgPrice"] = avgprice
+						results[region][typeid][date_indx][date]["volume"] = volume
+						results[region][typeid][date_indx][date]["orders"] = orders
+						results[region][typeid][date_indx][date]["openPrice"] = None
+						results[region][typeid][date_indx][date]["closePrice"] = None
+						results[region][typeid][date_indx][date]["source"] = "EMD_mod"
+				date_indx+=1
+			print results[region][typeid]		
+			sys.exit(1)
+	
 def EMD_crunch(EMD_JSON):
 	#Parses return object from EMD and conditions for writing to the DB
 	dates_todo = days_2_dates(days)	#convert #days into list of dates
@@ -349,24 +394,24 @@ def EMD_crunch(EMD_JSON):
 		result_index = 0
 		for element in results[region][typeid]:
 			indx_date = element.keys()
-			if indx_date[0] == date:
+			if indx_date[0] == entry_date:
 				break
 			else:
 				result_index+=1
 
 		#Load data into structure
-		results[region][typeid][result_index][date]["regionID"] = region
-		results[region][typeid][result_index][date]["typeID"] = typeid
-		results[region][typeid][result_index][date]["date"] = entry_date
-		results[region][typeid][result_index][date]["lowPrice"] = lowprice
-		results[region][typeid][result_index][date]["highPrice"] = highprice
-		results[region][typeid][result_index][date]["avgPrice"] = avgprice
-		results[region][typeid][result_index][date]["volume"] = volume
-		results[region][typeid][result_index][date]["orders"] = orders
-		results[region][typeid][result_index][date]["openPrice"] = openprice
-		results[region][typeid][result_index][date]["closePrice"] = closeprice
-		results[region][typeid][result_index][date]["source"] = "EMD"
-		
+		results[region][typeid][result_index][entry_date]["regionID"] = region
+		results[region][typeid][result_index][entry_date]["typeID"] = typeid
+		results[region][typeid][result_index][entry_date]["date"] = entry_date
+		results[region][typeid][result_index][entry_date]["lowPrice"] = lowprice
+		results[region][typeid][result_index][entry_date]["highPrice"] = highprice
+		results[region][typeid][result_index][entry_date]["avgPrice"] = avgprice
+		results[region][typeid][result_index][entry_date]["volume"] = volume
+		results[region][typeid][result_index][entry_date]["orders"] = orders
+		results[region][typeid][result_index][entry_date]["openPrice"] = openprice
+		results[region][typeid][result_index][entry_date]["closePrice"] = closeprice
+		results[region][typeid][result_index][entry_date]["source"] = "EMD"	
+	
 	return results
 	
 def EMD_fetch(url):
@@ -399,7 +444,7 @@ def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (n
 	while len(list_of_dates) < num_days:
 		list_of_dates.append(start_date.strftime("%Y-%m-%d"))
 		start_date += datetime.timedelta(days=-1)
-		
+	list_of_dates.reverse()
 	return list_of_dates
 def main():
 	parseargs()
