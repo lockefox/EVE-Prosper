@@ -577,7 +577,7 @@ def main():
 				item_fast_scrape(item_str,item_n)
 				batch_region = []
 				continue
-			elif batch_count == item_count
+			elif batch_count == item_count:
 				item_str = ",".join(batch_item)
 				item_n = len(batch_item)
 				item_fast_scrape(item_str,item_n)
