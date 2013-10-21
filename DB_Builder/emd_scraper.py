@@ -299,6 +299,8 @@ def region_fast_scrape(region_string, region_number):
 		if len(batch_item) == item_limit:
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
+			#print EMD_url
+			print "----------"
 			EMD_return = EMD_fetch(EMD_url)
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
@@ -309,12 +311,42 @@ def region_fast_scrape(region_string, region_number):
 		elif batch_count == region_count:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
+			#print EMD_url
+			print "----------"
 			EMD_return = EMD_fetch(EMD_url)	
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean)
 			batch_item=[]
+def SQL_writer (results):
+	#Pushes data out to SQL
+	global db_cursor, db
 	
+	for region,region_data in results.iteritems():
+		date_indx=0
+		for typeid,item_data in region_data.iteritems():
+			#TODO: add EMD_mod cleanup
+			
+			for date_obj in item_data:
+				date = date_obj.keys()[0]
+				lowprice = results[region][typeid][date_indx][date]["lowPrice"]
+				highprice = results[region][typeid][date_indx][date]["highPrice"]
+				avgprice = results[region][typeid][date_indx][date]["avgPrice"]
+				volume = results[region][typeid][date_indx][date]["volume"]
+				orders = results[region][typeid][date_indx][date]["orders"]
+				openprice = "NULL" #results[region][typeid][date_indx][date]["openPrice"]
+				closeprice = "NULL" #results[region][typeid][date_indx][date]["closePrice"]
+				source = results[region][typeid][date_indx][date]["source"]
+						#'date',locationID,systemID,regionID,typeID,'source',priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose
+				data_str = "'%s',%s,NULL,%s,%s,'%s',%s,%s,%s,%s,%s,%s,%s" %\
+					(date,region,region,typeid,source,highprice,lowprice,avgprice,volume,orders,openprice,closeprice)
+				table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
+				
+				#print "REPLACE %s (%s) VALUES(%s)" % (db_table,table_str,data_str)
+				
+				db_cursor.execute("REPLACE %s (%s) VALUES(%s)" % (db_table,table_str,data_str))
+				db.commit()
+				
 def result_process(results):
 	#Takes result object and backfills missing values
 	for region,region_data in results.iteritems():
@@ -323,7 +355,6 @@ def result_process(results):
 			#print results[region][typeid]
 			for date_obj in item_data:
 				date = date_obj.keys()[0]
-
 				if len(date_obj[date])==0:	#if object is empty
 					if date_indx == 0:	#start of object is empty
 						results[region][typeid][date_indx][date]["regionID"] = region
@@ -358,7 +389,7 @@ def result_process(results):
 						results[region][typeid][date_indx][date]["source"] = "EMD_mod"
 
 				date_indx+=1
-	return result
+	return results
 	
 def EMD_crunch(EMD_JSON):
 	#Parses return object from EMD and conditions for writing to the DB
