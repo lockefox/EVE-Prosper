@@ -92,7 +92,7 @@ def parseargs():
 		print "invalid arguments"
 		#help()
 		sys.exit(2)
-		
+	global region_fast		
 	for opt, arg in opts:
 		if opt == "-h":
 			help()
@@ -108,10 +108,8 @@ def parseargs():
 			days=int(arg)
 			print days
 		elif opt =="--regionfast":
-			global region_fast
 			region_fast=1
 		elif opt =="--itemfast":	#default
-			global region_fast
 			region_fast=0
 		else:
 			print "herp"
@@ -304,7 +302,7 @@ def region_fast_scrape(region_string, region_number):
 			EMD_return = EMD_fetch(EMD_url)
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
-			#print EMD_return
+			SQL_writer(results_clean)
 			sys.exit(1)
 			batch_item=[]
 			continue
@@ -314,6 +312,7 @@ def region_fast_scrape(region_string, region_number):
 			EMD_return = EMD_fetch(EMD_url)	
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
+			SQL_writer(results_clean)
 			batch_item=[]
 	
 def result_process(results):
@@ -321,11 +320,11 @@ def result_process(results):
 	for region,region_data in results.iteritems():
 		for typeid,item_data in region_data.iteritems():
 			date_indx = 0
+			#print results[region][typeid]
 			for date_obj in item_data:
 				date = date_obj.keys()[0]
-				print results[region][typeid]
-				sys.exit(1)
-				if len(date_obj)<=1:	#if object is empty
+
+				if len(date_obj[date])==0:	#if object is empty
 					if date_indx == 0:	#start of object is empty
 						results[region][typeid][date_indx][date]["regionID"] = region
 						results[region][typeid][date_indx][date]["typeID"] = typeid
@@ -357,9 +356,9 @@ def result_process(results):
 						results[region][typeid][date_indx][date]["openPrice"] = None
 						results[region][typeid][date_indx][date]["closePrice"] = None
 						results[region][typeid][date_indx][date]["source"] = "EMD_mod"
+
 				date_indx+=1
-			print results[region][typeid]		
-			sys.exit(1)
+	return result
 	
 def EMD_crunch(EMD_JSON):
 	#Parses return object from EMD and conditions for writing to the DB
