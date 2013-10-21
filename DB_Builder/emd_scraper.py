@@ -10,6 +10,7 @@ EMD_base = "http://eve-marketdata.com/"
 lookup_json = open("lookup.json")
 lookup = json.load(lookup_json)
 crash_file = "emd_scraper_crash.json"
+crash_obj={}
 
 #Config File Globals
 conf = ConfigParser.ConfigParser()
@@ -301,7 +302,8 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)
-			EMD_crunch(EMD_return)
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_clean)
 			#print EMD_return
 			sys.exit(1)
 			batch_item=[]
@@ -310,18 +312,18 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
 			EMD_return = EMD_fetch(EMD_url)	
-			EMD_crunch(EMD_return)
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_clean)
 			batch_item=[]
 			
 def EMD_crunch(EMD_JSON):
 	#Parses return object from EMD and conditions for writing to the DB
 	dates_todo = days_2_dates(days)	#convert #days into list of dates
 	
-	#results{region}{item}=[date:{hi,low,avg,vol,ord,date},date:{hi,low,avg,vol,ord,date}]
+	#results{region}{item}=[{date:{hi,low,avg,vol,ord,date}},{date:{hi,low,avg,vol,ord,date}}]
 	results={}
 	
 	for entry in EMD_JSON:
-		print entry
 		region = int(entry["row"]["regionID"])
 		typeid = int(entry["row"]["typeID"])
 		entry_date = str(entry["row"]["date"])
@@ -343,15 +345,15 @@ def EMD_crunch(EMD_JSON):
 				item_object = {}
 				item_object[date]={}
 				results[region][typeid].append(item_object)
-
+			
 		result_index = 0
 		for element in results[region][typeid]:
-			if element.get(date)==None:
-				result_index+=1
-				continue
-			else:
+			indx_date = element.keys()
+			if indx_date[0] == date:
 				break
-				
+			else:
+				result_index+=1
+
 		#Load data into structure
 		results[region][typeid][result_index][date]["regionID"] = region
 		results[region][typeid][result_index][date]["typeID"] = typeid
@@ -363,10 +365,10 @@ def EMD_crunch(EMD_JSON):
 		results[region][typeid][result_index][date]["orders"] = orders
 		results[region][typeid][result_index][date]["openPrice"] = openprice
 		results[region][typeid][result_index][date]["closePrice"] = closeprice
+		results[region][typeid][result_index][date]["source"] = "EMD"
 		
-		print results
-		time.sleep(30)
-		
+	return results
+	
 def EMD_fetch(url):
 	#queries EMD and returns the JSON
 	print url
