@@ -321,6 +321,7 @@ def EMD_crunch(EMD_JSON):
 	results={}
 	
 	for entry in EMD_JSON:
+		print entry
 		region = int(entry["row"]["regionID"])
 		typeid = int(entry["row"]["typeID"])
 		entry_date = str(entry["row"]["date"])
@@ -363,7 +364,8 @@ def EMD_crunch(EMD_JSON):
 		results[region][typeid][result_index][date]["openPrice"] = openprice
 		results[region][typeid][result_index][date]["closePrice"] = closeprice
 		
-	
+		print results
+		time.sleep(30)
 		
 def EMD_fetch(url):
 	#queries EMD and returns the JSON
