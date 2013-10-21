@@ -321,7 +321,8 @@ def region_fast_scrape(region_string, region_number):
 def SQL_writer (results):
 	#Pushes data out to SQL
 	global db_cursor, db
-	
+	table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
+	commit_str = "REPLACE %s (%s) VALUES" % (db_table,table_str)
 	for region,region_data in results.iteritems():
 		for typeid,item_data in region_data.iteritems():
 			#TODO: add EMD_mod cleanup
@@ -339,13 +340,14 @@ def SQL_writer (results):
 						#'date',locationID,systemID,regionID,typeID,'source',priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose
 				data_str = "'%s',%s,NULL,%s,%s,'%s',%s,%s,%s,%s,%s,%s,%s" %\
 					(date,region,region,typeid,source,highprice,lowprice,avgprice,volume,orders,openprice,closeprice)
-				table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
+				commit_str += " (%s)," % data_str
 				
-				#print "REPLACE %s (%s) VALUES(%s)" % (db_table,table_str,data_str)
+				date_indx+=1
+	commit_str = commit_str.rstrip(',') #clean up trailing comma
+	#print commit_str
+	db_cursor.execute(commit_str)
+	db.commit()
 				
-				db_cursor.execute("REPLACE %s (%s) VALUES(%s)" % (db_table,table_str,data_str))
-				db.commit()
-				date_indx+=1	
 def result_process(results):
 	#Takes result object and backfills missing values
 	for region,region_data in results.iteritems():
