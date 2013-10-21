@@ -323,10 +323,9 @@ def SQL_writer (results):
 	global db_cursor, db
 	
 	for region,region_data in results.iteritems():
-		date_indx=0
 		for typeid,item_data in region_data.iteritems():
 			#TODO: add EMD_mod cleanup
-			
+			date_indx=0
 			for date_obj in item_data:
 				date = date_obj.keys()[0]
 				lowprice = results[region][typeid][date_indx][date]["lowPrice"]
@@ -346,7 +345,7 @@ def SQL_writer (results):
 				
 				db_cursor.execute("REPLACE %s (%s) VALUES(%s)" % (db_table,table_str,data_str))
 				db.commit()
-				
+				date_indx+=1	
 def result_process(results):
 	#Takes result object and backfills missing values
 	for region,region_data in results.iteritems():
