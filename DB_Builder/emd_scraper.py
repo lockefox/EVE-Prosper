@@ -321,18 +321,50 @@ def EMD_crunch(EMD_JSON):
 	results={}
 	
 	for entry in EMD_JSON:
-		region = entry["row"]["regionID"]
-		typeid = entry["row"]["typeID"]
+		region = int(entry["row"]["regionID"])
+		typeid = int(entry["row"]["typeID"])
+		entry_date = str(entry["row"]["date"])
+		lowprice = float(entry["row"]["lowPrice"])
+		highprice = float(entry["row"]["highPrice"])
+		avgprice = float(entry["row"]["avgPrice"])
+		volume = int(entry["row"]["volume"])
+		orders = int(entry["row"]["volume"])
+		openprice = None		#used for SQL write step
+		closeprice = None 		#used for SQL write step
 		
 		#Initialize result structure before parsing
 		if results.get(region)==None:
 			results[region]={}
-		else:
-			if results[region].get(typeid)==None:
-				results[region][typeid]= []
-				for date in dates_todo:
-					results[region][typeid].append(date)
-	print results
+		if results[region].get(typeid)==None:
+			results[region][typeid]= []
+			tmp_indx=0
+			for date in dates_todo:
+				item_object = {}
+				item_object[date]={}
+				results[region][typeid].append(item_object)
+
+		result_index = 0
+		for element in results[region][typeid]:
+			if element.get(date)==None:
+				result_index+=1
+				continue
+			else:
+				break
+				
+		#Load data into structure
+		results[region][typeid][result_index][date]["regionID"] = region
+		results[region][typeid][result_index][date]["typeID"] = typeid
+		results[region][typeid][result_index][date]["date"] = entry_date
+		results[region][typeid][result_index][date]["lowPrice"] = lowprice
+		results[region][typeid][result_index][date]["highPrice"] = highprice
+		results[region][typeid][result_index][date]["avgPrice"] = avgprice
+		results[region][typeid][result_index][date]["volume"] = volume
+		results[region][typeid][result_index][date]["orders"] = orders
+		results[region][typeid][result_index][date]["openPrice"] = openprice
+		results[region][typeid][result_index][date]["closePrice"] = closeprice
+		
+	
+		
 def EMD_fetch(url):
 	#queries EMD and returns the JSON
 	print url
