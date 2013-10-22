@@ -173,7 +173,7 @@ def repeat_scrubber (region_string, item_string):
 	#remove regions
 	region_index=0
 	max_len = 0
-	print region_list
+	#print region_list
 	for row in find_matrix:
 		#print "scrubbing regions"
 		skip_region = 1
@@ -190,17 +190,17 @@ def repeat_scrubber (region_string, item_string):
 
 	item_index=0
 	for col in range(max_len):
-		print "scrubbing items"
+		#print "scrubbing items"
 		skip_item = 1
 		for row in find_matrix:
 			if row[col] == 0:
 				skip_item=0
 		if skip_item == 1:
 			item_to_skip = item_list[item_index]
-			tmp_item_list.remove(region_to_skip)
+			tmp_item_list.remove(item_to_skip)
 		item_index+=1
 	
-	if (len(tmp_item_list)==0 or len(region_to_skip)==0):
+	if (len(tmp_item_list)==0 or len(tmp_item_list)==0):
 		conditioned_string = None
 	else:
 		conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
@@ -277,7 +277,7 @@ def item_fast_scrape(item_string,item_number):
 		batch_region.append(region)
 		batch_count += 1
 		if len(batch_region) == region_limit:
-			region_str = ",".join(batch_item)
+			region_str = ",".join(batch_region)
 			region_item_str = repeat_scrubber(region_str,item_string)
 			if region_item_str == None:
 				print "skipping regions:%s x items:%s" (region_str,item_string)
