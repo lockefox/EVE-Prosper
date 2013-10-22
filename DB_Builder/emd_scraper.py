@@ -143,10 +143,66 @@ def repeat_scrubber (region_string, item_string):
 	global crash_obj
 	
 	region_list = region_string.split(',')
-	item_string = item_string.split(',')		#Could have imported lists, but whatever
+	item_list = item_string.split(',')		#Could have imported lists, but whatever
 	
+	tmp_region_list = region_list
+	tmp_item_list = item_list
 	
+	find_matrix = []
+	#####		item1	item2	item3
+	#####region1 [x]			 [x]
+	#####region2 [x]	[x]		 [x]	del region2
+	#####region3 [x]	[x]			
+	#####	 del item1
 	
+	#loads checker
+	region_index=0
+	for region in region_list:
+		find_matrix.append([])
+		for item in item_list:
+			if region in crash_obj:
+				if item in crash_obj[region]:
+					if crash_obj[region][item]==1:
+						find_matrix[region_index].append(1)
+				else:
+					find_matrix[region_index].append(0)
+			else:
+				find_matrix[region_index].append(0)
+		region_index+=1
+	
+	#remove regions
+	region_index=0
+	max_len = 0
+	print region_list
+	for row in find_matrix:
+		#print "scrubbing regions"
+		skip_region = 1
+		if len(row) > max_len:	#I am bad at code and impatient.  enjoy CS101 solution
+			max_len = len(row)
+		for col in row:
+			if col == 0:
+				skip_region = 0
+		if skip_region == 1:
+			
+			region_to_skip = region_list[region_index]
+			tmp_region_list.remove(region_to_skip)
+		region_index+=1
+
+	item_index=0
+	for col in range(max_len):
+		print "scrubbing items"
+		skip_item = 1
+		for row in find_matrix:
+			if row[col] == 0:
+				skip_item=0
+		if skip_item == 1:
+			item_to_skip = item_list[item_index]
+			tmp_item_list.remove(region_to_skip)
+		item_index+=1
+		
+	conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
+	return conditioned_string
+
 	
 def region_fast_scrape(region_string, region_number):
 	items_todo = []
@@ -169,7 +225,8 @@ def region_fast_scrape(region_string, region_number):
 		batch_count += 1
 		if len(batch_item) == item_limit:
 			item_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
+			region_item_str = repeat_scrubber(region_string,item_str)
+			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
 			print "----------"
@@ -180,7 +237,8 @@ def region_fast_scrape(region_string, region_number):
 			continue
 		elif batch_count == region_number:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_string,item_str,days)
+			region_item_str = repeat_scrubber(region_string,item_str)
+			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			print "----------"
 			EMD_return = EMD_fetch(EMD_url)	
@@ -189,6 +247,49 @@ def region_fast_scrape(region_string, region_number):
 			SQL_writer(results_clean)
 			batch_item=[]
 			
+def item_fast_scrape(item_string,item_number):
+	region_todo = []
+	region_str = ""
+	
+	if regionlist == None:	#use JSON
+		region_todo = lookup["regions_scrape"]
+	else: 					#user input
+		region_todo = regionlist.split(',')
+		
+	#TODO crash handler
+	
+	region_limit = math.floor(query_limit/(days*item_number))
+	
+	batch_region = []
+	batch_count = 0
+	EMD_return = {}
+	for region in region_todo:
+		batch_region.append(region)
+		batch_count += 1
+		if len(batch_region) == region_limit:
+			region_str = ",".join(batch_item)
+			region_item_str = repeat_scrubber(region_str,item_string)
+			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
+			#print EMD_url
+			EMD_return = EMD_fetch(EMD_url)
+			print "----------"
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_raw)
+			SQL_writer(results_clean)
+			batch_region=[]
+			continue
+		elif batch_count == item_number:
+			region_str = ",".join(batch_item)
+			region_item_str = repeat_scrubber(region_str,item_string)
+			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
+			#print EMD_url
+			EMD_return = EMD_fetch(EMD_url)
+			print "----------"
+			results_raw = EMD_crunch(EMD_return)
+			results_clean = result_process(results_raw)
+			SQL_writer(results_clean)
+			batch_region=[]
+						
 def SQL_writer (results):
 	#Pushes data out to SQL
 	global db_cursor, db, crash_obj
@@ -339,47 +440,7 @@ def EMD_fetch(url):
 	
 	return EMD_json["emd"]["result"]
 	
-def item_fast_scrape(item_string,item_number):
-	region_todo = []
-	region_str = ""
-	
-	if regionlist == None:	#use JSON
-		region_todo = lookup["regions_scrape"]
-	else: 					#user input
-		region_todo = regionlist.split(',')
-		
-	#TODO crash handler
-	
-	region_limit = math.floor(query_limit/(days*item_number))
-	
-	batch_region = []
-	batch_count = 0
-	EMD_return = {}
-	for region in region_todo:
-		batch_region.append(region)
-		batch_count += 1
-		if len(batch_region) == region_limit:
-			region_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_str,item_string,days)
-			#print EMD_url
-			EMD_return = EMD_fetch(EMD_url)
-			print "----------"
-			results_raw = EMD_crunch(EMD_return)
-			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
-			batch_region=[]
-			continue
-		elif batch_count == item_number:
-			region_str = ",".join(batch_item)
-			EMD_url = "%sapi/item_history2.json?char_name=%s&region_ids=%s&type_ids=%s&days=%s" % (EMD_base,User_Agent,region_str,item_string,days)
-			#print EMD_url
-			EMD_return = EMD_fetch(EMD_url)
-			print "----------"
-			results_raw = EMD_crunch(EMD_return)
-			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
-			batch_region=[]
-			
+
 def days_2_dates (num_days):	#returns a strftime list of dates.  newest first (now, now-1d,...)
 	list_of_dates=[]
 	start_date = datetime.datetime.utcnow()
