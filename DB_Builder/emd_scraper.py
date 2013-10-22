@@ -40,6 +40,7 @@ db = None
 
 def init():
 	##Initialize DB cursor##
+	global crash_obj
 	if (csv_only==0 and sql_init_only==0):	
 		global db_cursor, db
 		
@@ -85,6 +86,17 @@ def init():
 		sys.exit(4)
 	print "EVE-Marketdata connection:\tGOOD"
 	
+	## Initialize or load crash handler ##
+	try:
+		with open(crash_file):
+			print "Recovering from: %s" % crash_file
+			crash_json = open(crash_file)
+			crash_obj = json.load(crash_json)
+			pass
+	except IOError:
+		print "No crash log found.  Initializing fresh run"
+		crash_obj = {}
+		
 def parseargs():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","regionfast","itemfast","full","csv","items=","days="])
