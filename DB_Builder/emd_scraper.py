@@ -138,6 +138,15 @@ def crash_handler(completed_work):
 	
 	crash_handle.write(json.dumps(completed_work))
 	crash_handle.close()
+
+def repeat_scrubber (region_string, item_string):
+	global crash_obj
+	
+	region_list = region_string.split(',')
+	item_string = item_string.split(',')		#Could have imported lists, but whatever
+	
+	
+	
 	
 def region_fast_scrape(region_string, region_number):
 	items_todo = []
@@ -182,7 +191,7 @@ def region_fast_scrape(region_string, region_number):
 			
 def SQL_writer (results):
 	#Pushes data out to SQL
-	global db_cursor, db
+	global db_cursor, db, crash_obj
 	table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
 	commit_str = "REPLACE %s (%s) VALUES" % (db_table,table_str)
 	for region,region_data in results.iteritems():
