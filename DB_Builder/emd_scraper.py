@@ -199,8 +199,12 @@ def repeat_scrubber (region_string, item_string):
 			item_to_skip = item_list[item_index]
 			tmp_item_list.remove(region_to_skip)
 		item_index+=1
-		
-	conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
+	
+	if (len(tmp_item_list)==0 or len(region_to_skip)==0):
+		conditioned_string = None
+	else:
+		conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
+	
 	return conditioned_string
 
 	
@@ -226,6 +230,9 @@ def region_fast_scrape(region_string, region_number):
 		if len(batch_item) == item_limit:
 			item_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_string,item_str)
+			if region_item_str == None:
+				print "skipping regions:%s x items:%s" (region_string,item_str)
+				continue
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
@@ -238,6 +245,9 @@ def region_fast_scrape(region_string, region_number):
 		elif batch_count == region_number:	#Clean up odd remainders
 			item_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_string,item_str)
+			if region_item_str == None:
+				print "skipping regions:%s x items:%s" (region_string,item_str)
+				continue
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			print "----------"
@@ -269,6 +279,9 @@ def item_fast_scrape(item_string,item_number):
 		if len(batch_region) == region_limit:
 			region_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_str,item_string)
+			if region_item_str == None:
+				print "skipping regions:%s x items:%s" (region_str,item_string)
+				continue
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
@@ -281,6 +294,9 @@ def item_fast_scrape(item_string,item_number):
 		elif batch_count == item_number:
 			region_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_str,item_string)
+			if region_item_str == None:
+				print "skipping regions:%s x items:%s" (region_str,item_string)
+				continue
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
@@ -296,7 +312,12 @@ def SQL_writer (results):
 	table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
 	commit_str = "REPLACE %s (%s) VALUES" % (db_table,table_str)
 	for region,region_data in results.iteritems():
+		if crash_obj.get(region) == None:
+			crash_obj[region]={}
 		for typeid,item_data in region_data.iteritems():
+			#if crash_obj[region].get(typeid) == None:
+			crash_obj[region][typeid]=1
+			
 			#TODO: add EMD_mod cleanup
 			date_indx=0
 			for date_obj in item_data:
@@ -315,10 +336,13 @@ def SQL_writer (results):
 				commit_str += " (%s)," % data_str
 				
 				date_indx+=1
+				
 	commit_str = commit_str.rstrip(',') #clean up trailing comma
 	#print commit_str
 	db_cursor.execute(commit_str)	#dumps whole EMD result into db at once
 	db.commit()
+	
+	crash_handler(crash_obj)
 				
 def result_process(results):
 	#Takes result object and backfills missing values
