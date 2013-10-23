@@ -96,6 +96,8 @@ def init():
 	except IOError:
 		print "No crash log found.  Initializing fresh run"
 		crash_obj = {}
+		crash_obj ["progress_list"] = {}
+		crash_obj ["queries_run"] = {}
 		
 def parseargs():
 	try:
@@ -160,9 +162,9 @@ def repeat_scrubber (region_string, item_string):
 	for region in region_list:
 		find_matrix.append([])
 		for item in item_list:
-			if region in crash_obj:
-				if item in crash_obj[region]:
-					if crash_obj[region][item]==1:
+			if region in crash_obj["progress_list"]:
+				if item in crash_obj["progress_list"][region]:
+					if crash_obj["progress_list"][region][item]==1:
 						find_matrix[region_index].append(1)
 				else:
 					find_matrix[region_index].append(0)
@@ -239,7 +241,7 @@ def region_fast_scrape(region_string, region_number):
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
+			SQL_writer(results_clean,region_item_str)
 			batch_item=[]
 			continue
 		elif batch_count == region_number:	#Clean up odd remainders
@@ -254,7 +256,7 @@ def region_fast_scrape(region_string, region_number):
 			EMD_return = EMD_fetch(EMD_url)	
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
+			SQL_writer(results_clean,region_item_str)
 			batch_item=[]
 			
 def item_fast_scrape(item_string,item_number):
@@ -288,7 +290,7 @@ def item_fast_scrape(item_string,item_number):
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
+			SQL_writer(results_clean,region_item_str)
 			batch_region=[]
 			continue
 		elif batch_count == item_number:
@@ -303,20 +305,21 @@ def item_fast_scrape(item_string,item_number):
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
 			results_clean = result_process(results_raw)
-			SQL_writer(results_clean)
+			SQL_writer(results_clean,region_item_str)
 			batch_region=[]
 						
-def SQL_writer (results):
+def SQL_writer (results,EMD_query):
 	#Pushes data out to SQL
 	global db_cursor, db, crash_obj
 	table_str = "date,locationID,systemID,regionID,typeID,source,priceMax,priceMin,priceAverage,volume,orders,priceOpen,priceClose"
 	commit_str = "REPLACE %s (%s) VALUES" % (db_table,table_str)
+	crash_obj["queries_run"][EMD_query]=1
 	for region,region_data in results.iteritems():
-		if crash_obj.get(region) == None:
-			crash_obj[region]={}
+		if crash_obj["progress_list"].get(region) == None:
+			crash_obj["progress_list"][region]={}
 		for typeid,item_data in region_data.iteritems():
 			#if crash_obj[region].get(typeid) == None:
-			crash_obj[region][typeid]=1
+			crash_obj["progress_list"][region][typeid]=1
 			
 			#TODO: add EMD_mod cleanup
 			date_indx=0
@@ -339,7 +342,11 @@ def SQL_writer (results):
 				
 	commit_str = commit_str.rstrip(',') #clean up trailing comma
 	#print commit_str
-	db_cursor.execute(commit_str)	#dumps whole EMD result into db at once
+	try:
+		db_cursor.execute(commit_str)	#dumps whole EMD result into db at once
+	except MySQLdb.ProgrammingError as er:
+		print commit_str
+		sys.exit(5)
 	db.commit()
 	
 	crash_handler(crash_obj)
