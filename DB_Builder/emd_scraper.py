@@ -158,54 +158,59 @@ def repeat_scrubber (region_string, item_string):
 	#####	 del item1
 	
 	#loads checker
-	region_index=0
-	for region in region_list:
-		find_matrix.append([])
-		for item in item_list:
-			if region in crash_obj["progress_list"]:
-				if item in crash_obj["progress_list"][region]:
-					if crash_obj["progress_list"][region][item]==1:
-						find_matrix[region_index].append(1)
-				else:
-					find_matrix[region_index].append(0)
-			else:
-				find_matrix[region_index].append(0)
-		region_index+=1
+	#region_index=0
+	#for region in region_list:
+	#	find_matrix.append([])
+	#	for item in item_list:
+	#		if region in crash_obj["progress_list"]:
+	#			if item in crash_obj["progress_list"][region]:
+	#				if crash_obj["progress_list"][region][item]==1:
+	#					find_matrix[region_index].append(1)
+	#			else:
+	#				find_matrix[region_index].append(0)
+	#		else:
+	#			find_matrix[region_index].append(0)
+	#	region_index+=1
+	#
+	##remove regions
+	#region_index=0
+	#max_len = 0
+	##print region_list
+	#for row in find_matrix:
+	#	#print "scrubbing regions"
+	#	skip_region = 1
+	#	if len(row) > max_len:	#I am bad at code and impatient.  enjoy CS101 solution
+	#		max_len = len(row)
+	#	for col in row:
+	#		if col == 0:
+	#			skip_region = 0
+	#	if skip_region == 1:
+	#		
+	#		region_to_skip = region_list[region_index]
+	#		tmp_region_list.remove(region_to_skip)
+	#	region_index+=1
+    #
+	#item_index=0
+	#for col in range(max_len):
+	#	#print "scrubbing items"
+	#	skip_item = 1
+	#	for row in find_matrix:
+	#		if row[col] == 0:
+	#			skip_item=0
+	#	if skip_item == 1:
+	#		item_to_skip = item_list[item_index]
+	#		tmp_item_list.remove(item_to_skip)
+	#	item_index+=1
+	#
+	#if (len(tmp_item_list)==0 or len(tmp_item_list)==0):
+	#	conditioned_string = None
+	#else:
+	#	conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
 	
-	#remove regions
-	region_index=0
-	max_len = 0
-	#print region_list
-	for row in find_matrix:
-		#print "scrubbing regions"
-		skip_region = 1
-		if len(row) > max_len:	#I am bad at code and impatient.  enjoy CS101 solution
-			max_len = len(row)
-		for col in row:
-			if col == 0:
-				skip_region = 0
-		if skip_region == 1:
-			
-			region_to_skip = region_list[region_index]
-			tmp_region_list.remove(region_to_skip)
-		region_index+=1
-
-	item_index=0
-	for col in range(max_len):
-		#print "scrubbing items"
-		skip_item = 1
-		for row in find_matrix:
-			if row[col] == 0:
-				skip_item=0
-		if skip_item == 1:
-			item_to_skip = item_list[item_index]
-			tmp_item_list.remove(item_to_skip)
-		item_index+=1
+	conditioned_string="&region_ids=%s&type_ids=%s" % (region_string, item_string)
+	if conditioned_string in crash_obj["queries_run"]:
+		return None
 	
-	if (len(tmp_item_list)==0 or len(tmp_item_list)==0):
-		conditioned_string = None
-	else:
-		conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
 	
 	return conditioned_string
 
