@@ -137,8 +137,7 @@ def crash_handler(completed_work):
 		pass
 	
 	crash_handle = open (crash_file,'w')
-	
-	crash_handle.write(json.dumps(completed_work))
+	crash_handle.write(json.dumps(completed_work,sort_keys=True,indent=4))
 	crash_handle.close()
 
 def repeat_scrubber (region_string, item_string):
