@@ -156,7 +156,9 @@ def repeat_scrubber (region_string, item_string):
 	#####region2 [x]	[x]		 [x]	del region2
 	#####region3 [x]	[x]			
 	#####	 del item1
-	
+	conditioned_string="&region_ids=%s&type_ids=%s" % (region_string, item_string)
+	if conditioned_string in crash_obj["queries_run"]:
+		return None
 	#loads checker
 	#region_index=0
 	#for region in region_list:
@@ -207,10 +209,7 @@ def repeat_scrubber (region_string, item_string):
 	#else:
 	#	conditioned_string="&region_ids=%s&type_ids=%s" % (",".join(tmp_region_list),",".join(tmp_item_list))
 	
-	conditioned_string="&region_ids=%s&type_ids=%s" % (region_string, item_string)
-	if conditioned_string in crash_obj["queries_run"]:
-		return None
-	
+
 	
 	return conditioned_string
 
