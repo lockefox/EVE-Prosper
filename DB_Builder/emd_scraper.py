@@ -237,13 +237,16 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_string,item_str)
 			if region_item_str == None:
-				print "skipping regions:%s x items:%s" (region_string,item_str)
-				continue
+				print "skipping regions:%s x items:%s" % (region_string,item_str)
+				break
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
+			if results_raw == None:
+				print "no data returned for %s" % EMD_url
+				break
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean,region_item_str)
 			batch_item=[]
@@ -252,13 +255,16 @@ def region_fast_scrape(region_string, region_number):
 			item_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_string,item_str)
 			if region_item_str == None:
-				print "skipping regions:%s x items:%s" (region_string,item_str)
-				continue
+				print "skipping regions:%s x items:%s" % (region_string,item_str)
+				break
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			print "----------"
 			EMD_return = EMD_fetch(EMD_url)	
 			results_raw = EMD_crunch(EMD_return)
+			if results_raw == None:
+				print "no data returned for %s" % EMD_url
+				break
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean,region_item_str)
 			batch_item=[]
@@ -286,13 +292,16 @@ def item_fast_scrape(item_string,item_number):
 			region_str = ",".join(batch_region)
 			region_item_str = repeat_scrubber(region_str,item_string)
 			if region_item_str == None:
-				print "skipping regions:%s x items:%s" (region_str,item_string)
-				continue
+				print "skipping regions:%s x items:%s" % (region_str,item_string)
+				break
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
+			if results_raw == None:
+				print "no data returned for %s" % EMD_url
+				break
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean,region_item_str)
 			batch_region=[]
@@ -301,13 +310,16 @@ def item_fast_scrape(item_string,item_number):
 			region_str = ",".join(batch_item)
 			region_item_str = repeat_scrubber(region_str,item_string)
 			if region_item_str == None:
-				print "skipping regions:%s x items:%s" (region_str,item_string)
-				continue
+				print "skipping regions:%s x items:%s" % (region_str,item_string)
+				break
 			EMD_url = "%sapi/item_history2.json?char_name=%s%s&days=%s" % (EMD_base,User_Agent,region_item_str,days)
 			#print EMD_url
 			EMD_return = EMD_fetch(EMD_url)
 			print "----------"
 			results_raw = EMD_crunch(EMD_return)
+			if results_raw == None:
+				print "no data returned for %s" % EMD_url
+				break
 			results_clean = result_process(results_raw)
 			SQL_writer(results_clean,region_item_str)
 			batch_region=[]
@@ -405,7 +417,8 @@ def EMD_crunch(EMD_JSON):
 	
 	#results{region}{item}=[{date:{hi,low,avg,vol,ord,date}},{date:{hi,low,avg,vol,ord,date}}]
 	results={}
-	
+	if len(EMD_JSON) == 0:	#No data returned, skip processing
+		return None
 	for entry in EMD_JSON:
 		region = int(entry["row"]["regionID"])
 		typeid = int(entry["row"]["typeID"])
