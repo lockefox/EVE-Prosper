@@ -59,7 +59,7 @@ def init():
 			`priceMin` float(16,4) DEFAULT NULL,\
 			`priceAverage` float(16,4) DEFAULT NULL,\
 			`volume` bigint(32) unsigned DEFAULT NULL,\
-			`orders` int(16) DEFAULT NULL,\
+			`orders` bigint(32) DEFAULT NULL,\
 			`priceOpen` float(16,4) DEFAULT NULL,\
 			`priceClose` float(16,4) DEFAULT NULL,\
 			PRIMARY KEY (`date`,`locationID`,`typeID`,`source`))\
