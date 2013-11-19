@@ -93,4 +93,36 @@ def init:
 			sys.exit(2)
 	print "Material DB connection:\t\tGOOD"
 	
-	
+def parseargs():
+	try:
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","csv","items=","startdate="])
+	except getopt.GetoptError:
+		print "invalid arguments"
+		#help()
+		sys.exit(2)
+		
+	for opt, arg in opts:
+		if opt == "-h":
+			print "herp"
+		elif opt == "--csv":
+			global csv_only
+			csv_only=1
+			print "CSV function not supported yet"
+		elif opt == "--startdate":
+			global start_date,start_date_test
+			start_date=arg
+			try:	#Validate input
+				time.strptime(start_date,"%Y-%m-%d")
+			except ValueError as e:
+				print e
+				print "Valid date format: YYYY-mm-dd"
+				sys.exit(2)
+			start_date_test=time.strptime(start_date,"%Y-%m-%d")
+		else:
+			print "herp"	
+def main():
+	parseargs()
+	init()
+
+if __name__ == "__main__":
+	main()

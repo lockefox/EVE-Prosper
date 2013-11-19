@@ -17,6 +17,7 @@ ships_json = open(shiplist)
 lookup = json.load(lookup_json)
 systems= json.load(system_json)
 ship_list=json.load(ships_json)
+headder_err=0
 
 #Config File Globals
 conf = ConfigParser.ConfigParser()
@@ -317,16 +318,28 @@ def crash_recover():
 		crash_obj["progress"]={}
 
 def snooze_setter(header):
-	global call_sleep
-	try:
-		conn_allowance = int(header["X-Bin-Attempts-Allowed"])
-		conn_reqs_used = int(header["X-Bin-Requests"])
+	global call_sleep, headder_err
+	try:	#see if default sleep timer is defined
 		conn_sleep_time= int(header["X-Bin-Seconds-Between-Request"])
 	except KeyError as e:
-		print "WARNING: %s" % e
-		call_sleep = call_sleep_default
-		print header_hold
-	
+		if headder_err==0:
+			print "WARNING: %s not found" %e
+			print header
+			headder_err+=1
+		call_sleep=call_sleep_default
+		return	#return if default case
+		
+	try:	#see if allowances are defined
+		conn_allowance = int(header["X-Bin-Attempts-Allowed"])
+		conn_reqs_used = int(header["X-Bin-Requests"])		
+	except KeyError as e:
+		if headder_err==0:
+			print "WARNING: %s not found" %e
+			print header
+			headder_err+=1
+		call_sleep=conn_sleep_time
+		return	#return if default case
+		
 	if (conn_reqs_used+1)==conn_allowance:
 		call_sleep = conn_sleep_time #full back-off if allowance is out
 	##### Polite Scheme.  Need to speed/fail test
@@ -335,9 +348,9 @@ def snooze_setter(header):
 	#############################################
 	else:
 		call_sleep = 0 #conn_sleep_time/5		#Go as fast as possible
-	#print "X-Bin-Attempts-Allowed: %s" % conn_allowance
-	#print "X-Bin-Requests: %s" % conn_reqs_used
-	#print "X-Bin-Seconds-Between-Request: %s" % conn_sleep_time
+	##print "X-Bin-Attempts-Allowed: %s" % conn_allowance
+	##print "X-Bin-Requests: %s" % conn_reqs_used
+	##print "X-Bin-Seconds-Between-Request: %s" % conn_sleep_time
 		
 def crash_handler(tracker_obj):
 	try:
