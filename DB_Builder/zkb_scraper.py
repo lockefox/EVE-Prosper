@@ -18,6 +18,7 @@ lookup = json.load(lookup_json)
 systems= json.load(system_json)
 ship_list=json.load(ships_json)
 headder_err=0
+please_force=0
 
 #Config File Globals
 conf = ConfigParser.ConfigParser()
@@ -101,7 +102,7 @@ def init():
 	
 def parseargs():
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","csv","items=","startdate="])
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","csv","items=","startdate=","please"])
 	except getopt.GetoptError:
 		print "invalid arguments"
 		#help()
@@ -124,6 +125,11 @@ def parseargs():
 				print "Valid date format: YYYY-mm-dd"
 				sys.exit(2)
 			start_date_test=time.strptime(start_date,"%Y-%m-%d")
+		elif opt == "--please":
+			print "WARNING: --please can cause zkb bans"
+			time.sleep(5)
+			global please_force
+			please_force=1
 		else:
 			print "herp"
 
@@ -159,8 +165,10 @@ def feed_primer():	#initial fetch to initilaize crawler
 		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
 		print headers
 		sys.exit(4)
-	
-	snooze_setter(header_hold)
+	if please_force==0:
+		snooze_setter(header_hold)
+	else:
+		time.sleep(1)
 	raw_zip = opener.open(request)
 	dump_zip_stream = raw_zip.read()
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -217,9 +225,10 @@ def kill_crawler(start_killID,group,groupName,progress):
 		print headers
 		sys.exit(4)
 	
-
-	snooze_setter(header_hold)
-
+	if please_force==0:
+		snooze_setter(header_hold)
+	else:
+		time.sleep(1)
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
 	
 	zipper = gzip.GzipFile(fileobj=dump_IOstream)
