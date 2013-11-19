@@ -126,7 +126,7 @@ def parseargs():
 				sys.exit(2)
 			start_date_test=time.strptime(start_date,"%Y-%m-%d")
 		elif opt == "--please":
-			print "WARNING: --please can cause zkb bans"
+			print "WARNING: --please can cause zkb bans.  Ignoring throtling info"
 			time.sleep(5)
 			global please_force
 			please_force=1
