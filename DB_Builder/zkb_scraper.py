@@ -405,7 +405,7 @@ def main():
 			crash_obj["parsed_data"][group]=kills_parsed[1]
 			crash_obj["progress"][group]=kills_parsed[0]
 			crash_handler(crash_obj)
-			print "Parsed %s: %s sleep=%s" %( groupName,kills_parsed,call_sleep)
+			print "%s %s\t%s sleep=%s" %( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),groupName,kills_parsed,call_sleep)
 		crash_obj["parsed_data"][group]="done"	#once complete, log as "done"
 		crash_handler(crash_obj)
 if __name__ == "__main__":
