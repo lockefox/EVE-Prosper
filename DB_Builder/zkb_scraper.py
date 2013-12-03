@@ -213,11 +213,20 @@ def kill_crawler(start_killID,group,groupName,progress):
 			continue
 		except urllib2.URLError as er:
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), er))
-			print "retry %s: %s" %(zkb_addr,tries+1)
+			print "URLError.  Retry %s: %s" %(zkb_addr,tries+1)
 			continue
 		except socket.error as err:
 			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), err))
-			print "retry %s: %s" %(zkb_addr,tries+1)
+			print "Socket Error.  Retry %s: %s" %(zkb_addr,tries+1)
+			
+		try:
+			dump_IOstream = StringIO.StringIO(dump_zip_stream)
+			zipper = gzip.GzipFile(fileobj=dump_IOstream)
+			JSON_obj = json.load(zipper)
+		except ValueError as errr:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), errr))
+			print "Empty response.  Retry %s: %s" %(zkb_addr,tries+1)
+			
 		else:
 			break
 	else:
@@ -229,11 +238,11 @@ def kill_crawler(start_killID,group,groupName,progress):
 		snooze_setter(header_hold)
 	else:
 		time.sleep(1)
-	dump_IOstream = StringIO.StringIO(dump_zip_stream)
 	
-	zipper = gzip.GzipFile(fileobj=dump_IOstream)
 	
-	JSON_obj = json.load(zipper)
+	#zipper = gzip.GzipFile(fileobj=dump_IOstream)
+	#
+	#JSON_obj = json.load(zipper)
 
 
 	if len(JSON_obj)==0:
