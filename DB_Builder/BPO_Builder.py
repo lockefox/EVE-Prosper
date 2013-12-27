@@ -29,9 +29,9 @@ class Character:
 		self.metalurgy                  = 5
 		self.research                   = 5
 		
-		self.research_slots				= self.lab_operations + self.advanced_lab_operations + 1		#10
-		self.manufacture_slots			= self.mass_production + self.advanced_mass_production + 1	#10
-		self.prod_eff					= (25-(5*self.production_efficiency)) 					#1
+		self.research_slots             = self.lab_operations + self.advanced_lab_operations + 1		#10
+		self.manufacture_slots          = self.mass_production + self.advanced_mass_production + 1	#10
+		self.prod_eff                   = (25-(5*self.production_efficiency)) 					#1
 		##Add Invention/T3 skills
 		self.skills = {}	#hold skills by itemID
 	def load_skills(self,API_return):
@@ -41,25 +41,25 @@ class Character:
 		
 class BPO:
 	def __init__(self):		#http://stackoverflow.com/questions/1389180/python-automatically-initialize-instance-variables
-		self.typeID		=0
-		self.groupID	=0
-		self.meta	    =0
+		self.typeID 	=0
+		self.groupID    =0
+		self.meta       =0
 		self.outType    =0
-		self.tech	    =0
+		self.tech       =0
 		self.BPOname    =""
 		self.parent     =0
 		self.mfgtime    =0
-		self.PEtime	    =0
+		self.PEtime     =0
 		self.MEtime     =0
 		self.cpytime    =0
 		self.tchtime    =0
 		self.prodmod    =0
 		self.matmod     =0
-		self.waste 	    =0
+		self.waste      =0
 		self.prodlmt    =0
 		
-		self.materials	={}
-		self.extra_mats	={}
+		self.materials  = {}
+		self.extra_mats = {}
 
 	def bp_type_load(self,cursor_line):		#This is terrible.  You should feel bad
 		typeID	= cursor_line[0]
