@@ -37,7 +37,16 @@ class Character:
 	def load_skills(self,API_return):
 		#take skills API from eveapi
 		test=1
-	
+		
+	def __getattr__ (self,name):
+		skill_lookup = name.replace('_',' ')	#parse out the _'s
+		skill_lookup.title()					#help align casing
+		try:
+			skill_level = self.skills[skill_dict[skill_lookup]]
+		except KeyError as e:
+			raise e
+		
+		return skill_level
 		
 class BPO:
 	def __init__(self):		#http://stackoverflow.com/questions/1389180/python-automatically-initialize-instance-variables
@@ -45,6 +54,7 @@ class BPO:
 		self.ITEM_properties = {}
 		self.materials       = {}
 		self.extra_mats      = {}
+		
 			#debug reference
 		self.BPO_typeID    = 0
 		self.BPO_typeName  = ""
@@ -63,7 +73,7 @@ class BPO:
 		self.BPO_properties["cpytime"]    = cursor_line[10]
 		self.BPO_properties["techtime"]   = cursor_line[11]
 		self.BPO_properties["prodmod"]    = cursor_line[12]
-		self.BPO_properties["matmod"]	 = cursor_line[13]
+		self.BPO_properties["matmod"]	  = cursor_line[13]
 		self.BPO_properties["waste"]      = cursor_line[14]
 		self.BPO_properties["prodlimit"]  = cursor_line[15]
 		                             
@@ -163,7 +173,6 @@ def main():
 	for item in tmp_lookup:
 		tmp_bpo = BPO()
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
-		print tmp_bpo.BPO_typeName
 		BPO_lookup.append(tmp_bpo)
 		
 
