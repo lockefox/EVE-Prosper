@@ -110,7 +110,7 @@ class BPO:
 		dump_dict["extra_materials"] = self.extra_mats
 		
 		return dump_dict
-		
+	##Add __str__ method?	
 		
 def init():
 	global db_schema,db,db_cursor,default_character,skill_dict
