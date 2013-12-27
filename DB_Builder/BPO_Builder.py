@@ -17,6 +17,7 @@ default_character = None
 
 class Character:
 	def __init__(self):
+			#remove manual definition?  Do math off skills{}
 		self.production_efficiency		=5
 		self.industry					=5
 		self.advanced_mass_production	=4
@@ -26,7 +27,12 @@ class Character:
 		self.science					=5
 		self.metalurgy					=5
 		self.research					=5
+		
+		self.research_slots				= self.lab_operations + self.advanced_lab_operations + 1		#10
+		self.manufacture_slots			= self.mass_production + self.advanced_mass_production + 1	#10
+		self.prod_eff					= (25-(5*self.production_efficiency)) 					#1
 		##Add Invention/T3 skills
+		self.skills = {}	#hold skills by itemID
 		
 class BPO:
 	def __init__(self):
