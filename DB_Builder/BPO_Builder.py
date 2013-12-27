@@ -32,6 +32,9 @@ class BPO:
 		self.matmod     =0
 		self.waste 	    =0
 		self.prodlmt    =0
+		
+		self.materials	={}
+		self.extra_mats	={}
 
 	def bp_type_load(self,cursor_line):		#This is terrible.  You should feel bad
 		typeID	= cursor_line[0]
