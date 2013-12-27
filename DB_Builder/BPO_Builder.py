@@ -45,7 +45,12 @@ class BPO:
 		self.ITEM_properties = {}
 		self.materials       = {}
 		self.extra_mats      = {}
-
+			#debug reference
+		self.BPO_typeID    = 0
+		self.BPO_typeName  = ""
+		self.ITEM_typeID   = 0
+		self.ITEM_typeName = ""
+		
 	def bp_type_load(self,cursor_line):	
 		self.BPO_properties["typeID"]     = cursor_line[0]
 		self.BPO_properties["groupID"]    = cursor_line[1]
@@ -67,6 +72,11 @@ class BPO:
 		self.ITEM_properties["typeName"]  = cursor_line[16]
 		self.ITEM_properties["groupID"]   = cursor_line[17]
 		self.ITEM_properties["categoryID"]= cursor_line[18]
+		
+		self.BPO_typeID    = self.BPO_properties["typeID"]
+		self.BPO_typeName  = self.BPO_properties["typeName"] 
+		self.ITEM_typeID   = self.ITEM_properties["typeID"]
+		self.ITEM_typeName = self.ITEM_properties["typeName"]
 		
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
@@ -153,6 +163,7 @@ def main():
 	for item in tmp_lookup:
 		tmp_bpo = BPO()
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
+		print tmp_bpo.BPO_typeName
 		BPO_lookup.append(tmp_bpo)
 		
 
