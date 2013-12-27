@@ -101,7 +101,7 @@ class BPO:
 				item_waste = round(qty*(self.BPO_properties["waste"]/100)*(1/(ME + 1)))		
 				#item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
 				build_bill[base_item] = item_waste
-				
+			
 	def dump(self):
 		dump_dict={}
 		dump_dict["BPO_properties"]  = self.BPO_properties
@@ -110,6 +110,8 @@ class BPO:
 		dump_dict["extra_materials"] = self.extra_mats
 		
 		return dump_dict
+		
+		
 def init():
 	global db_schema,db,db_cursor,default_character,skill_dict
 	db_schema = conf.get("GLOBALS" ,"db_name")
