@@ -19,15 +19,15 @@ skill_dict={}
 class Character:
 	def __init__(self):
 			#remove manual definition?  Do math off skills{}
-		self.production_efficiency		=5
-		self.industry					=5
-		self.advanced_mass_production	=4
-		self.mass_production			=5
-		self.lab_operations				=5
-		self.advanced_lab_operations	=4
-		self.science					=5
-		self.metalurgy					=5
-		self.research					=5
+		self.production_efficiency      = 5
+		self.industry                   = 5
+		self.advanced_mass_production   = 4
+		self.mass_production            = 5
+		self.lab_operations             = 5
+		self.advanced_lab_operations    = 4
+		self.science                    = 5
+		self.metalurgy                  = 5
+		self.research                   = 5
 		
 		self.research_slots				= self.lab_operations + self.advanced_lab_operations + 1		#10
 		self.manufacture_slots			= self.mass_production + self.advanced_mass_production + 1	#10
@@ -37,9 +37,10 @@ class Character:
 	def load_skills(self,API_return):
 		#take skills API from eveapi
 		test=1
+	
 		
 class BPO:
-	def __init__(self):
+	def __init__(self):		#http://stackoverflow.com/questions/1389180/python-automatically-initialize-instance-variables
 		self.typeID		=0
 		self.groupID	=0
 		self.meta	    =0
@@ -77,19 +78,20 @@ class BPO:
 		matmod	= cursor_line[13]
 		waste	= cursor_line[14]
 		prodlmt	= cursor_line[15]
-	
+		
+		
 	def materials(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
 		if ME<0:
 			for base_item,qty in materials.iteritems():
 				item_waste = round(qty*(waste/100)*(1-ME))
-				item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
+				#item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
 				build_bill[base_item] = item_waste
 		else:
 			for base_item,qty in materials.iteritems():
 				item_waste = round(qty*(waste/100)*(1/(ME + 1)))		
-				item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
+				#item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
 				build_bill[base_item] = item_waste
 				
 	def dump(self):
@@ -128,6 +130,7 @@ def init():
 		
 	db_cursor = db.cursor()
 	try:
+			#Fetch skills lookup table
 		db_cursor.execute('''SELECT t.typeID,t.typeName
 			FROM invtypes t
 			JOIN invgroups grp on (grp.groupID=t.groupID)
