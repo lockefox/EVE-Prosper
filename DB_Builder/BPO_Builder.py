@@ -73,10 +73,14 @@ class BPO:
 			#ME Equations: http://wiki.eve-id.net/Equations
 		if ME<0:
 			for base_item,qty in materials.iteritems():
-				build_bill[base_item] = round(qty*(waste/100)*(1-ME))
+				item_waste = round(qty*(waste/100)*(1-ME))
+				item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
+				build_bill[base_item] = item_waste
 		else:
 			for base_item,qty in materials.iteritems():
-				build_bill[base_item] = round(qty*(waste/100)*(1/(ME + 1)))		
+				item_waste = round(qty*(waste/100)*(1/(ME + 1)))		
+				item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
+				build_bill[base_item] = item_waste
 				
 	def dump(self):
 		dump_dict={}
