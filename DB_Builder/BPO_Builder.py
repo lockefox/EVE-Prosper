@@ -41,81 +41,53 @@ class Character:
 		
 class BPO:
 	def __init__(self):		#http://stackoverflow.com/questions/1389180/python-automatically-initialize-instance-variables
-		self.typeID     = 0
-		self.groupID    = 0
-		self.meta       = 0
-		self.outType    = 0
-		self.tech       = 0
-		self.BPOname    = ""
-		self.parent     = 0
-		self.mfgtime    = 0
-		self.PEtime     = 0
-		self.MEtime     = 0
-		self.cpytime    = 0
-		self.tchtime    = 0
-		self.prodmod    = 0
-		self.matmod     = 0
-		self.waste      = 0
-		self.prodlmt    = 0
-		
-		self.materials  = {}
-		self.extra_mats = {}
+		self.BPO_properties  = {}
+		self.ITEM_properties = {}
+		self.materials       = {}
+		self.extra_mats      = {}
 
-	def bp_type_load(self,cursor_line):		#This is terrible.  You should feel bad
-		typeID  = cursor_line[0]
-		groupID = cursor_line[1]
-		meta    = cursor_line[2]
-		outType = cursor_line[3]	#Need name lookup
-		tech    = cursor_line[4]
-		BPOname = cursor_line[5]
-		parent  = cursor_line[6]	#Need name lookup
-		mfgtime = cursor_line[7]
-		PEtime  = cursor_line[8]
-		MEtime  = cursor_line[9]
-		cpytime = cursor_line[10]
-		tchtime = cursor_line[11]
-		prodmod = cursor_line[12]
-		matmod  = cursor_line[13]
-		waste   = cursor_line[14]
-		prodlmt = cursor_line[15]
+	def bp_type_load(self,cursor_line):	
+		self.BPO_properties["typeID"]     = cursor_line[0]
+		self.BPO_properties["groupID"]    = cursor_line[1]
+		self.BPO_properties["tech_level"] = cursor_line[4]
+		self.BPO_properties["typeName"]   = cursor_line[5]
+		self.BPO_properties["parent_BPO"] = cursor_line[6]
+		self.BPO_properties["mfgtime"]    = cursor_line[7]
+		self.BPO_properties["PEtime"]     = cursor_line[8]
+		self.BPO_properties["MEtime"]     = cursor_line[9]
+		self.BPO_properties["cpytime"]    = cursor_line[10]
+		self.BPO_properties["techtime"]   = cursor_line[11]
+		self.BPO_properties["prodmod"]    = cursor_line[12]
+		self.BPO_properties["matmod"]	 = cursor_line[13]
+		self.BPO_properties["waste"]      = cursor_line[14]
+		self.BPO_properties["prodlimit"]  = cursor_line[15]
+		                             
+		self.ITEM_properties["meta"]      = cursor_line[2]
+		self.ITEM_properties["typeID"]    = cursor_line[3]
+		self.ITEM_properties["typeName"]  = cursor_line[16]
+		self.ITEM_properties["groupID"]   = cursor_line[17]
+		self.ITEM_properties["categoryID"]= cursor_line[18]
 		
-		
-	def materials(self,ME,prod_line_waste=1):
+	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
 		if ME<0:
 			for base_item,qty in materials.iteritems():
-				item_waste = round(qty*(waste/100)*(1-ME))
+				item_waste = round(qty*(self.BPO_properties["waste"]/100)*(1-ME))
 				#item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
 				build_bill[base_item] = item_waste
 		else:
 			for base_item,qty in materials.iteritems():
-				item_waste = round(qty*(waste/100)*(1/(ME + 1)))		
+				item_waste = round(qty*(self.BPO_properties["waste"]/100)*(1/(ME + 1)))		
 				#item_waste = round(((25-(5*default_character.production_efficiency))/100)*prod_line_waste)
 				build_bill[base_item] = item_waste
 				
 	def dump(self):
 		dump_dict={}
-		dump_dict["BPO_typeID"]     = typeID
-		dump_dict["BPO_typeName"]   = BPOname
-		dump_dict["BPO_groupID"]    = groupID
-		dump_dict["BPO_parent"]     = parent
-		dump_dict["BPO_prodlimit"]  = prodlimit
-		
-		dump_dict["item_meta"]      = meta
-		dump_dict["item_typeID"]    = outType
-		
-		dump_dict["tech_level"]     = tech
-		dump_dict["research_ME"]    = MEtime
-		dump_dict["research_PE"]    = PEtime
-		dump_dict["research_cpy"]   = cpytime
-		
-		dump_dict["mats_basemats"]  = materials
-		dump_dict["mats_extramats"] = extra_mats
-		dump_dict["math_techtime"]  = tchtime
-		dump_dict["math_prodmod"]   = prodmod
-		dump_dict["math_matmod"]    = matmod
-		dump_dict["math_waste"]     = waste
+		dump_dict["BPO_properties"]  = self.BPO_properties
+		dump_dict["ITEM_properties"] = self.ITEM_properties
+		dump_dict["base_materials"]  = self.materials
+		dump_dict["extra_materials"] = self.extra_mats
 		
 		return dump_dict
 def init():
@@ -152,24 +124,29 @@ def main():
 
 		#Pull initial BPO data to build to-do list
 	db_cursor.execute('''SELECT bpo.blueprintTypeID,
-		conv.groupID,
-		COALESCE(meta.valueInt,meta.valueFloat,0),
-		productTypeID,
-		techLevel,
-		conv.typeName,
-		parentBlueprintTypeID,
-		productionTime,
-		researchProductivityTime,
-		researchMaterialTime,
-		researchCopyTime,
-		researchTechTime,
-		productivityModifier,
-		materialModifier,
-		wasteFactor,
-		maxProductionLimit
+			conv.groupID,
+			COALESCE(meta.valueInt,meta.valueFloat,0),
+			productTypeID,
+			techLevel,
+			conv.typeName,
+			parentBlueprintTypeID,
+			productionTime,
+			researchProductivityTime,
+			researchMaterialTime,
+			researchCopyTime,
+			researchTechTime,
+			productivityModifier,
+			materialModifier,
+			wasteFactor,
+			maxProductionLimit,
+			conv2.typeName,
+			conv2.groupID,
+			grp.categoryID
 		FROM invBluePrintTypes bpo
-		JOIN dgmTypeAttributes meta ON (meta.typeID=productTypeID AND meta.attributeID=633)
-		JOIN invtypes conv ON (bpo.blueprintTypeID=conv.typeID)
+		JOIN dgmTypeAttributes meta ON (meta.typeID = productTypeID AND meta.attributeID = 633)
+		JOIN invtypes conv ON (bpo.blueprintTypeID = conv.typeID)
+		JOIN invtypes conv2 ON (bpo.productTypeID = conv2.typeID)
+		JOIN invgroups grp ON (grp.groupID = conv2.groupID)
 		WHERE conv.published = 1
 		AND COALESCE (meta.valueInt,meta.valueFloat,0) IN (0,0.0,5,5.0)''')
 	tmp_lookup = db_cursor.fetchall()
