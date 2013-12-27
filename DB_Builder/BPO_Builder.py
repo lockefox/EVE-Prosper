@@ -13,7 +13,21 @@ conf.read(["scraper.ini","scraper_local.ini"])
 db_schema=""
 db=None
 db_cursor=None
+default_character = None
 
+class Character:
+	def __init__(self):
+		self.production_efficiency		=5
+		self.industry					=5
+		self.advanced_mass_production	=4
+		self.mass_production			=5
+		self.lab_operations				=5
+		self.advanced_lab_operations	=4
+		self.science					=5
+		self.metalurgy					=5
+		self.research					=5
+		##Add Invention/T3 skills
+		
 class BPO:
 	def __init__(self):
 		self.typeID		=0
@@ -53,7 +67,17 @@ class BPO:
 		matmod	= cursor_line[13]
 		waste	= cursor_line[14]
 		prodlmt	= cursor_line[15]
-		
+	
+	def materials(self,ME,prod_line_waste=1):
+		build_bill = {}
+			#ME Equations: http://wiki.eve-id.net/Equations
+		if ME<0:
+			for base_item,qty in materials.iteritems():
+				build_bill[base_item] = round(qty*(waste/100)*(1-ME))
+		else:
+			for base_item,qty in materials.iteritems():
+				build_bill[base_item] = round(qty*(waste/100)*(1/(ME + 1)))		
+				
 	def dump(self):
 		dump_dict={}
 		dump_dict["BPO_typeID"]		= typeID
@@ -70,13 +94,16 @@ class BPO:
 		dump_dict["research_PE"]	= PEtime
 		dump_dict["research_cpy"]	= cpytime
 		
+		dump_dict["mats_basemats"]	= materials
+		dump_dict["mats_extramats"]	= extra_mats
 		dump_dict["math_techtime"]	= tchtime
 		dump_dict["math_prodmod"]	= prodmod
 		dump_dict["math_matmod"]	= matmod
 		dump_dict["math_waste"]		= waste
 		
+		return dump_dict
 def init():
-	global db_schema,db,db_cursor
+	global db_schema,db,db_cursor,default_character
 	db_schema=conf.get("GLOBALS" ,"db_name")
 	db_IP=conf.get("GLOBALS" ,"db_host")
 	db_user=conf.get("GLOBALS" ,"db_user")
@@ -87,6 +114,7 @@ def init():
 		
 	db_cursor = db.cursor()
 	
+	default_character = Character()
 	print "DB Init: %s connection GOOD" % db_schema
 	
 def main():
