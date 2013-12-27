@@ -14,6 +14,7 @@ db_schema=""
 db=None
 db_cursor=None
 default_character = None
+skill_dict={}
 
 class Character:
 	def __init__(self):
@@ -33,6 +34,9 @@ class Character:
 		self.prod_eff					= (25-(5*self.production_efficiency)) 					#1
 		##Add Invention/T3 skills
 		self.skills = {}	#hold skills by itemID
+	def load_skills(self,API_return):
+		#take skills API from eveapi
+		test=1
 		
 class BPO:
 	def __init__(self):
@@ -113,7 +117,7 @@ class BPO:
 		
 		return dump_dict
 def init():
-	global db_schema,db,db_cursor,default_character
+	global db_schema,db,db_cursor,default_character,skill_dict
 	db_schema=conf.get("GLOBALS" ,"db_name")
 	db_IP=conf.get("GLOBALS" ,"db_host")
 	db_user=conf.get("GLOBALS" ,"db_user")
@@ -123,7 +127,19 @@ def init():
 	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
 		
 	db_cursor = db.cursor()
+	try:
+		db_cursor.execute('''SELECT t.typeID,t.typeName
+			FROM invtypes t
+			JOIN invgroups grp on (grp.groupID=t.groupID)
+			WHERE grp.categoryID=16''')
+	except MySQLdb.Error as e:
+		print "Unable to execute query on %s: %s" % (db_schema,e)
+		sys.exit(-1)
+	skill_list_hold = db_cursor.fetchall()
 	
+	for row in skill_list_hold:
+		skill_dict[row[0]]=row[1]
+		
 	default_character = Character()
 	print "DB Init: %s connection GOOD" % db_schema
 	
