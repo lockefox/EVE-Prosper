@@ -15,24 +15,63 @@ db=None
 db_cursor=None
 
 class BPO:
-	def __init__(self,cursor_line):
-		self.typeID	= cursor_line[0]
-		self.groupID= cursor_line[1]
-		self.meta	= cursor_line[2]
-		self.outType= cursor_line[3]	#Need name lookup
-		self.tech	= cursor_line[4]
-		self.BPOname= cursor_line[5]
-		self.parent = cursor_line[6]	#Need name lookup
-		self.mfgtime= cursor_line[7]
-		self.PEtime	= cursor_line[8]
-		self.MEtime = cursor_line[9]
-		self.cpytime= cursor_line[10]
-		self.tchtime= cursor_line[11]
-		self.prodmod= cursor_line[12]
-		self.matmod = cursor_line[13]
-		self.waste 	= cursor_line[14]
-		self.prodlmt= cursor_line[15]
-	
+	def __init__(self):
+		self.typeID		=0
+		self.groupID	=0
+		self.meta	    =0
+		self.outType    =0
+		self.tech	    =0
+		self.BPOname    =""
+		self.parent     =0
+		self.mfgtime    =0
+		self.PEtime	    =0
+		self.MEtime     =0
+		self.cpytime    =0
+		self.tchtime    =0
+		self.prodmod    =0
+		self.matmod     =0
+		self.waste 	    =0
+		self.prodlmt    =0
+
+	def bp_type_load(self,cursor_line):		#This is terrible.  You should feel bad
+		typeID	= cursor_line[0]
+		groupID	= cursor_line[1]
+		meta	= cursor_line[2]
+		outType	= cursor_line[3]	#Need name lookup
+		tech	= cursor_line[4]
+		BPOname	= cursor_line[5]
+		parent 	= cursor_line[6]	#Need name lookup
+		mfgtime	= cursor_line[7]
+		PEtime	= cursor_line[8]
+		MEtime	= cursor_line[9]
+		cpytime	= cursor_line[10]
+		tchtime	= cursor_line[11]
+		prodmod	= cursor_line[12]
+		matmod	= cursor_line[13]
+		waste	= cursor_line[14]
+		prodlmt	= cursor_line[15]
+		
+	def dump(self):
+		dump_dict={}
+		dump_dict["BPO_typeID"]		= typeID
+		dump_dict["BPO_typeName"]	= BPOname
+		dump_dict["BPO_groupID"]	= groupID
+		dump_dict["BPO_parent"]		= parent
+		dump_dict["BPO_prodlimit"]	= prodlimit
+		
+		dump_dict["item_meta"]		= meta
+		dump_dict["item_typeID"]	= outType
+		
+		dump_dict["tech_level"]		= tech
+		dump_dict["research_ME"]	= MEtime
+		dump_dict["research_PE"]	= PEtime
+		dump_dict["research_cpy"]	= cpytime
+		
+		dump_dict["math_techtime"]	= tchtime
+		dump_dict["math_prodmod"]	= prodmod
+		dump_dict["math_matmod"]	= matmod
+		dump_dict["math_waste"]		= waste
+		
 def init():
 	global db_schema,db,db_cursor
 	db_schema=conf.get("GLOBALS" ,"db_name")
@@ -75,7 +114,8 @@ def main():
 		AND COALESCE (meta.valueInt,meta.valueFloat,0) IN (0,0.0,5,5.0)''')
 	tmp_lookup = db_cursor.fetchall()
 	for item in tmp_lookup:
-		tmp_bpo = BPO(item)	#push mySQL data into BPO object
+		tmp_bpo = BPO()
+		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
 		BPO_lookup.append(tmp_bpo)
 		
 
