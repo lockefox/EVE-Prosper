@@ -61,6 +61,10 @@ class BPO:
 		self.BPO_typeName  = ""
 		self.ITEM_typeID   = 0
 		self.ITEM_typeName = ""
+	
+	def __str__ (self):
+		return_str = "BPO:\t%s\nITEM:\t%s" % (self.BPO_typeName,self.ITEM_typeName)
+		return return_str
 		
 	def bp_type_load(self,cursor_line):	
 		self.BPO_properties["typeID"]     = cursor_line[0]
@@ -188,7 +192,8 @@ def main():
 		tmp_bpo = BPO()
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
 		BPO_lookup.append(tmp_bpo)
-		
+		print tmp_bpo
+		sys.exit(1)
 
 
 if __name__ == "__main__":
