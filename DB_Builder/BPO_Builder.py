@@ -15,6 +15,7 @@ db = None
 db_cursor = None
 default_character = None
 skill_dict = {}
+job_types = []
 
 class Character:
 	def __init__(self):
@@ -113,7 +114,7 @@ class BPO:
 	##Add __str__ method?	
 		
 def init():
-	global db_schema,db,db_cursor,default_character,skill_dict
+	global db_schema,db,db_cursor,default_character,skill_dict,job_types
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
 	db_user = conf.get("GLOBALS" ,"db_user")
@@ -132,10 +133,21 @@ def init():
 	except MySQLdb.Error as e:
 		print "Unable to execute query on %s: %s" % (db_schema,e)
 		sys.exit(-1)
-	skill_list_hold = db_cursor.fetchall()
-	
+	skill_list_hold = db_cursor.fetchall()	
 	for row in skill_list_hold:
 		skill_dict[row[0]] = row[1]
+		
+	try:
+		db_cursor.execute('''SELECT activityName
+			FROM ramactivities
+			ORDER BY activityID ASC''')
+	except MySQLdb.Error as e:
+		print "Unable to execute query on %s: %s" % (db_schema,e)
+		sys.exit(-1)
+		
+	job_type_hold = db_cursor.fetchall()
+	for row in job_type_hold:
+		job_types.append(row[0])	
 		
 	default_character = Character()
 	print "DB Init: %s connection GOOD" % db_schema
