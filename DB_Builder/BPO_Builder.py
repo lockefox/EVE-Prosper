@@ -63,7 +63,7 @@ class BPO:
 		self.ITEM_typeName = ""
 	
 	def __str__ (self):
-		return_str = "BPO:\t%s\nITEM:\t%s" % (self.BPO_typeName,self.ITEM_typeName)
+		return_str = "BPO:\t%s\t%s\nITEM:\t%s\t%s" % (self.BPO_typeID,self.BPO_typeName,self.ITEM_typeID,self.ITEM_typeName)
 		return return_str
 		
 	def bp_type_load(self,cursor_line):	
@@ -93,6 +93,30 @@ class BPO:
 		self.ITEM_typeID   = self.ITEM_properties["typeID"]
 		self.ITEM_typeName = self.ITEM_properties["typeName"]
 		
+			#Fetch ME-affected materials
+		db_cursor.execute('''SElECT materialTypeID,quantity
+			FROM invtypematerials
+			WHERE typeID=%s''' % self.ITEM_typeID)
+		for row in db_cursor.fetchall():
+			self.materials[row[0]]=row[1]
+			#BPO materials "extra materials"
+		db_cursor.execute('''SELECT ram.activityID,ram.requiredTypeID,(ram.quantity*ram.damagePerJob),grp.categoryID
+			FROM ramtyperequirements ram
+			JOIN invtypes conv2 ON (ram.requiredTypeID=conv2.typeID)
+			JOIN invgroups grp on (grp.groupID=conv2.groupID)
+			WHERE ram.typeID=%s''' % self.BPO_typeID)
+			
+		for row in db_cursor.fetchall():
+				##row[activity,material,qty_needed,material_category]
+			if self.extra_mats.get(job_types[row[0]])==None:	#if job type is empty, initialize dict
+				self.extra_mats[job_types[row[0]]]={}
+			if (row[3]==16 and not(row[0]==7 or row[0]==8)):	#if "skill" and not invention/reverse engineering
+				continue
+				
+			self.extra_mats[job_types[row[0]]][row[1]]=row[2]	#this is terrible.  Fix it
+		
+		print self.extra_mats
+			
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
