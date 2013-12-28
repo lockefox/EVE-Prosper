@@ -16,7 +16,20 @@ db_cursor = None
 default_character = None
 skill_dict = {}
 job_types = []
-
+interfaceID_to_decryptorGRP ={
+	25554:728,	
+	25851:728,
+	26603:728,
+	25555:731,
+	25853:731,
+	26599:731,
+	25553:729,
+	25857:729,
+	26597:729,
+	25556:730,
+	25855:730,
+	26601:730	
+}
 class Character:
 	def __init__(self):
 			#remove manual definition?  Do math off skills{}
@@ -55,7 +68,7 @@ class BPO:
 		self.ITEM_properties = {}
 		self.materials       = {}
 		self.extra_mats      = {}
-		self.decryptors      = {}
+		self.decryptor_group = 0
 			#debug reference
 		self.BPO_typeID    = 0
 		self.BPO_typeName  = ""
@@ -101,7 +114,11 @@ class BPO:
 			self.materials[row[0]]=row[1]
 			
 			#BPO materials "extra materials"
-		db_cursor.execute('''SELECT ram.activityID,ram.requiredTypeID,(ram.quantity*ram.damagePerJob),cats.categoryName
+		db_cursor.execute('''SELECT ram.activityID,
+				ram.requiredTypeID,
+				(ram.quantity*ram.damagePerJob),
+				cats.categoryName,
+				conv2.groupID
 			FROM ramtyperequirements ram
 			JOIN invtypes conv2 ON (ram.requiredTypeID=conv2.typeID)
 			JOIN invgroups grp ON (grp.groupID=conv2.groupID)
@@ -114,16 +131,18 @@ class BPO:
 			mat  = row[1]
 			qty  = row[2]
 			mat_category = row[3]
+			mat_group    = row[4]
 			
+			if job == "Invention":
+					inventable = 1
 			if self.extra_mats.get(job) == None:	#if job type is empty, initialize dict
 				self.extra_mats[job]={}
 			if (mat_category == "Skill" and not(job == "Invention" or job == "Reverse Engineering")):	#if "skill" and not invention/reverse engineering
-				if job == "Invention":
-					inventable = 1
 				continue
 				
 			self.extra_mats[job][mat] = qty	#this is terrible.  Fix it
-		
+			if mat_group == 716:	#Data interface
+				self.extra_mats[job][mat] = 0
 			
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
