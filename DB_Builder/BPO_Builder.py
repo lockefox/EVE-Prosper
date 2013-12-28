@@ -69,6 +69,7 @@ class BPO:
 		self.materials       = {}
 		self.extra_mats      = {}
 		self.decryptor_group = 0
+		self.inv_base_chance = 0
 			#debug reference
 		self.BPO_typeID    = 0
 		self.BPO_typeName  = ""
@@ -143,7 +144,20 @@ class BPO:
 			self.extra_mats[job][mat] = qty	#this is terrible.  Fix it
 			if mat_group == 716:	#Data interface
 				self.extra_mats[job][mat] = 0
-			
+				self.decryptor_group = interfaceID_to_decryptorGRP[mat]
+		
+		if inventable: 
+			if (self.ITEM_properties["groupID"] in (419,27) 
+					or self.ITEM_properties["typeID"] == 17476): #BS, BC, Covetor
+				self.inv_base_chance = 0.20
+			elif (self.ITEM_properties["groupID"] in (26,28) 
+					or self.ITEM_properties["typeID"] == 17476): #Cruiser, Industrial, Retriever
+				self.inv_base_chance = 0.25
+			elif (self.ITEM_properties["groupID"] in (25,420,513) #Frigate, Destroyer, Freighter, Skiff
+					or self.ITEM_properties["typeID"] == 17480):
+				self.inv_base_chance = 0.30
+			else:
+				self.inv_base_chance = 0.40
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
