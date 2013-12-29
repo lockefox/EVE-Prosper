@@ -175,7 +175,8 @@ class BPO:
 			mat_group    = row[3]
 			
 			if job == "Invention":
-					inventable = 1
+				inventable = 1
+				
 			if self.extra_mats.get(job) == None:	#if job type is empty, initialize dict
 				self.extra_mats[job]={}
 				
@@ -184,9 +185,11 @@ class BPO:
 				self.extra_mats[job][mat] = 0	#To avoid miscalculation on bill-of-mats
 				self.decryptor_group = interfaceID_to_decryptorGRP[mat]
 				self.inv_encryption  = interfaceID_to_encryptionSkillID[mat]
+			
 			if mat_group == 333: 	#datacore
 				self.inv_skills.append(datacoreID_to_researchSkillID[mat])
-		
+				
+
 		if inventable: 
 			if (self.ITEM_properties["groupID"] in (419,27) 
 					or self.ITEM_properties["typeID"] == 17476): #BS, BC, Covetor
@@ -200,7 +203,14 @@ class BPO:
 			else:
 				self.inv_base_chance = 0.40
 				
-			
+		if self.BPO_properties["groupID"] in (971,990,991,992,993,997):	#T3 parts
+				if   self.BPO_properties["typeID"] in (30187,30599,30628,30582,30614,30752):	#Intact parts	
+					self.inv_base_chance = 0.40
+				elif self.BPO_properties["typeID"] in (30558,30600,30632,30586,30615,30753):	#Malfunctioning parts
+					self.inv_base_chance = 0.30
+				else: #Wrecked parts
+					self.inv_base_chance = 0.20
+		
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
