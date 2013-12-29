@@ -17,19 +17,58 @@ default_character = None
 skill_dict = {}
 job_types = []
 interfaceID_to_decryptorGRP ={
-	25554:728,	
+	25554:728,	#occult
 	25851:728,
 	26603:728,
-	25555:731,
+	25555:731,	#esoteric
 	25853:731,
 	26599:731,
-	25553:729,
+	25553:729,	#cryptic
 	25857:729,
 	26597:729,
-	25556:730,
+	25556:730,	#incognito
 	25855:730,
 	26601:730	
 }
+interfaceID_to_encryptionSkillID ={
+	25554:23087,	
+	25851:23087,
+	26603:23087,
+	25555:21790,
+	25853:21790,
+	26599:21790,
+	25553:21791,
+	25857:21791,
+	26597:21791,
+	25556:23121,
+	25855:23121,
+	26601:23121,
+}
+datacoreID_to_researchSkillID ={
+11496:30324,	#Defensive Subsystems Engineering
+20114:30788,	#Propulsion Subsystems Engineering
+20115:30325,	#Engineering Subsystems Engineering
+20116:30326,	#Electronic Subsystems Engineering
+20171:11443,	#Hydromagnetic Physics
+20172:11445,	#Minmatar Starship Engineering
+20410:11450,	#Gallentean Starship Engineering
+20411:11433,	#High Energy Physics
+20412:11441,	#Plasma Physics
+20413:11447,	#Laser Physics
+20414:11455,	#Quantum Physics
+20415:11529,	#Molecular Engineering
+20416:11442,	#Nanite Engineering
+20417:11448,	#Electromagnetic Physics
+20418:11453,	#Electronic Engineering
+20419:11446,	#Graviton Physics
+20420:11449,	#Rocket Science
+20421:11444,	#Amarrian Starship Engineering
+20423:11451,	#Nuclear Physics
+20424:11452,	#Mechanical Engineering
+20425:30327,	#Offensive Subsystems Engineering
+25887:11454,	#Caldari Starship Engineering
+}
+
 class Character:
 	def __init__(self):
 			#remove manual definition?  Do math off skills{}
@@ -70,6 +109,10 @@ class BPO:
 		self.extra_mats      = {}
 		self.decryptor_group = 0
 		self.inv_base_chance = 0
+		self.inv_skill1      = 0
+		self.inv_skill2      = 0
+		self.inv_ecryption   = 0
+		
 			#debug reference
 		self.BPO_typeID    = 0
 		self.BPO_typeName  = ""
@@ -118,28 +161,24 @@ class BPO:
 		db_cursor.execute('''SELECT ram.activityID,
 				ram.requiredTypeID,
 				(ram.quantity*ram.damagePerJob),
-				cats.categoryName,
 				conv2.groupID
 			FROM ramtyperequirements ram
 			JOIN invtypes conv2 ON (ram.requiredTypeID=conv2.typeID)
 			JOIN invgroups grp ON (grp.groupID=conv2.groupID)
-			JOIN invcategories cats ON (cats.categoryID = grp.categoryID)
-			WHERE ram.typeID=%s''' % self.BPO_typeID)
+			WHERE ram.typeID=%s
+			AND grp.categoryID <> 16''' % self.BPO_typeID)
 		inventable = 0
 		for row in db_cursor.fetchall():
 				##row[activity,material,qty_needed,material_category]
 			job  = job_types[row[0]]
 			mat  = row[1]
 			qty  = row[2]
-			mat_category = row[3]
-			mat_group    = row[4]
+			mat_group    = row[3]
 			
 			if job == "Invention":
 					inventable = 1
 			if self.extra_mats.get(job) == None:	#if job type is empty, initialize dict
 				self.extra_mats[job]={}
-			if (mat_category == "Skill" and not(job == "Invention" or job == "Reverse Engineering")):	#if "skill" and not invention/reverse engineering
-				continue
 				
 			self.extra_mats[job][mat] = qty	#this is terrible.  Fix it
 			if mat_group == 716:	#Data interface
@@ -158,6 +197,8 @@ class BPO:
 				self.inv_base_chance = 0.30
 			else:
 				self.inv_base_chance = 0.40
+				
+			
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
