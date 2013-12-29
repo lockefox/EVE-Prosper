@@ -45,28 +45,28 @@ interfaceID_to_encryptionSkillID ={
 	26601:23121,
 }
 datacoreID_to_researchSkillID ={
-11496:30324,	#Defensive Subsystems Engineering
-20114:30788,	#Propulsion Subsystems Engineering
-20115:30325,	#Engineering Subsystems Engineering
-20116:30326,	#Electronic Subsystems Engineering
-20171:11443,	#Hydromagnetic Physics
-20172:11445,	#Minmatar Starship Engineering
-20410:11450,	#Gallentean Starship Engineering
-20411:11433,	#High Energy Physics
-20412:11441,	#Plasma Physics
-20413:11447,	#Laser Physics
-20414:11455,	#Quantum Physics
-20415:11529,	#Molecular Engineering
-20416:11442,	#Nanite Engineering
-20417:11448,	#Electromagnetic Physics
-20418:11453,	#Electronic Engineering
-20419:11446,	#Graviton Physics
-20420:11449,	#Rocket Science
-20421:11444,	#Amarrian Starship Engineering
-20423:11451,	#Nuclear Physics
-20424:11452,	#Mechanical Engineering
-20425:30327,	#Offensive Subsystems Engineering
-25887:11454,	#Caldari Starship Engineering
+	11496:30324,	#Defensive Subsystems Engineering
+	20114:30788,	#Propulsion Subsystems Engineering
+	20115:30325,	#Engineering Subsystems Engineering
+	20116:30326,	#Electronic Subsystems Engineering
+	20171:11443,	#Hydromagnetic Physics
+	20172:11445,	#Minmatar Starship Engineering
+	20410:11450,	#Gallentean Starship Engineering
+	20411:11433,	#High Energy Physics
+	20412:11441,	#Plasma Physics
+	20413:11447,	#Laser Physics
+	20414:11455,	#Quantum Physics
+	20415:11529,	#Molecular Engineering
+	20416:11442,	#Nanite Engineering
+	20417:11448,	#Electromagnetic Physics
+	20418:11453,	#Electronic Engineering
+	20419:11446,	#Graviton Physics
+	20420:11449,	#Rocket Science
+	20421:11444,	#Amarrian Starship Engineering
+	20423:11451,	#Nuclear Physics
+	20424:11452,	#Mechanical Engineering
+	20425:30327,	#Offensive Subsystems Engineering
+	25887:11454,	#Caldari Starship Engineering
 }
 
 class Character:
@@ -109,9 +109,8 @@ class BPO:
 		self.extra_mats      = {}
 		self.decryptor_group = 0
 		self.inv_base_chance = 0
-		self.inv_skill1      = 0
-		self.inv_skill2      = 0
-		self.inv_ecryption   = 0
+		self.inv_skills      = []
+		self.inv_encryption  = 0
 		
 			#debug reference
 		self.BPO_typeID    = 0
@@ -182,8 +181,11 @@ class BPO:
 				
 			self.extra_mats[job][mat] = qty	#this is terrible.  Fix it
 			if mat_group == 716:	#Data interface
-				self.extra_mats[job][mat] = 0
+				self.extra_mats[job][mat] = 0	#To avoid miscalculation on bill-of-mats
 				self.decryptor_group = interfaceID_to_decryptorGRP[mat]
+				self.inv_encryption  = interfaceID_to_encryptionSkillID[mat]
+			if mat_group === 333: 	#datacore
+				self.invskills.append(datacoreID_to_researchSkillID[mat])
 		
 		if inventable: 
 			if (self.ITEM_properties["groupID"] in (419,27) 
