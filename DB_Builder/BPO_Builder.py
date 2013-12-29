@@ -184,8 +184,8 @@ class BPO:
 				self.extra_mats[job][mat] = 0	#To avoid miscalculation on bill-of-mats
 				self.decryptor_group = interfaceID_to_decryptorGRP[mat]
 				self.inv_encryption  = interfaceID_to_encryptionSkillID[mat]
-			if mat_group === 333: 	#datacore
-				self.invskills.append(datacoreID_to_researchSkillID[mat])
+			if mat_group == 333: 	#datacore
+				self.inv_skills.append(datacoreID_to_researchSkillID[mat])
 		
 		if inventable: 
 			if (self.ITEM_properties["groupID"] in (419,27) 
@@ -301,7 +301,7 @@ def main():
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
 		BPO_lookup.append(tmp_bpo)
 		print tmp_bpo
-		sys.exit(1)
+		print "----------"
 
 
 if __name__ == "__main__":
