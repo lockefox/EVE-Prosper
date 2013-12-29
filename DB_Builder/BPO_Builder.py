@@ -14,7 +14,8 @@ db_schema = ""
 db = None
 db_cursor = None
 default_character = None
-skill_dict = {}
+skill_dict_byID = {}
+skill_dict_byname = {}
 job_types = []
 interfaceID_to_decryptorGRP ={
 	25554:728,	#occult
@@ -91,11 +92,24 @@ class Character:
 		#take skills API from eveapi
 		test=1
 		
+	def lookup (self,skill_lookup):
+		if not isinstance(skill_lookup,(int)):	#if skill is a string
+			try:
+				skill_level = self.skills[skill_dict_byName[skill_lookup]]
+			except KeyError as e:
+				raise e
+		else:
+			try:
+				skill_level = self.skills[skill_dict_byID[skill_lookup]]
+			except KeyError as e:
+				raise e
+		return skill_level
+		
 	def __getattr__ (self,name):
 		skill_lookup = name.replace('_',' ')	#parse out the _'s
 		skill_lookup.title()					#help align casing
 		try:
-			skill_level = self.skills[skill_dict[skill_lookup]]
+			skill_level = self.skills[skill_dict_byName[skill_lookup]]
 		except KeyError as e:
 			raise e
 		
@@ -236,7 +250,7 @@ class BPO:
 	##Add __str__ method?	
 		
 def init():
-	global db_schema,db,db_cursor,default_character,skill_dict,job_types
+	global db_schema,db,db_cursor,default_character,skill_dict_byID,skill_dict_byname,job_types
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
 	db_user = conf.get("GLOBALS" ,"db_user")
@@ -257,8 +271,8 @@ def init():
 		sys.exit(-1)
 	skill_list_hold = db_cursor.fetchall()	
 	for row in skill_list_hold:
-		skill_dict[row[0]] = row[1]
-		
+		skill_dict_byID[row[0]] = row[1]
+		skill_dict_byname[row[1]] = row[0]
 	try:
 		db_cursor.execute('''SELECT activityName
 			FROM ramactivities
@@ -307,10 +321,13 @@ def main():
 		AND COALESCE (meta.valueInt,meta.valueFloat,0) IN (0,0.0,5,5.0)''')
 	tmp_lookup = db_cursor.fetchall()
 	for item in tmp_lookup:
+		tmp_dump= {}
 		tmp_bpo = BPO()
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
 		BPO_lookup.append(tmp_bpo)
+		tmp_dump = tmp_bpo.dump()
 		print tmp_bpo
+		print tmp_dump
 		print "----------"
 
 
