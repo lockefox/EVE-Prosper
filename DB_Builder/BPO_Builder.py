@@ -141,7 +141,7 @@ class BPO:
 		self.BPO_properties["groupID"]    = cursor_line[1]
 		self.BPO_properties["tech_level"] = cursor_line[4]
 		self.BPO_properties["typeName"]   = cursor_line[5]
-		self.BPO_properties["parent_BPO"] = cursor_line[6]
+		self.BPO_properties["parent_BPO"] = cursor_line[6]		#garbage value
 		self.BPO_properties["mfgtime"]    = cursor_line[7]
 		self.BPO_properties["PEtime"]     = cursor_line[8]
 		self.BPO_properties["MEtime"]     = cursor_line[9]
@@ -224,7 +224,57 @@ class BPO:
 					self.inv_base_chance = 0.30
 				else: #Wrecked parts
 					self.inv_base_chance = 0.20
-		
+		if self.BPO_properties["tech_level"] == 2:
+				#https://neweden-dev.com/EVE_Manufacturing_SQL#T1_to_T2_Blueprint_Mapping
+			db_cursor.execute('''SELECT it2.typeid basebpid
+				FROM invTypes it1
+				JOIN invBlueprintTypes ibt1 ON it1.typeid=ibt1.producttypeid
+				JOIN invTypes it2 ON it2.typeid=ibt1.blueprinttypeid
+				JOIN invMetaTypes imt ON imt.parenttypeid=it1.typeid
+				JOIN invTypes it3 ON imt.typeid=it3.typeid
+				JOIN invBlueprintTypes ibt2 ON it3.typeid=ibt2.producttypeid
+				JOIN invTypes it4 ON it4.typeid=ibt2.blueprinttypeid
+				WHERE imt.metaGroupID=2 
+				AND it4.typeid = %s''' % self.BPO_properties["typeID"])
+			parent_bpo_result = db_cursor.fetchone()
+
+			try:
+				self.BPO_properties["parent_BPO"] = parent_bpo_result[0]
+			except TypeError as e:
+				self.BPO_properties["parent_BPO"] = None	#Unpublished item handler
+				
+		elif self.BPO_properties["tech_level"] == 3:
+			if self.ITEM_properties["groupID"] == 963:		#T3 Hull
+				self.BPO_properties["parent_BPO"] = 997		#hull section group
+			elif self.ITEM_properties["groupID"] == 954:	#Defensive Subsystem
+				self.BPO_properties["parent_BPO"] = 993
+			elif self.ITEM_properties["groupID"] == 955:	#Electronic Subsystem
+				self.BPO_properties["parent_BPO"] = 990
+			elif self.ITEM_properties["groupID"] == 956:	#Offensive Subsystem
+				self.BPO_properties["parent_BPO"] = 991
+			elif self.ITEM_properties["groupID"] == 957:	#Propulsion Subsystem
+				self.BPO_properties["parent_BPO"] = 971
+			elif self.ITEM_properties["groupID"] == 958:	#Engineering Subsystems
+				self.BPO_properties["parent_BPO"] = 992
+			else:
+				self.BPO_properties["parent_BPO"] = None
+		else:
+			db_cursor.execute('''SELECT it4.typeid t2bpid
+				FROM invTypes it1
+				JOIN invBlueprintTypes ibt1 ON it1.typeid=ibt1.producttypeid
+				JOIN invTypes it2 ON it2.typeid=ibt1.blueprinttypeid
+				JOIN invMetaTypes imt ON imt.parenttypeid=it1.typeid
+				JOIN invTypes it3 ON imt.typeid=it3.typeid
+				JOIN invBlueprintTypes ibt2 ON it3.typeid=ibt2.producttypeid
+				JOIN invTypes it4 ON it4.typeid=ibt2.blueprinttypeid
+				WHERE imt.metaGroupID=2 
+				AND it2.typeid = %s''' % self.BPO_properties["typeID"])
+			parent_bpo_result = db_cursor.fetchone()
+			try:
+				self.BPO_properties["parent_BPO"] = parent_bpo_result[0]
+			except TypeError as e:
+				self.BPO_properties["parent_BPO"] = None	#Unpublished item handler
+
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
@@ -290,8 +340,9 @@ def init():
 	
 def main():
 	init()
-	BPO_lookup = []	#list of BPO objects
-
+	BPO_lookup = {}	#list of BPO objects
+	BPO_to_product = {}
+	product_to_BPO = {}
 		#Pull initial BPO data to build to-do list
 	db_cursor.execute('''SELECT bpo.blueprintTypeID,
 			conv.groupID,
@@ -324,12 +375,15 @@ def main():
 		tmp_dump= {}
 		tmp_bpo = BPO()
 		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
-		BPO_lookup.append(tmp_bpo)
+		BPO_lookup[tmp_bpo.BPO_typeID]=tmp_bpo
 		tmp_dump = tmp_bpo.dump()
-		print tmp_bpo
-		print tmp_dump
-		print "----------"
+		
+		BPO_to_product[tmp_bpo.BPO_typeID]=tmp_bpo.ITEM_typeID
+		product_to_BPO[tmp_bpo.ITEM_typeID]=tmp_bpo.BPO_typeID
+	test_bpo_obj = BPO_lookup[11177]
+	print test_bpo_obj.dump()
 
 
+	
 if __name__ == "__main__":
 	main()
