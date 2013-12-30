@@ -1,0 +1,46 @@
+<root>
+	<blueprint BPO_typeName="Crow" BPO_typeID="11177" BPO_groupID="105" BPO_parent="684" ITEM_typeName="Crow" ITEM_typeID="11176" ITEM_categoryID="6" ITEM_groupID="831">
+		<properties>
+			<researchMaterialTime>100000</researchMaterialTime>
+			<researchProductivityTime>150000</researchProductivityTime>
+			<researchCopyTime>250000</researchCopyTime>
+			<productionTime>6000</productionTime>
+			<techLevel>2</techLevel>
+			<productivityModifier>5000</productivityModifier>
+			<materialModifier>5</materialModifier>
+			<wasteFactor>10</wasteFactor>
+			<maxProductionLimit>10</maxProductionLimit>
+		</properties>
+		<baseMaterials>	<!--Affected by ME-->
+			<item itemID="11552" itemName="Scalar Capacitor Unit" buildable="1" itemBPO="17327" quantity="50"/>
+			<item itemID="34" itemName="Tritanium" buildable="0" itemBPO="0" quantity="2199"/>
+			<item itemID="35" itemName="Pyerite" buildable="0" itemBPO="0" quantity="1622"/>
+			<item itemID="36" itemName="Mexallon" buildable="0" itemBPO="0" quantity="166"/>
+			<item itemID="37" itemName="Isogen" buildable="0" itemBPO="0" quantity="88"/>
+			<item itemID="11558" itemName="Sustained Shield Emitter" buildable="1" itemBPO="17352" quantity="15"/>
+			<item itemID="39" itemName="Zydrine" buildable="0" itemBPO="0" quantity="10"/>
+			<item itemID="40" itemName="Megacyte" buildable="0" itemBPO="0" quantity="10"/>
+			<item itemID="11399" itemName="Morphite" buildable="0" itemBPO="0" quantity="5"/>
+			<item itemID="11533" itemName="Magpulse Thruster" buildable="1" itemBPO="17356" quantity="30"/>
+			<item itemID="11534" itemName="Gravimetric Sensor Cluster" buildable="1" itemBPO="17340" quantity="20"/>
+			<item itemID="3828" itemName="Construction Blocks" buildable="0" itemBPO="0" quantity="10"/>
+			<item itemID="11544" itemName="Titanium Diborite Armor Plate" buildable="1" itemBPO="17328" quantity="300"/>
+			<item itemID="11540" itemName="Quantum Microprocessor" buildable="1" itemBPO="17351" quantity="80"/>
+			<item itemID="11550" itemName="Graviton Reactor Unit" buildable="1" itemBPO="17353" quantity="3"/>
+		</baseMaterials>
+		<extraMaterials> <!--Not Affected by ME-->
+			<item itemID="11478" itemName="R.A.M.- Starship Tech" buildable="1" itemBPO="11890" quantity="0.95"/>
+			<item itemID="583" itemName="Condor" buildable="1" itemBPO="684" quantity="1"/>
+		</extraMaterials>
+		<inventionMaterials BPO_parent="684">	<!--fetched from ParentBPO-->
+			<skill itemID="11452" itemName="Mechanical Engineering"/>
+			<skill itemID="11454" itemName="Caldari Starship Engineering"/>
+			<skill itemID="21790" itemName="Caldari Encryption Methods"/>
+			<item itemID="20424" itemName="Datacore - Mechanical Engineering" quantity="2"/>
+			<item itemID="25887" itemName="Datacore - Caldari Starship Engineering" quantity="2"/>
+			<item itemID="25853" itemName="Esoteric Ship Data Interface" quantity="0"/>
+			<attribute baseInventionProbability="0.30"/>
+			<attribute decryptorGroupID="731"/>
+		</inventionMaterials>
+	</blueprint>
+</root>
