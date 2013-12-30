@@ -2,6 +2,8 @@
 
 import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, datetime, time, json, socket
 import urllib2
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 import MySQLdb
 import ConfigParser
 
@@ -19,8 +21,9 @@ skill_dict_byname = {}
 t1BPO_to_t2BPO = {}
 t2BPO_to_t1BPO = {}
 job_types = []
-xml_tree = None
+xml_root = ET.Element("root")
 xml_file = conf.get("GLOBALS" ,"bpo_file")
+
 json_tree = None
 json_file = conf.get("GLOBALS" ,"json_file")
 interfaceID_to_decryptorGRP ={
@@ -128,7 +131,7 @@ class BPO:
 		self.materials       = {}
 		self.extra_mats      = {}
 		self.decryptor_group = 0
-		self.inv_base_chance = 0
+		self.inv_base_chance = None
 		self.inv_skills      = []
 		self.inv_encryption  = 0
 		
@@ -283,12 +286,17 @@ class BPO:
 		
 		return dump_dict
 	##Add __str__ method?	
-		
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")	
 def init():
 	global db_schema,db,db_cursor	#DB utilities
 	global default_character		#character data
 	global skill_dict_byID,skill_dict_byname,job_types,t1BPO_to_t2BPO,t2BPO_to_t1BPO	#lookup/translation data
-	
+
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
 	db_user = conf.get("GLOBALS" ,"db_user")
@@ -347,14 +355,60 @@ def init():
 	print "DB Init: %s connection GOOD" % db_schema
 
 def XML_builder (BPO_obj, dict_of_BPOs):
-	global xml_tree
+	global xml_root
+
+	blueprint = ET.SubElement(xml_root,"blueprint")
+	#blueprint element set
+	blueprint.set("BPO_typeName",BPO_obj.BPO_properties["typeName"])
+	blueprint.set("BPO_typeID",str(BPO_obj.BPO_properties["typeID"]))
+	blueprint.set("BPO_groupID",str(BPO_obj.BPO_properties["groupID"]))
+	blueprint.set("BPO_parent",str(BPO_obj.BPO_properties["parent_BPO"]))
+	blueprint.set("ITEM_typeName",BPO_obj.ITEM_properties["typeName"])
+	blueprint.set("ITEM_typeID",str(BPO_obj.ITEM_properties["typeID"]))
+	blueprint.set("ITEM_categoryID",str(BPO_obj.ITEM_properties["categoryID"]))
+	blueprint.set("ITEM_groupID",str(BPO_obj.ITEM_properties["groupID"]))
 	
+	properties = ET.SubElement(blueprint,"properties")
+	#blueprint properites
+	researchMaterialTime = ET.SubElement(properties,"researchMaterialTime")
+	researchProductivityTime = ET.SubElement(properties,"researchProductivityTime")
+	researchCopyTime = ET.SubElement(properties,"researchCopyTime")
+	productionTime = ET.SubElement(properties,"productionTime")
+	techLevel = ET.SubElement(properties,"techLevel")
+	productivityModifier = ET.SubElement(properties,"productivityModifier")
+	materialModifier = ET.SubElement(properties,"materialModifier")
+	wasteFactor = ET.SubElement(properties,"wasteFactor")
+	maxProductionLimit = ET.SubElement(properties,"maxProductionLimit")
+	baseInventionProbability = ET.SubElement(properties,"baseInventionProbability")
 	
+	researchMaterialTime.text		= str(BPO_obj.BPO_properties["MEtime"])
+	researchProductivityTime.text	= str(BPO_obj.BPO_properties["PEtime"]) 
+	researchCopyTime.text			= str(BPO_obj.BPO_properties["cpytime"])     
+	productionTime.text				= str(BPO_obj.BPO_properties["mfgtime"])    
+	techLevel.text					= str(BPO_obj.BPO_properties["tech_level"])
+	productivityModifier.text		= str(BPO_obj.BPO_properties["prodmod"]) 
+	materialModifier.text			= str(BPO_obj.BPO_properties["matmod"])    
+	wasteFactor.text				= str(BPO_obj.BPO_properties["waste"])     
+	maxProductionLimit.text			= str(BPO_obj.BPO_properties["prodlimit"])
+	
+	if BPO_obj.BPO_properties["tech_level"] == 2:
+
+		try:
+			t2BPO_lookup = t2BPO_to_t1BPO[BPO_obj.BPO_properties["typeID"]]
+			t2BPO_obj = dict_of_BPOs[t2BPO_lookup]
+			t2BPO_chanceStr = str(t2BPO_obj.inv_base_chance)
+		except KeyError as e:
+			t2BPO_chanceStr = str(None)
+			
+		baseInventionProbability.text = t2BPO_chanceStr
+	else:
+		baseInventionProbability.text = str(BPO_obj.inv_base_chance)
 def main():
 	init()
 	BPO_lookup = {}	#list of BPO objects
 	BPO_to_product = {}
 	product_to_BPO = {}
+	XML_FILE_HANDLE = open (xml_file,'w')
 		#Pull initial BPO data to build to-do list
 	db_cursor.execute('''SELECT bpo.blueprintTypeID,
 			conv.groupID,
@@ -392,10 +446,22 @@ def main():
 		
 		BPO_to_product[tmp_bpo.BPO_typeID]=tmp_bpo.ITEM_typeID
 		product_to_BPO[tmp_bpo.ITEM_typeID]=tmp_bpo.BPO_typeID
-	test_bpo_obj = BPO_lookup[11177]
-	print test_bpo_obj.dump()
-
-
+	#test_bpo_obj = BPO_lookup[18055]
+	#print test_bpo_obj.dump()
+	print "writing XML"
+	for BPO_typeID,bpo_obj in BPO_lookup.iteritems():
+		#print BPO_lookup
+		#sys.exit()
+		XML_builder(bpo_obj,BPO_lookup)
+	
+	
+	#xml_minidom = minidom.parse(ET.dump(xml_root))
+	#pretty_xml = xml_minidom.toprettyxml()
+	pretty_xml = prettify(xml_root)
+	XML_FILE_HANDLE.write(pretty_xml)
+	
+	#xml_tree = ET.ElementTree(xml_root)
+	#xml_tree.write(xml_file)
 	
 if __name__ == "__main__":
 	main()
