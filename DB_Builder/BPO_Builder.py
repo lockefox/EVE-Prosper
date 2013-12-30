@@ -158,7 +158,7 @@ class BPO:
 		self.BPO_properties["waste"]      = cursor_line[14]
 		self.BPO_properties["prodlimit"]  = cursor_line[15]
 		                             
-		self.ITEM_properties["meta"]      = cursor_line[2]
+		self.ITEM_properties["meta"]      = int(cursor_line[2])
 		self.ITEM_properties["typeID"]    = cursor_line[3]
 		self.ITEM_properties["typeName"]  = cursor_line[16]
 		self.ITEM_properties["groupID"]   = cursor_line[17]
