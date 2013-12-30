@@ -16,7 +16,13 @@ db_cursor = None
 default_character = None
 skill_dict_byID = {}
 skill_dict_byname = {}
+t1BPO_to_t2BPO = {}
+t2BPO_to_t1BPO = {}
 job_types = []
+xml_tree = None
+xml_file = conf.get("GLOBALS" ,"bpo_file")
+json_tree = None
+json_file = conf.get("GLOBALS" ,"json_file")
 interfaceID_to_decryptorGRP ={
 	25554:728,	#occult
 	25851:728,
@@ -224,24 +230,13 @@ class BPO:
 					self.inv_base_chance = 0.30
 				else: #Wrecked parts
 					self.inv_base_chance = 0.20
+		
 		if self.BPO_properties["tech_level"] == 2:
-				#https://neweden-dev.com/EVE_Manufacturing_SQL#T1_to_T2_Blueprint_Mapping
-			db_cursor.execute('''SELECT it2.typeid basebpid
-				FROM invTypes it1
-				JOIN invBlueprintTypes ibt1 ON it1.typeid=ibt1.producttypeid
-				JOIN invTypes it2 ON it2.typeid=ibt1.blueprinttypeid
-				JOIN invMetaTypes imt ON imt.parenttypeid=it1.typeid
-				JOIN invTypes it3 ON imt.typeid=it3.typeid
-				JOIN invBlueprintTypes ibt2 ON it3.typeid=ibt2.producttypeid
-				JOIN invTypes it4 ON it4.typeid=ibt2.blueprinttypeid
-				WHERE imt.metaGroupID=2 
-				AND it4.typeid = %s''' % self.BPO_properties["typeID"])
-			parent_bpo_result = db_cursor.fetchone()
-
 			try:
-				self.BPO_properties["parent_BPO"] = parent_bpo_result[0]
-			except TypeError as e:
+				self.BPO_properties["parent_BPO"] = t2BPO_to_t1BPO[self.BPO_properties["typeID"]]
+			except KeyError as e:
 				self.BPO_properties["parent_BPO"] = None	#Unpublished item handler
+				#print self.BPO_properties["typeName"]
 				
 		elif self.BPO_properties["tech_level"] == 3:
 			if self.ITEM_properties["groupID"] == 963:		#T3 Hull
@@ -258,23 +253,13 @@ class BPO:
 				self.BPO_properties["parent_BPO"] = 992
 			else:
 				self.BPO_properties["parent_BPO"] = None
-		else:
-			db_cursor.execute('''SELECT it4.typeid t2bpid
-				FROM invTypes it1
-				JOIN invBlueprintTypes ibt1 ON it1.typeid=ibt1.producttypeid
-				JOIN invTypes it2 ON it2.typeid=ibt1.blueprinttypeid
-				JOIN invMetaTypes imt ON imt.parenttypeid=it1.typeid
-				JOIN invTypes it3 ON imt.typeid=it3.typeid
-				JOIN invBlueprintTypes ibt2 ON it3.typeid=ibt2.producttypeid
-				JOIN invTypes it4 ON it4.typeid=ibt2.blueprinttypeid
-				WHERE imt.metaGroupID=2 
-				AND it2.typeid = %s''' % self.BPO_properties["typeID"])
-			parent_bpo_result = db_cursor.fetchone()
+		else:		
 			try:
-				self.BPO_properties["parent_BPO"] = parent_bpo_result[0]
-			except TypeError as e:
+				self.BPO_properties["parent_BPO"] = t1BPO_to_t2BPO[self.BPO_properties["typeID"]]
+			except KeyError as e:
 				self.BPO_properties["parent_BPO"] = None	#Unpublished item handler
-
+				#print self.BPO_properties["typeName"]
+				
 	def bill_of_mats(self,ME,prod_line_waste=1):
 		build_bill = {}
 			#ME Equations: http://wiki.eve-id.net/Equations
@@ -300,7 +285,10 @@ class BPO:
 	##Add __str__ method?	
 		
 def init():
-	global db_schema,db,db_cursor,default_character,skill_dict_byID,skill_dict_byname,job_types
+	global db_schema,db,db_cursor	#DB utilities
+	global default_character		#character data
+	global skill_dict_byID,skill_dict_byname,job_types,t1BPO_to_t2BPO,t2BPO_to_t1BPO	#lookup/translation data
+	
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
 	db_user = conf.get("GLOBALS" ,"db_user")
@@ -323,6 +311,7 @@ def init():
 	for row in skill_list_hold:
 		skill_dict_byID[row[0]] = row[1]
 		skill_dict_byname[row[1]] = row[0]
+	
 	try:
 		db_cursor.execute('''SELECT activityName
 			FROM ramactivities
@@ -330,13 +319,36 @@ def init():
 	except MySQLdb.Error as e:
 		print "Unable to execute query on %s: %s" % (db_schema,e)
 		sys.exit(-1)
-		
 	job_type_hold = db_cursor.fetchall()
 	for row in job_type_hold:
 		job_types.append(row[0])	
-		
+	
+	try:
+		#https://neweden-dev.com/EVE_Manufacturing_SQL#T1_to_T2_Blueprint_Mapping
+		db_cursor.execute('''SELECT it2.typeid basebpid,
+				it4.typeid t2bpid
+			FROM invTypes it1
+			JOIN invBlueprintTypes ibt1 ON it1.typeid=ibt1.producttypeid
+			JOIN invTypes it2 ON it2.typeid=ibt1.blueprinttypeid
+			JOIN invMetaTypes imt ON imt.parenttypeid=it1.typeid
+			JOIN invTypes it3 ON imt.typeid=it3.typeid
+			JOIN invBlueprintTypes ibt2 ON it3.typeid=ibt2.producttypeid
+			JOIN invTypes it4 ON it4.typeid=ibt2.blueprinttypeid
+			WHERE imt.metaGroupID=2''')
+	except MySQLdb.Error as e:
+		print "Unable to execute query on %s: %s" % (db_schema,e)
+		sys.exit(-1)
+	BPO_match_hold = db_cursor.fetchall()
+	for row in BPO_match_hold:
+		t1BPO_to_t2BPO[row[0]]=row[1]
+		t2BPO_to_t1BPO[row[1]]=row[0]
+	
 	default_character = Character()
 	print "DB Init: %s connection GOOD" % db_schema
+
+def XML_builder (BPO_obj, dict_of_BPOs):
+	global xml_tree
+	
 	
 def main():
 	init()
