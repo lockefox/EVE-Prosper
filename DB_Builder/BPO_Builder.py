@@ -531,22 +531,49 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 			else:
 				item.set("buildable",str(0))
 				item.set("itemBPO",str(None))
-	
-	#if BPO_obj.BPO_properties["tech_level"] == 2:
-	#	inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
-	#	skill = ET.SubElement(inventionMaterials,"skill")
-	#	item = ET.SubElement(inventionMaterials,"item")
-	#	attribute = ET.SubElement(inventionMaterials,"attribute")
-	#	parent_BPO = dict_of_BPOs[BPO_obj.BPO_properties["parent_BPO"]]
-	#	for inv_skill in parent_BPO.inv_skills:
-	#		skill.set("typeID",str(inv_skill))
-	#		skill.set("typeName",item_info_lookup[inv_skill]["typeName"])
-	#	
-	#elif BPO_obj.BPO_properties["tech_level"] == 1 and BPO_obj.BPO_properties["parent_BPO"] != None:
-	#	inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
-	#	skill = ET.SubElement(inventionMaterials,"skill")
-	#	item = ET.SubElement(inventionMaterials,"item")
-	#	attribute = ET.SubElement(inventionMaterials,"attribute")
+	#Invention stats (reverse lookup)
+	if BPO_obj.BPO_properties["tech_level"] == 2 and BPO_obj.BPO_properties["parent_BPO"] != None:
+		inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
+		try:
+			parent_BPO = dict_of_BPOs[BPO_obj.BPO_properties["parent_BPO"]]
+			for bposkill in parent_BPO.inv_skills:
+				skill = ET.SubElement(inventionMaterials,"skill")
+				skill.set("typeID",str(bposkill))
+				skill.set("typeName",item_info_lookup[bposkill]["typeName"])
+			eskill = ET.SubElement(inventionMaterials,"skill")
+			eskill.set("typeID",str(parent_BPO.inv_encryption))
+			eskill.set("typeName",item_info_lookup[parent_BPO.inv_encryption]["typeName"])
+			
+			for datacore,qty in parent_BPO.extra_mats["Invention"].iteritems():
+				item = ET.SubElement(inventionMaterials,"item")
+				item.set("typeID",str(datacore))
+				item.set("typeName",item_info_lookup[datacore]["typeName"])
+				item.set("quantity",str(qty))
+				
+			prob_attr = ET.SubElement(inventionMaterials,"attribute")
+			prob_attr.set("baseInventionProbability",str(parent_BPO.inv_base_chance))
+			prob_attr.set("decryptorGroupID",str(parent_BPO.decryptor_group))
+		except KeyError as e:
+			print "invalid key: %s\t%s" % (BPO_obj.BPO_properties["parent_BPO"],item_info_lookup[BPO_obj.BPO_properties["parent_BPO"]]["typeName"])
+	elif BPO_obj.BPO_properties["tech_level"] == 1 and BPO_obj.BPO_properties["parent_BPO"] != None:
+		inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
+		for bposkill in BPO_obj.inv_skills:
+			skill = ET.SubElement(inventionMaterials,"skill")
+			skill.set("typeID",str(bposkill))
+			skill.set("typeName",item_info_lookup[bposkill]["typeName"])
+		eskill = ET.SubElement(inventionMaterials,"skill")
+		eskill.set("typeID",str(BPO_obj.inv_encryption))
+		eskill.set("typeName",item_info_lookup[BPO_obj.inv_encryption]["typeName"])
+		
+		for datacore,qty in BPO_obj.extra_mats["Invention"].iteritems():
+			item = ET.SubElement(inventionMaterials,"item")
+			item.set("typeID",str(datacore))
+			item.set("typeName",item_info_lookup[datacore]["typeName"])
+			item.set("quantity",str(qty))
+			
+		prob_attr = ET.SubElement(inventionMaterials,"attribute")
+		prob_attr.set("baseInventionProbability",str(BPO_obj.inv_base_chance))
+		prob_attr.set("decryptorGroupID",str(BPO_obj.decryptor_group))
 def main():
 	init()
 	BPO_lookup = {}	#list of BPO objects
