@@ -462,7 +462,91 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 			else:
 				item.set("buildable",str(0))
 				item.set("itemBPO",str(None))
-
+				
+	productionEfficiency = ET.SubElement(blueprint,"productionEfficiency")
+	if "Researching Time Productivity" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Researching Time Productivity"].iteritems():
+			item = ET.SubElement(productionEfficiency,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+			
+	materialEffciency = ET.SubElement(blueprint,"materialEffciency")
+	if "Researching Material Productivity" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Researching Material Productivity"].iteritems():
+			item = ET.SubElement(materialEffciency,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+	
+	copying = ET.SubElement(blueprint,"copying")
+	if "Copying" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Copying"].iteritems():
+			item = ET.SubElement(copying,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+				
+	reverseEngineering = ET.SubElement(blueprint,"reverseEngineering")
+	if "Reverse Engineering" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Reverse Engineering"].iteritems():
+			item = ET.SubElement(reverseEngineering,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+	invention = ET.SubElement(blueprint,"invention")
+	if "Invention" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Invention"].iteritems():
+			item = ET.SubElement(invention,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+	
+	#if BPO_obj.BPO_properties["tech_level"] == 2:
+	#	inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
+	#	skill = ET.SubElement(inventionMaterials,"skill")
+	#	item = ET.SubElement(inventionMaterials,"item")
+	#	attribute = ET.SubElement(inventionMaterials,"attribute")
+	#	parent_BPO = dict_of_BPOs[BPO_obj.BPO_properties["parent_BPO"]]
+	#	for inv_skill in parent_BPO.inv_skills:
+	#		skill.set("typeID",str(inv_skill))
+	#		skill.set("typeName",item_info_lookup[inv_skill]["typeName"])
+	#	
+	#elif BPO_obj.BPO_properties["tech_level"] == 1 and BPO_obj.BPO_properties["parent_BPO"] != None:
+	#	inventionMaterials = ET.SubElement(blueprint, "inventionMaterials")
+	#	skill = ET.SubElement(inventionMaterials,"skill")
+	#	item = ET.SubElement(inventionMaterials,"item")
+	#	attribute = ET.SubElement(inventionMaterials,"attribute")
 def main():
 	init()
 	BPO_lookup = {}	#list of BPO objects
