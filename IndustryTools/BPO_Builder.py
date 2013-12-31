@@ -9,7 +9,7 @@ import ConfigParser
 
 ##Config File Globals##
 conf = ConfigParser.ConfigParser()
-conf.read(["init.ini","init.ini"])
+conf.read(["init.ini","tmp_init.ini"])
 
 ########## GLOBALS ##########
 db_schema = ""
@@ -25,10 +25,10 @@ BPO_to_product = {}
 product_to_BPO = {}
 job_types = []
 xml_root = ET.Element("root")
-xml_file = "%s.xml" % conf.get("GLOBALS" ,"bpo_file")
+xml_file = "%s.xml" % conf.get("BPO_BUILDER" ,"bpo_file")
 
 json_tree = None
-json_file = "%s.json" % conf.get("GLOBALS" ,"bpo_file")
+json_file = "%s.json" % conf.get("BPO_BUILDER" ,"bpo_file")
 interfaceID_to_decryptorGRP ={
 	25554:728,	#occult
 	25851:728,
