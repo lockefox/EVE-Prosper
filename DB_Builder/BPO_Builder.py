@@ -642,7 +642,8 @@ def main():
 		JOIN invtypes conv2 ON (bpo.productTypeID = conv2.typeID)
 		JOIN invgroups grp ON (grp.groupID = conv2.groupID)
 		WHERE conv.published = 1
-		AND (conv2.groupID IN (334,913,964,873,332,86,85,83) OR grp.categoryID IN (22,23))''')
+		AND (conv2.groupID IN (334,913,964,873,332,86,85,83) OR grp.categoryID IN (22,23))
+		AND wasteFactor<>0''') #Avoids meta POS equipment
 			#group(T2components,capital T2components,capital parts,T3 compoents,R.A.M.,laser charge,hybrid charge,proj charge) OR category(Deployable,Structure)
 	tmp_lookup = db_cursor.fetchall()
 	for item in tmp_lookup:
