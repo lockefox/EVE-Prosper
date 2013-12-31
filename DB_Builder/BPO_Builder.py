@@ -20,6 +20,9 @@ skill_dict_byID = {}
 skill_dict_byname = {}
 t1BPO_to_t2BPO = {}
 t2BPO_to_t1BPO = {}
+item_info_lookup = {}
+BPO_to_product = {}
+product_to_BPO = {}
 job_types = []
 xml_root = ET.Element("root")
 xml_file = conf.get("GLOBALS" ,"bpo_file")
@@ -295,7 +298,7 @@ def prettify(elem):
 def init():
 	global db_schema,db,db_cursor	#DB utilities
 	global default_character		#character data
-	global skill_dict_byID,skill_dict_byname,job_types,t1BPO_to_t2BPO,t2BPO_to_t1BPO	#lookup/translation data
+	global skill_dict_byID,skill_dict_byname,job_types,t1BPO_to_t2BPO,t2BPO_to_t1BPO,item_info_lookup	#lookup/translation data
 
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
@@ -351,6 +354,35 @@ def init():
 		t1BPO_to_t2BPO[row[0]]=row[1]
 		t2BPO_to_t1BPO[row[1]]=row[0]
 	
+	try:
+		db_cursor.execute('''SELECT conv.typeID,
+				conv.typeName,
+				conv.groupID,
+				COALESCE(meta.valueInt,meta.valueFloat,0),
+				grp.categoryID
+			FROM invTypes conv
+			LEFT JOIN dgmTypeAttributes meta ON (meta.typeID = conv.typeID AND meta.attributeID = 633)
+			JOIN invGroups grp ON (grp.groupID=conv.groupID)''')
+	except MySQLdb.Error as e:
+		print "Unable to execute query on %s: %s" % (db_schema,e)
+		sys.exit(-1)
+	item_lookup_hold = db_cursor.fetchall()
+	for row in 	item_lookup_hold:
+		item_info_lookup[row[0]]={}
+		item_info_lookup[row[0]]["typeID"]=row[0]
+		item_info_lookup[row[0]]["typeName"]=row[1]
+		item_info_lookup[row[0]]["groupID"]=row[2]
+		item_info_lookup[row[0]]["metaLevel"]=row[3]
+		item_info_lookup[row[0]]["categoryID"]=row[4]
+	
+		#CCP_PrismX is an asshole
+	item_info_lookup[18054]["typeID"]=18054
+	item_info_lookup[18054]["typeName"]="Mercoxit Mining Crystal I"
+	item_info_lookup[18054]["groupID"]=663
+	item_info_lookup[18054]["metaLevel"]=0
+	item_info_lookup[18054]["categoryID"]=8
+	
+	#print item_info_lookup
 	default_character = Character()
 	print "DB Init: %s connection GOOD" % db_schema
 
@@ -403,12 +435,26 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 		baseInventionProbability.text = t2BPO_chanceStr
 	else:
 		baseInventionProbability.text = str(BPO_obj.inv_base_chance)
+		
+	baseMaterials = ET.SubElement(blueprint,"baseMaterials")
+
+	for mats,qty in BPO_obj.materials.iteritems():
+		item = ET.SubElement(baseMaterials,"item")
+		item.set("typeID",str(mats))
+		item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+		item.set("quantity",str(qty))
+		if mats in product_to_BPO:
+			item.set("buildable",str(1))
+			item.set("itemBPO",str(product_to_BPO[mats]))
+		else:
+			item.set("buildable",str(0))
+			item.set("itemBPO",str(None))
 def main():
 	init()
 	BPO_lookup = {}	#list of BPO objects
-	BPO_to_product = {}
-	product_to_BPO = {}
-	XML_FILE_HANDLE = open (xml_file,'w')
+	global BPO_to_product
+	global product_to_BPO
+
 		#Pull initial BPO data to build to-do list
 	db_cursor.execute('''SELECT bpo.blueprintTypeID,
 			conv.groupID,
@@ -446,9 +492,46 @@ def main():
 		
 		BPO_to_product[tmp_bpo.BPO_typeID]=tmp_bpo.ITEM_typeID
 		product_to_BPO[tmp_bpo.ITEM_typeID]=tmp_bpo.BPO_typeID
+	#fetch components
+	db_cursor.execute('''SELECT bpo.blueprintTypeID,
+			conv.groupID,
+			0,
+			productTypeID,
+			techLevel,
+			conv.typeName,
+			parentBlueprintTypeID,
+			productionTime,
+			researchProductivityTime,
+			researchMaterialTime,
+			researchCopyTime,
+			researchTechTime,
+			productivityModifier,
+			materialModifier,
+			wasteFactor,
+			maxProductionLimit,
+			conv2.typeName,
+			conv2.groupID,
+			grp.categoryID
+		FROM invBluePrintTypes bpo
+		JOIN invtypes conv ON (bpo.blueprintTypeID = conv.typeID)
+		JOIN invtypes conv2 ON (bpo.productTypeID = conv2.typeID)
+		JOIN invgroups grp ON (grp.groupID = conv2.groupID)
+		WHERE conv.published = 1
+		AND conv2.groupID IN (334,913,964,873)''')
+	tmp_lookup = db_cursor.fetchall()
+	for item in tmp_lookup:
+		tmp_dump= {}
+		tmp_bpo = BPO()
+		tmp_bpo.bp_type_load(item)	#push mySQL data into BPO object
+		BPO_lookup[tmp_bpo.BPO_typeID]=tmp_bpo
+		tmp_dump = tmp_bpo.dump()
+		
+		BPO_to_product[tmp_bpo.BPO_typeID]=tmp_bpo.ITEM_typeID
+		product_to_BPO[tmp_bpo.ITEM_typeID]=tmp_bpo.BPO_typeID
 	#test_bpo_obj = BPO_lookup[18055]
 	#print test_bpo_obj.dump()
 	print "writing XML"
+	XML_FILE_HANDLE = open (xml_file,'w')
 	for BPO_typeID,bpo_obj in BPO_lookup.iteritems():
 		#print BPO_lookup
 		#sys.exit()
