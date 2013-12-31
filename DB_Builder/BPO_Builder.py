@@ -437,7 +437,6 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 		baseInventionProbability.text = str(BPO_obj.inv_base_chance)
 		
 	baseMaterials = ET.SubElement(blueprint,"baseMaterials")
-
 	for mats,qty in BPO_obj.materials.iteritems():
 		item = ET.SubElement(baseMaterials,"item")
 		item.set("typeID",str(mats))
@@ -449,6 +448,21 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 		else:
 			item.set("buildable",str(0))
 			item.set("itemBPO",str(None))
+	
+	extraMaterials = ET.SubElement(blueprint,"extraMaterials")
+	if "Manufacturing" in BPO_obj.extra_mats:
+		for mats,qty in BPO_obj.extra_mats["Manufacturing"].iteritems():
+			item = ET.SubElement(extraMaterials,"item")
+			item.set("typeID",str(mats))
+			item.set("typeName",str(item_info_lookup[mats]["typeName"]))
+			item.set("quantity",str(qty))
+			if mats in product_to_BPO:
+				item.set("buildable",str(1))
+				item.set("itemBPO",str(product_to_BPO[mats]))
+			else:
+				item.set("buildable",str(0))
+				item.set("itemBPO",str(None))
+
 def main():
 	init()
 	BPO_lookup = {}	#list of BPO objects
@@ -517,7 +531,7 @@ def main():
 		JOIN invtypes conv2 ON (bpo.productTypeID = conv2.typeID)
 		JOIN invgroups grp ON (grp.groupID = conv2.groupID)
 		WHERE conv.published = 1
-		AND conv2.groupID IN (334,913,964,873)''')
+		AND conv2.groupID IN (334,913,964,873,332)''')
 	tmp_lookup = db_cursor.fetchall()
 	for item in tmp_lookup:
 		tmp_dump= {}
