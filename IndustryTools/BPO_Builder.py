@@ -9,7 +9,7 @@ import ConfigParser
 
 ##Config File Globals##
 conf = ConfigParser.ConfigParser()
-conf.read(["scraper.ini","scraper_local.ini"])
+conf.read(["init.ini","init.ini"])
 
 ########## GLOBALS ##########
 db_schema = ""
@@ -25,10 +25,10 @@ BPO_to_product = {}
 product_to_BPO = {}
 job_types = []
 xml_root = ET.Element("root")
-xml_file = conf.get("GLOBALS" ,"bpo_file")
+xml_file = "%s.xml" % conf.get("GLOBALS" ,"bpo_file")
 
 json_tree = None
-json_file = conf.get("GLOBALS" ,"json_file")
+json_file = "%s.json" % conf.get("GLOBALS" ,"bpo_file")
 interfaceID_to_decryptorGRP ={
 	25554:728,	#occult
 	25851:728,
@@ -300,6 +300,7 @@ def init():
 	global default_character		#character data
 	global skill_dict_byID,skill_dict_byname,job_types,t1BPO_to_t2BPO,t2BPO_to_t1BPO,item_info_lookup	#lookup/translation data
 
+	
 	db_schema = conf.get("GLOBALS" ,"db_name")
 	db_IP = conf.get("GLOBALS" ,"db_host")
 	db_user = conf.get("GLOBALS" ,"db_user")
@@ -388,7 +389,8 @@ def init():
 
 def XML_builder (BPO_obj, dict_of_BPOs):
 	global xml_root
-
+	version = ET.SubElement(xml_root,"DBversion")
+	version.set(str(conf.get("GLOBALS" ,"db_name")))
 	blueprint = ET.SubElement(xml_root,"blueprint")
 	#blueprint element set
 	blueprint.set("BPO_typeName",BPO_obj.BPO_properties["typeName"])
