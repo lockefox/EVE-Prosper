@@ -399,7 +399,7 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 	blueprint.set("ITEM_typeID",str(BPO_obj.ITEM_properties["typeID"]))
 	blueprint.set("ITEM_categoryID",str(BPO_obj.ITEM_properties["categoryID"]))
 	blueprint.set("ITEM_groupID",str(BPO_obj.ITEM_properties["groupID"]))
-	
+	blueprint.set("techLevel",str(BPO_obj.ITEM_properties["tech_level"]))
 	properties = ET.SubElement(blueprint,"properties")
 	#blueprint properites
 	researchMaterialTime = ET.SubElement(properties,"researchMaterialTime")
