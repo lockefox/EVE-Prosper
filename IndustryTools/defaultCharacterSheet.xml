@@ -103,15 +103,15 @@
 			<row typeID="21718"	level="5" skillpoints="0" published="1" typeName="Hacking"/>
 			<row typeID="3551"	level="5" skillpoints="0" published="1" typeName="Survey"/>
 			<row typeID="26252"	level="5" skillpoints="0" published="1" typeName="Jury Rigging"/>
-			<row typeID="26253"	level="5" skillpoints="0" published="1" typeName="Armor Rigging"/>
-			<row typeID="26254"	level="5" skillpoints="0" published="1" typeName="Astronautics Rigging"/>
-			<row typeID="26255"	level="5" skillpoints="0" published="1" typeName="Drones Rigging"/>
-			<row typeID="26256"	level="5" skillpoints="0" published="1" typeName="Electronic Superiority Rigging"/>
-			<row typeID="26257"	level="5" skillpoints="0" published="1" typeName="Projectile Weapon Rigging"/>
-			<row typeID="26258"	level="5" skillpoints="0" published="1" typeName="Energy Weapon Rigging"/>
-			<row typeID="26259"	level="5" skillpoints="0" published="1" typeName="Hybrid Weapon Rigging"/>
-			<row typeID="26260"	level="5" skillpoints="0" published="1" typeName="Launcher Rigging"/>
-			<row typeID="26261"	level="5" skillpoints="0" published="1" typeName="Shield Rigging"/>
+			<row typeID="26253"	level="4" skillpoints="0" published="1" typeName="Armor Rigging"/>
+			<row typeID="26254"	level="4" skillpoints="0" published="1" typeName="Astronautics Rigging"/>
+			<row typeID="26255"	level="4" skillpoints="0" published="1" typeName="Drones Rigging"/>
+			<row typeID="26256"	level="4" skillpoints="0" published="1" typeName="Electronic Superiority Rigging"/>
+			<row typeID="26257"	level="4" skillpoints="0" published="1" typeName="Projectile Weapon Rigging"/>
+			<row typeID="26258"	level="4" skillpoints="0" published="1" typeName="Energy Weapon Rigging"/>
+			<row typeID="26259"	level="4" skillpoints="0" published="1" typeName="Hybrid Weapon Rigging"/>
+			<row typeID="26260"	level="4" skillpoints="0" published="1" typeName="Launcher Rigging"/>
+			<row typeID="26261"	level="4" skillpoints="0" published="1" typeName="Shield Rigging"/>
 		</rowset>
 		<rowset name="certificates" key="certificateID" columns="certificateID">
 		</rowset>
