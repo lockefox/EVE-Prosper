@@ -548,7 +548,7 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 				item = ET.SubElement(inventionMaterials,"item")
 				item.set("typeID",str(datacore))
 				item.set("typeName",item_info_lookup[datacore]["typeName"])
-				item.set("quantity",str(qty))
+				item.set("quantity",str(int(qty)))
 				
 			prob_attr = ET.SubElement(inventionMaterials,"attribute")
 			prob_attr.set("baseInventionProbability",str(parent_BPO.inv_base_chance))
@@ -569,7 +569,7 @@ def XML_builder (BPO_obj, dict_of_BPOs):
 			item = ET.SubElement(inventionMaterials,"item")
 			item.set("typeID",str(datacore))
 			item.set("typeName",item_info_lookup[datacore]["typeName"])
-			item.set("quantity",str(qty))
+			item.set("quantity",str(int(qty)))
 			
 		prob_attr = ET.SubElement(inventionMaterials,"attribute")
 		prob_attr.set("baseInventionProbability",str(BPO_obj.inv_base_chance))
@@ -642,7 +642,7 @@ def main():
 		JOIN invtypes conv2 ON (bpo.productTypeID = conv2.typeID)
 		JOIN invgroups grp ON (grp.groupID = conv2.groupID)
 		WHERE conv.published = 1
-		AND conv2.groupID IN (334,913,964,873,332)''')
+		AND conv2.groupID IN (334,913,964,873,332,86,85,83)''')
 	tmp_lookup = db_cursor.fetchall()
 	for item in tmp_lookup:
 		tmp_dump= {}
