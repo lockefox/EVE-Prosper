@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+	<currentTime>2009-08-26 12:00:09</currentTime>
+	<result>
+		<characterID>999999999</characterID>
+		<name>Prosper-Default</name>
+		<DoB>2006-01-01 00:00:00</DoB>
+		<race>Minmatar</race>
+		<bloodLine>Brutor</bloodLine>
+		<ancestry>Slave Child</ancestry>
+		<gender>Female</gender>
+		<corporationName>corpexport Corp</corporationName>
+		<corporationID>999999999</corporationID>
+		<allianceName />
+		<allianceID>0</allianceID>
+		<cloneName>Clone Grade Pi</cloneName>
+		<cloneSkillPoints>0</cloneSkillPoints>
+		<balance>0</balance>
+		<attributeEnhancers>
+			<memoryBonus>
+			<augmentatorName>Memory Augmentation - Basic</augmentatorName>
+			<augmentatorValue>3</augmentatorValue>
+			</memoryBonus>
+			<perceptionBonus>
+			<augmentatorName>Ocular Filter - Basic</augmentatorName>
+			<augmentatorValue>3</augmentatorValue>
+			</perceptionBonus>
+			<willpowerBonus>
+			<augmentatorName>Neural Boost - Basic</augmentatorName>
+			<augmentatorValue>3</augmentatorValue>
+			</willpowerBonus>
+			<intelligenceBonus>
+			<augmentatorName>Snake Delta</augmentatorName>
+			<augmentatorValue>3</augmentatorValue>
+			</intelligenceBonus>
+			<charismaBonus>
+			<augmentatorName>Limited Social Adaptation Chip</augmentatorName>
+			<augmentatorValue>1</augmentatorValue>
+			</charismaBonus>
+		</attributeEnhancers>
+		<attributes>
+			<intelligence>6</intelligence>
+			<memory>4</memory>
+			<charisma>7</charisma>
+			<perception>12</perception>
+			<willpower>10</willpower>
+		</attributes>
+		<rowset name="skills" key="typeID" columns="typeID,level,skillpoints,published,typeName">
+			<row typeID="3380"	level="5" skillpoints="0" published="1" typeName="Industry"/>
+			<row typeID="3387"	level="5" skillpoints="0" published="1" typeName="Mass Production"/>
+			<row typeID="3388"	level="5" skillpoints="0" published="1" typeName="Production Efficiency"/>
+			<row typeID="3395"	level="5" skillpoints="0" published="1" typeName="Frigate Construction"/>
+			<row typeID="3396"	level="5" skillpoints="0" published="1" typeName="Industrial Construction"/>
+			<row typeID="3397"	level="5" skillpoints="0" published="1" typeName="Cruiser Construction"/>
+			<row typeID="3398"	level="4" skillpoints="0" published="1" typeName="Battleship Construction"/>
+			<row typeID="3400"	level="5" skillpoints="0" published="1" typeName="Outpost Construction"/>
+			<row typeID="22242"	level="5" skillpoints="0" published="1" typeName="Capital Ship Construction"/>
+			<row typeID="24268"	level="5" skillpoints="0" published="1" typeName="Supply Chain Management"/>
+			<row typeID="24625"	level="4" skillpoints="0" published="1" typeName="Advanced Mass Production"/>
+			<row typeID="26224"	level="5" skillpoints="0" published="1" typeName="Drug Manufacturing"/>
+			<row typeID="3402"	level="5" skillpoints="0" published="1" typeName="Science"/>
+			<row typeID="3403"	level="5" skillpoints="0" published="1" typeName="Research"/>
+			<row typeID="3406"	level="5" skillpoints="0" published="1" typeName="Laboratory Operation"/>
+			<row typeID="3408"	level="4" skillpoints="0" published="1" typeName="Reverse Engineering"/>
+			<row typeID="3409"	level="5" skillpoints="0" published="1" typeName="Metallurgy"/>
+			<row typeID="11433"	level="4" skillpoints="0" published="1" typeName="High Energy Physics"/>
+			<row typeID="11441"	level="4" skillpoints="0" published="1" typeName="Plasma Physics"/>
+			<row typeID="11442"	level="4" skillpoints="0" published="1" typeName="Nanite Engineering"/>
+			<row typeID="11443"	level="4" skillpoints="0" published="1" typeName="Hydromagnetic Physics"/>
+			<row typeID="11444"	level="5" skillpoints="0" published="1" typeName="Amarrian Starship Engineering"/>
+			<row typeID="11445"	level="5" skillpoints="0" published="1" typeName="Minmatar Starship Engineering"/>
+			<row typeID="11446"	level="4" skillpoints="0" published="1" typeName="Graviton Physics"/>
+			<row typeID="11447"	level="4" skillpoints="0" published="1" typeName="Laser Physics"/>
+			<row typeID="11448"	level="4" skillpoints="0" published="1" typeName="Electromagnetic Physics"/>
+			<row typeID="11449"	level="4" skillpoints="0" published="1" typeName="Rocket Science"/>
+			<row typeID="11450"	level="5" skillpoints="0" published="1" typeName="Gallentean Starship Engineering"/>
+			<row typeID="11451"	level="4" skillpoints="0" published="1" typeName="Nuclear Physics"/>
+			<row typeID="11452"	level="5" skillpoints="0" published="1" typeName="Mechanical Engineering"/>
+			<row typeID="11453"	level="4" skillpoints="0" published="1" typeName="Electronic Engineering"/>
+			<row typeID="11454"	level="5" skillpoints="0" published="1" typeName="Caldari Starship Engineering"/>
+			<row typeID="11455"	level="4" skillpoints="0" published="1" typeName="Quantum Physics"/>
+			<row typeID="11487"	level="0" skillpoints="0" published="1" typeName="Astronautic Engineering"/>
+			<row typeID="11529"	level="4" skillpoints="0" published="1" typeName="Molecular Engineering"/>
+			<row typeID="12179"	level="4" skillpoints="0" published="1" typeName="Research Project Management"/>
+			<row typeID="20433"	level="4" skillpoints="0" published="1" typeName="Talocan Technology"/>
+			<row typeID="21789"	level="4" skillpoints="0" published="1" typeName="Sleeper Technology"/>
+			<row typeID="21790"	level="4" skillpoints="0" published="1" typeName="Caldari Encryption Methods"/>
+			<row typeID="21791"	level="4" skillpoints="0" published="1" typeName="Minmatar Encryption Methods"/>
+			<row typeID="23087"	level="4" skillpoints="0" published="1" typeName="Amarr Encryption Methods"/>
+			<row typeID="23121"	level="4" skillpoints="0" published="1" typeName="Gallente Encryption Methods"/>
+			<row typeID="23123"	level="4" skillpoints="0" published="1" typeName="Takmahl Technology"/>
+			<row typeID="23124"	level="4" skillpoints="0" published="1" typeName="Yan Jung Technology"/>
+			<row typeID="24270"	level="4" skillpoints="0" published="1" typeName="Scientific Networking"/>
+			<row typeID="24624"	level="4" skillpoints="0" published="1" typeName="Advanced Laboratory Operation"/>
+			<row typeID="30324"	level="4" skillpoints="0" published="1" typeName="Defensive Subsystem Technology"/>
+			<row typeID="30325"	level="4" skillpoints="0" published="1" typeName="Engineering Subsystem Technology"/>
+			<row typeID="30326"	level="4" skillpoints="0" published="1" typeName="Electronic Subsystem Technology"/>
+			<row typeID="30327"	level="4" skillpoints="0" published="1" typeName="Offensive Subsystem Technology"/>
+			<row typeID="30788"	level="4" skillpoints="0" published="1" typeName="Propulsion Subsystem Technology"/>
+			<row typeID="3392"	level="5" skillpoints="0" published="1" typeName="Mechanics"/>
+			<row typeID="3413"	level="5" skillpoints="0" published="1" typeName="Power Grid Management"/>
+			<row typeID="3426"	level="5" skillpoints="0" published="1" typeName="CPU Management"/>
+			<row typeID="21718"	level="5" skillpoints="0" published="1" typeName="Hacking"/>
+			<row typeID="3551"	level="5" skillpoints="0" published="1" typeName="Survey"/>
+			<row typeID="26252"	level="5" skillpoints="0" published="1" typeName="Jury Rigging"/>
+			<row typeID="26253"	level="5" skillpoints="0" published="1" typeName="Armor Rigging"/>
+			<row typeID="26254"	level="5" skillpoints="0" published="1" typeName="Astronautics Rigging"/>
+			<row typeID="26255"	level="5" skillpoints="0" published="1" typeName="Drones Rigging"/>
+			<row typeID="26256"	level="5" skillpoints="0" published="1" typeName="Electronic Superiority Rigging"/>
+			<row typeID="26257"	level="5" skillpoints="0" published="1" typeName="Projectile Weapon Rigging"/>
+			<row typeID="26258"	level="5" skillpoints="0" published="1" typeName="Energy Weapon Rigging"/>
+			<row typeID="26259"	level="5" skillpoints="0" published="1" typeName="Hybrid Weapon Rigging"/>
+			<row typeID="26260"	level="5" skillpoints="0" published="1" typeName="Launcher Rigging"/>
+			<row typeID="26261"	level="5" skillpoints="0" published="1" typeName="Shield Rigging"/>
+		</rowset>
+		<rowset name="certificates" key="certificateID" columns="certificateID">
+		</rowset>
+		<rowset name="corporationRoles" key="roleID" columns="roleID,roleName">
+			<row roleID="1" roleName="roleDirector" />
+		</rowset>
+		<rowset name="corporationRolesAtHQ" key="roleID" columns="roleID,roleName">
+			<row roleID="1" roleName="roleDirector" />
+		</rowset>
+		<rowset name="corporationRolesAtBase" key="roleID" columns="roleID,roleName">
+			<row roleID="1" roleName="roleDirector" />
+		</rowset>
+		<rowset name="corporationRolesAtOther" key="roleID" columns="roleID,roleName">
+			<row roleID="1" roleName="roleDirector" />
+		</rowset>
+		<rowset name="corporationTitles" key="titleID" columns="titleID,titleName">
+			<row titleID="1" titleName="Member" />
+		</rowset>
+	</result>
+	<cachedUntil></cachedUntil>
+</eveapi>
