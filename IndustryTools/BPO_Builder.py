@@ -389,8 +389,8 @@ def init():
 
 def XML_builder (BPO_obj, dict_of_BPOs):
 	global xml_root
-	version = ET.SubElement(xml_root,"DBversion")
-	version.set(str(conf.get("GLOBALS" ,"db_name")))
+	version = ET.SubElement(xml_root,"databaseVersion")
+	version.set("release",str(conf.get("GLOBALS" ,"db_name")))
 	blueprint = ET.SubElement(xml_root,"blueprint")
 	#blueprint element set
 	blueprint.set("BPO_typeName",BPO_obj.BPO_properties["typeName"])
