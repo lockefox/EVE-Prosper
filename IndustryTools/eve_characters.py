@@ -28,6 +28,7 @@ class Character:
 		self.allianceID = None
 		self.API_id = 0
 		self.API_vcode = 0
+		self.default_character = 0
 	
 	def __str__ (self):
 		return self.name
@@ -48,6 +49,38 @@ class Character:
 			raise TypeError
 	def dump_skills(self):
 		return self.skills
+	
+	def file_dump(self,filename):		#move to its own function?
+		if self.default_character==1:
+			return	#no need to print if character is default
+		
+		xml_root = ET.Element("eveapi")
+		result = ET.SubElement(xml_root,"result")
+		ET.SubElement(result,"name").text = self.name
+		ET.SubElement(result,"characterID").text = str(self.characterID)
+		ET.SubElement(result,"corporationName").text = self.corporationName
+		ET.SubElement(result,"corporationID").text = str(self.corporationID)
+		ET.SubElement(result,"allianceName").text = str(self.allianceName)
+		ET.SubElement(result,"allianceID").text = str(self.allianceID)
+		
+		skill_rowset = ET.SubElement(result,"rowset")
+		skill_rowset.set("name","skills")
+		skill_rowset.set("key","typeID")
+		skill_rowset.set("columns","typeID,level,skillpoints,published,typeName")
+		for skill,level in self.skills.iteritems():
+			row = ET.SubElement(skill_rowset,"row")
+			row.set("typeID",skill)
+			row.set("level",level)
+			row.set("skillpoints","0")	#dumping SP data on read, not important for math
+			row.set("published","1")	#not important for validity
+			row.set("typeName",skillID_to_skillName[skill])	#not in official API, but useful for debug
+			
+		
+		ET.SubElement(result,"cachedUntil").text = ""
+		
+		xmlStr = XML_prettify(xml_root)
+		file_writer = open(filename,'w')
+		file_writer.write(xmlStr)
 		
 	def load_default(self,char_xml=default_character_xml):
 		domObj = minidom.parse(char_xml)
@@ -64,8 +97,17 @@ class Character:
 		except AttributeError as e:
 			self.allianceName = None
 		self.allianceID = domObj.getElementsByTagName("allianceID")[0].firstChild.nodeValue
+		
+		self.default_character=1
 	def load_eveapi(self,charDataObj):
 		test=1
+
+def XML_prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")	
 		
 def SDE_loadSkills():
 	global skillName_to_skillID,skillID_to_skillName

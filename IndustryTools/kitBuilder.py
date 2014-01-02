@@ -8,4 +8,4 @@ import MySQLdb
 import ConfigParser
 
 import eve_characters
-
+import eve_accounts
