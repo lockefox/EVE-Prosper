@@ -54,7 +54,19 @@ class Character:
 		rowsets = domObj.getElementsByTagName("rowset")
 		for row in rowsets[0].getElementsByTagName("row"):
 			self.skills[row.getAttribute("typeID")] = int(row.getAttribute("level"))
-			
+		
+		self.name = domObj.getElementsByTagName("name")[0].firstChild.nodeValue
+		self.characterID = domObj.getElementsByTagName("characterID")[0].firstChild.nodeValue
+		self.corporationName = domObj.getElementsByTagName("corporationName")[0].firstChild.nodeValue
+		self.corporationID = domObj.getElementsByTagName("corporationID")[0].firstChild.nodeValue
+		try:	#value is empty for no alliance
+			self.allianceName = domObj.getElementsByTagName("allianceName")[0].firstChild.nodeValue
+		except AttributeError as e:
+			self.allianceName = None
+		self.allianceID = domObj.getElementsByTagName("allianceID")[0].firstChild.nodeValue
+	def load_eveapi(self,charDataObj):
+		test=1
+		
 def SDE_loadSkills():
 	global skillName_to_skillID,skillID_to_skillName
 	skill_json = {}
@@ -146,7 +158,7 @@ def main():
 	init()
 	default_char = Character()
 	default_char.load_default()
-	print default_char.dump_skills()
+	print default_char.name
 	
 if __name__ == "__main__":
 	main()
