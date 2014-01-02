@@ -12,10 +12,11 @@ conf.read(["init.ini","tmp_init.ini"])
 
 skillName_to_skillID = {}
 skillID_to_skillName = {}
+skill_list_default = {}
 
 class Character:
 	def __init__(self):
-		self.skills = {}	#skills[skillID]=skill_level
+		self.skills = skill_list_default	#skills[skillID]=skill_level
 		self.name = ""
 		self.characterID = 0
 		self.corporationName = ""
@@ -96,8 +97,38 @@ def JSON_dumper(json_object,filename):
 	json_str = json.dumps(json_object, indent=4, sort_keys=True)
 	file = open(filename,'w')
 	file.write(json_str)
+
+def init():
+	global skill_list_default, skillName_to_skillID, skillID_to_skillName
+	skill_list_file = conf.get("EVE_CHARACTERS" ,"skill_list")
+	#test if skill_list exists
+	try:
+		with open (skill_list_file):
+			pass
+	except IOError:
+		#skill list doesn't exist
+		SDE_loadSkills()
+	
+	skills_list = json.load(open(skill_list_file))
+	#make sure skill list version matches expected SDE
+	if skills_list["version"] != conf.get("GLOBALS" ,"db_name"):
+		SDE_loadSkills()
+		skills_list = json.load(open(skill_list_file))	#reload object
+	
+	#load module globals for lookups and init
+	for skillID,attributes in skills_list.iteritems():
+		if skillID == "version":
+			continue
+		skillName = attributes["skillName"]
+		skillID   = attributes["skillID"]
+		
+		skillName_to_skillID[skillName] = skillID
+		skillID_to_skillName[skillID] = skillName
+		skill_list_default[skillID] = 0
 	
 def main():
-	SDE_loadSkills()
+	init()
+
+	
 if __name__ == "__main__":
 	main()
