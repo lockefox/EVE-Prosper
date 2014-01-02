@@ -14,6 +14,8 @@ skillName_to_skillID = {}
 skillID_to_skillName = {}
 skill_list_default = {}
 
+default_character_xml = conf.get("EVE_CHARACTERS" ,"default_character")
+
 class Character:
 	def __init__(self):
 		self.skills = skill_list_default	#skills[skillID]=skill_level
@@ -44,7 +46,15 @@ class Character:
 			return skill_level
 		else:
 			raise TypeError
-	
+	def dump_skills(self):
+		return self.skills
+		
+	def load_default(self,char_xml=default_character_xml):
+		domObj = minidom.parse(char_xml)
+		rowsets = domObj.getElementsByTagName("rowset")
+		for row in rowsets[0].getElementsByTagName("row"):
+			self.skills[row.getAttribute("typeID")] = int(row.getAttribute("level"))
+			
 def SDE_loadSkills():
 	global skillName_to_skillID,skillID_to_skillName
 	skill_json = {}
@@ -126,15 +136,17 @@ def init():
 		if skillID == "version":
 			continue
 		skillName = attributes["typeName"]
-		skillID   = attributes["typeID"]
+		skillID   = str(attributes["typeID"])
 		
 		skillName_to_skillID[skillName] = skillID
 		skillID_to_skillName[skillID] = skillName
 		skill_list_default[skillID] = 0
-	
+		
 def main():
 	init()
-
+	default_char = Character()
+	default_char.load_default()
+	print default_char.dump_skills()
 	
 if __name__ == "__main__":
 	main()
