@@ -112,6 +112,20 @@
 			<row typeID="26259"	level="4" skillpoints="0" published="1" typeName="Hybrid Weapon Rigging"/>
 			<row typeID="26260"	level="4" skillpoints="0" published="1" typeName="Launcher Rigging"/>
 			<row typeID="26261"	level="4" skillpoints="0" published="1" typeName="Shield Rigging"/>
+			<row typeID="3443"	level="5" skillpoints="0" published="1" typeName="Trade"/>
+			<row typeID="3444"	level="5" skillpoints="0" published="1" typeName="Retail"/>
+			<row typeID="3446"	level="5" skillpoints="0" published="1" typeName="Broker Relations"/>
+			<row typeID="3447"	level="5" skillpoints="0" published="1" typeName="Visibility"/>
+			<row typeID="16594"	level="5" skillpoints="0" published="1" typeName="Procurement"/>
+			<row typeID="16595"	level="5" skillpoints="0" published="1" typeName="Daytrading"/>
+			<row typeID="16596"	level="5" skillpoints="0" published="1" typeName="Wholesale"/>
+			<row typeID="16597"	level="5" skillpoints="0" published="1" typeName="Margin Trading"/>
+			<row typeID="16598"	level="5" skillpoints="0" published="1" typeName="Marketing"/>
+			<row typeID="16622"	level="5" skillpoints="0" published="1" typeName="Accounting"/>
+			<row typeID="18580"	level="5" skillpoints="0" published="1" typeName="Tycoon"/>
+			<row typeID="25233"	level="5" skillpoints="0" published="1" typeName="Corporation Contracting"/>
+			<row typeID="25235"	level="5" skillpoints="0" published="1" typeName="Contracting"/>
+			<row typeID="33467"	level="5" skillpoints="0" published="1" typeName="Customs Code Expertise"/>
 		</rowset>
 		<rowset name="certificates" key="certificateID" columns="certificateID">
 		</rowset>
