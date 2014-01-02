@@ -63,7 +63,9 @@ def SDE_loadSkills():
 		db_cursor.execute('''SELECT conv.typeID,
 				conv.typeName,
 				attr_conv.attributeName,
-				COALESCE(attr.valueInt,attr.valueFloat,0)
+				COALESCE(attr.valueInt,attr.valueFloat,0),
+				grp.groupID,
+				grp.groupName
 			FROM invTypes conv
 			LEFT JOIN dgmtypeattributes attr ON (conv.typeID = attr.typeID)
 			LEFT JOIN dgmattributeTypes attr_conv ON (attr_conv.attributeID = attr.attributeID)
@@ -79,6 +81,8 @@ def SDE_loadSkills():
 		skillName      = row[1]
 		skillAttribute = row[2]
 		skillAttrValue = row[3]
+		skillGroupID   = row[4]
+		skillGroupName = row[5]
 			
 		skillName_to_skillID[skillName] = skillID
 		skillID_to_skillName[skillID] = skillName
@@ -87,9 +91,11 @@ def SDE_loadSkills():
 			skill_json[skillID][skillAttribute] = skillAttrValue
 		else:	#need to initialize entry for JSON
 			skill_json[skillID] = {}
-			skill_json[skillID]["skillID"]      = skillID
-			skill_json[skillID]["skillName"]    = skillName
+			skill_json[skillID]["typeID"]       = skillID
+			skill_json[skillID]["typeName"]     = skillName
 			skill_json[skillID][skillAttribute] = skillAttrValue
+			skill_json[skillID]["groupID"]      = skillGroupID
+			skill_json[skillID]["groupName"]    = skillGroupName
 	
 	JSON_dumper(skill_json,conf.get("EVE_CHARACTERS" ,"skill_list"))
 	
@@ -119,8 +125,8 @@ def init():
 	for skillID,attributes in skills_list.iteritems():
 		if skillID == "version":
 			continue
-		skillName = attributes["skillName"]
-		skillID   = attributes["skillID"]
+		skillName = attributes["typeName"]
+		skillID   = attributes["typeID"]
 		
 		skillName_to_skillID[skillName] = skillID
 		skillID_to_skillName[skillID] = skillName
