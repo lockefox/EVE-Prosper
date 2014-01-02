@@ -47,3 +47,4 @@ def SDE_loadSkills():
 	db_user = conf.get("GLOBALS" ,"db_user")
 	db_pw = conf.get("GLOBALS" ,"db_pw")
 	db_port = conf.getint("GLOBALS" ,"db_port")
+	
