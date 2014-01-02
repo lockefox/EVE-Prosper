@@ -9,6 +9,7 @@ import ConfigParser
 
 skillName_to_skillID = {}
 skillID_to_skillName = {}
+
 class Character:
 	def __init__(self):
 		self.skills = {}	#skills[skillID]=skill_level
@@ -40,3 +41,9 @@ class Character:
 		else:
 			raise TypeError
 	
+def SDE_loadSkills():
+	db_schema = conf.get("GLOBALS" ,"db_name")
+	db_IP = conf.get("GLOBALS" ,"db_host")
+	db_user = conf.get("GLOBALS" ,"db_user")
+	db_pw = conf.get("GLOBALS" ,"db_pw")
+	db_port = conf.getint("GLOBALS" ,"db_port")
