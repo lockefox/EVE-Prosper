@@ -1,0 +1,12 @@
+<root>
+	<kitPeriod name="WW01-14" startDate="2013-01-01" endDate="2013-01-20">
+		<producer name="Anya Kitsune" characterID="425131377" accountOwner="0xABC">
+			<product typeName="Ishtar" quantity="20" decryptor="Incognito Process" typeID="12005"/>
+			<product typeName="Taranis" quantity="40" decryptor="Incognito Parity" typeID="11200"/>
+		</producer>
+		<producer name="Lockefox" characterID="628592330" accountOwner="0xABC">
+			<product typeName="Neutron Blaster Cannon II" quantity="400" decryptor="" typeID="3186"/>
+			</product>
+		</producer>
+	</kitPeriod>
+</root>
