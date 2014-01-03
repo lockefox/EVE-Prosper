@@ -66,7 +66,7 @@ def fetch_characters(key_obj):
 		list_of_characters.append(tmp_char_dict)
 	return list_of_characters
 	
-def fetch_characterSheet(key_obj,characterID):
+def fetch_characterSheet(key_obj,characterID,enableDump=1):
 		#fetches character Sheet from /char/CharacterSheet.xml.aspx
 		#returns a dict of characters: D_O_C[characterID]=Character()
 	CAK_mask = 8
@@ -80,9 +80,11 @@ def fetch_characterSheet(key_obj,characterID):
 		characterSheet = key_obj.char.CharacterSheet(characterID=characterID)
 	except Exception as e:
 		raise e
-		
+	
 	Parsed_Character.load_eveapi(characterSheet)
-	API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","%s_characterSheet.XML" % Parsed_Character.name,"characterID=" % characterID)
+	if enableDump:
+		API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","%s_characterSheet.XML" % Parsed_Character.name,"characterID=" % characterID)
+	
 	return Parsed_Character
 def fetch_allCharacters(apiFile=api_file):
 	character_dict = {}		#character_dict[characterID]=Character()
