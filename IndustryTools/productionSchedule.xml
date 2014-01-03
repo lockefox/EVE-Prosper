@@ -7,8 +7,14 @@
 		<producer name="Lockefox" characterID="628592330" accountOwner="0xABC">
 			<product typeName="Neutron Blaster Cannon II" quantity="400" decryptor="" typeID="3186"/>
 		</producer>
-		<subproduct>
-		
-		</subproduct>
+		<intermediateBuild><!--Populated by FIRST PASS-->
+			<subproduct typeName="Crystalline Carbonide Armor Plate" quantity="106800" toBuild="1" blueprintID="17323" typeID="16670"/>
+			<subproduct typeName="Magnetometric Sensor Cluster" quantity="7480" toBuild="1" blueprintID="17345" typeID="11535"/>
+			<subproduct typeName="Oscillator Capacitor Unit" quantity="8320" toBuild="1" blueprintID="17337" typeID="11553"/>
+			<subproduct typeName="Photon Microprocessor" quantity="29080" toBuild="1" blueprintID="17357" typeID="17357"/>
+			<subproduct typeName="Particle Accelerator Unit" quantity="64000" toBuild="1" blueprintID="17344" typeID="11688"/>
+			<subproduct typeName="Neutron Blaster Cannon I" quantity="400" toBuild="1" blueprintID="1124" typeID="573"/>
+			<subproduct typeName="Vexor" quantity="20" toBuild="1" blueprintID="971" typeID="626"/>
+		</intermediateBuild>
 	</kitPeriod>
 </root>
