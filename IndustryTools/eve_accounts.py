@@ -86,6 +86,7 @@ def fetch_characterSheet(key_obj,characterID,enableDump=1):
 		API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","%s_characterSheet.XML" % Parsed_Character.name,"characterID=" % characterID)
 	
 	return Parsed_Character
+	
 def fetch_allCharacters(apiFile=api_file):
 	character_dict = {}		#character_dict[characterID]=Character()
 	
@@ -116,6 +117,7 @@ def fetch_allCharacters(apiFile=api_file):
 	return character_dict
 def fetch_allCharacters_offline(all_character_dict, backupDump = backup_path):
 	test=1
+	files_to_parse = os.listdir(backupDump)
 	return all_character_dict
 def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	api_query = "%s/%s?keyID=%s&vCode=%s" % (api_basepath,api_path,key_obj.keyID,key_obj.vCode)
@@ -148,7 +150,7 @@ def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
 	zipper = gzip.GzipFile(fileobj=dump_IOstream)
 	
-	fileHandle = open(fileName,'w')
+	fileHandle = open("%s/%s" % (backup_path,fileName),'w')
 	fileHandle.write(zipper)	#dump XML raw to specified file
 def main():
 	test=0
