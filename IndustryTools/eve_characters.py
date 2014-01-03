@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import MySQLdb
 import ConfigParser
+from eveapi import eveapi
 
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini","tmp_init.ini"])
@@ -81,7 +82,19 @@ class Character:
 		xmlStr = XML_prettify(xml_root)
 		file_writer = open(filename,'w')
 		file_writer.write(xmlStr)
+	
+	def load_eveapi(self,eveapiObj):
+		self.name = eveapiObj.result.name
+		self.characterID = eveapiObj.result.characterID
+		self.corporationName = eveapiObj.result.corporationName
+		self.corporationID = eveapiObj.result.corporationID
+		self.allianceName = eveapiObj.result.allianceName
+		self.allianceID = eveapiObj.result.allianceID
 		
+		for row in eveapiObj.result.rowset[0]:
+			self.skills[row.Get(typeID)] = int(row.Get(level))
+			#ignoring sp/published values
+			
 	def load_default(self,char_xml=default_character_xml):
 		domObj = minidom.parse(char_xml)
 		rowsets = domObj.getElementsByTagName("rowset")
@@ -99,8 +112,7 @@ class Character:
 		self.allianceID = domObj.getElementsByTagName("allianceID")[0].firstChild.nodeValue
 		
 		self.default_character=1
-	def load_eveapi(self,charDataObj):
-		test=1
+
 
 def XML_prettify(elem):
     """Return a pretty-printed XML string for the Element.

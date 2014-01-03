@@ -15,30 +15,105 @@ from eveapi import eveapi
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini","tmp_init.ini"])
 
-api_file=conf.get("EVE_ACCOUNTS","api_list")
+api_file = conf.get("EVE_ACCOUNTS","api_list")
+backup_path = conf.get("EVE_ACCOUNTS","char_backup_path")
+api = eveapi.EVEAPIConnection()
 
-def fetch_characters(apiID,vCode,dict_of_characters):
+class KeyInfo:
+	def __init__ (self,keyID,vCode):
+		self.keyID = keyID
+		self.vCode = vCode
+		self.accessMask = 0
+		self.type = ""
+		self.expires = ""
+		fetch_keyInfo()
+		self.auth=None
+		
+	def fetch_keyInfo(keyID,vCode):
+		tmpauth = api.auth(keyID = self.keyID, vCode = self.vCode)
+		self.auth = tmpauth
+		try:
+			keyinfo = auth.account.APIKeyInfo()
+		except eveapi.Error, e:	#regular eveapi errors
+			raise e
+		except Exception, e:	#bigger issues (socket errs, fires, earthquakes, floods, dogs and cats living together)
+			raise e
+		
+		self.accessMask = keyinfo.key.accessMask
+		self.expires = keyinfo.key.expires
+		self.type = keyinfo.key.type
+		
+def fetch_characters(key_obj):
+		#fetches /account/Characters.xml.aspx
+		#returns list of char names/id's associated with account
+		#for auto-completing api.json data
+	list_of_characters = []
+	try:
+		characterAPI = key_obj.account.Characters()
+	except eveapi.Error, e:	#regular eveapi errors
+		raise e
+	except Exception, e:	#bigger issues (socket errs, fires, earthquakes, floods, dogs and cats living together)
+		raise e
+		
+	for character in characterAPI.characters:
+		tmp_char_dict = {}
+		tmp_char_dict["name"] = character.name
+		tmp_char_dict["characterID"] = character.characterID
+		tmp_char_dict["corporationID"] = character.corporationID
+		tmp_char_dict["corporationName"] = character.corporationName
+		list_of_characters.append(tmp_char_dict)
+	return list_of_characters
 	
-	return dict_of_characters
+def fetch_characterSheet(key_obj,characterID):
+		#fetches character Sheet from /char/CharacterSheet.xml.aspx
+		#returns a dict of characters: D_O_C[characterID]=Character()
+	CAK_mask = 8
+	if (key_obj.accessMask & CAK_mask) != CAK_mask:
+		raise KeyError("invalid accessMask.  Requires: %s" % CAK_mask)
+	if key_obj.type != "Account":
+		raise KeyError("invalid keyType.  Requires 'Account'")
 	
+	Parsed_Character = Character()
+	try:
+		characterSheet = key_obj.char.CharacterSheet(characterID=characterID)
+	except Exception as e:
+		raise e
+	Parsed_Character.load_eveapi(characterSheet)
+	API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","characterID=" % characterID)
+	return Parsed_Character
 def fetch_allCharacters(apiFile=api_file):
-	character_dict = {}	
-	api = eveapi.EVEAPIConnection()
+	character_dict = {}		#character_dict[characterID]=Character()
 	
 	api_todo = json.load(open(apiFile))
 	characterIndx = 0
 	for api_obj in api_todo:
 		#test api/connection
-		auth = api.auth(keyID = api_obj["keyID"], vCode = api_obj["vCode"])
 		try:
-			keyinfo = auth.account.APIKeyInfo()
+			api = keyInfo(api_obj["keyID"],api_obj["vCode"])
 		except eveapi.Error, e:	#regular eveapi errors
-			print e
-			sys.exit(1)
-		except Exception, e:	#bigger issues (socket errs, fires, earthquakes, floods, dogs and cats living together)
-			print "barf:", str(e)
-			sys.exit(1)
+			print "Invalid key combo: %s\t%s" % (api_obj["keyID"],api_obj["vCode"])
+			continue
+		except Exception, e:
+			print "Unable to fetch API: %s" % e
+			print "--Continuing offline--"
+			character_dict = fetch_allCharacters_offline(character_dict)
+			break
+		#update local API db
+		api_todo[characterIndx]["accessMask"] = api.accessMask
+		api_todo[characterIndx]["expiration"] = api.expiration
 		
+		character_list = fetch_characters(api)
+		api_todo[characterIndx]["characters"] = character_list
+		tmp_character_dict = {}
+		for character_obj in character_list:
+			tmp_character_dict[character_obj["characterID"]] = fetch_characterSheet(api,character_obj["characterID"])
+			
+	return character_dict
+def fetch_allCharacters_offline(all_character_dict, backupDump = backup_path):
+	test=1
+	return all_character_dict
+def API_localDumper(key_obj,api_path,optional_args=""):
+	test=1
 def main():
 	test=0
 	fetch_allCharacters()
