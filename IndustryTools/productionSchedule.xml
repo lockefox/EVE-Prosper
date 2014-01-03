@@ -6,7 +6,9 @@
 		</producer>
 		<producer name="Lockefox" characterID="628592330" accountOwner="0xABC">
 			<product typeName="Neutron Blaster Cannon II" quantity="400" decryptor="" typeID="3186"/>
-			</product>
 		</producer>
+		<subproduct>
+		
+		</subproduct>
 	</kitPeriod>
 </root>
