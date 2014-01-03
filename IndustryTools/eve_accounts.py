@@ -17,9 +17,10 @@ conf.read(["init.ini","tmp_init.ini"])
 
 api_file = conf.get("EVE_ACCOUNTS","api_list")
 backup_path = conf.get("EVE_ACCOUNTS","char_backup_path")
-api = eveapi.EVEAPIConnection()
 api_basepath = conf.get("GLOBALS","api_basepath")
 user_agent = conf.get("GLOBALS","user_agent")
+
+api = eveapi.EVEAPIConnection()
 
 class KeyInfo:
 	def __init__ (self,keyID,vCode):
