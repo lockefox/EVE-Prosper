@@ -18,6 +18,8 @@ conf.read(["init.ini","tmp_init.ini"])
 api_file = conf.get("EVE_ACCOUNTS","api_list")
 backup_path = conf.get("EVE_ACCOUNTS","char_backup_path")
 api = eveapi.EVEAPIConnection()
+api_basepath = conf.get("GLOBALS","api_basepath")
+user_agent = conf.get("GLOBALS","user_agent")
 
 class KeyInfo:
 	def __init__ (self,keyID,vCode):
@@ -78,8 +80,9 @@ def fetch_characterSheet(key_obj,characterID):
 		characterSheet = key_obj.char.CharacterSheet(characterID=characterID)
 	except Exception as e:
 		raise e
+		
 	Parsed_Character.load_eveapi(characterSheet)
-	API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","characterID=" % characterID)
+	API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","%s_characterSheet.XML" % Parsed_Character.name,"characterID=" % characterID)
 	return Parsed_Character
 def fetch_allCharacters(apiFile=api_file):
 	character_dict = {}		#character_dict[characterID]=Character()
@@ -112,8 +115,39 @@ def fetch_allCharacters(apiFile=api_file):
 def fetch_allCharacters_offline(all_character_dict, backupDump = backup_path):
 	test=1
 	return all_character_dict
-def API_localDumper(key_obj,api_path,optional_args=""):
-	test=1
+def API_localDumper(key_obj,api_path,fileName,optional_args=""):
+	api_query = "%s/%s?keyID=%s&vCode=%s" % (api_basepath,api_path,key_obj.keyID,key_obj.vCode)
+	if optional_args != "":
+		api_query = "%s&%s" % (api_query,optional_args)
+	
+	request = urllib2.Request(api_query)
+	request.add_header('Accept-Encoding','gzip')
+	request.add_header('User-Agent',user_agent)
+	
+	try:
+		opener = urllib2.build_opener()
+		header_hold = urllib2.urlopen(request).headers
+		headers.append(header_hold)
+		raw_zip = opener.open(request)
+		dump_zip_stream = raw_zip.read()
+	except urllib2.HTTPError as e:
+		print e
+		print "did not dump: %s" % api_query
+		return
+	except urllib2.URLError as er:
+		print e
+		print "did not dump: %s" % api_query
+		return
+	except socket.error as err:
+		print e
+		print "did not dump: %s" % api_query
+		return
+	
+	dump_IOstream = StringIO.StringIO(dump_zip_stream)
+	zipper = gzip.GzipFile(fileobj=dump_IOstream)
+	
+	fileHandle = open(fileName,'w')
+	fileHandle.write(zipper)	#dump XML raw to specified file
 def main():
 	test=0
 	fetch_allCharacters()
