@@ -117,7 +117,10 @@ def fetch_allCharacters(apiFile=api_file):
 		tmp_character_dict = {}
 		for character_obj in character_list:
 			tmp_character_dict[character_obj["characterID"]] = fetch_characterSheet(api,character_obj["characterID"])
-			
+		
+		characterIndx+=1
+	update_apis = open(apiFile,'w')
+	update_apis.write(json.dumps(api_todo,indent=4,sort_keys=True))
 	return character_dict
 def fetch_allCharacters_offline(all_character_dict, backupDump = backup_path):
 	test=1
