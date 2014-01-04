@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import MySQLdb
 import ConfigParser
+
 from eveapi import eveapi
 
 conf = ConfigParser.ConfigParser()
@@ -84,15 +85,16 @@ class Character:
 		file_writer.write(xmlStr)
 	
 	def load_eveapi(self,eveapiObj):
-		self.name = eveapiObj.result.name
-		self.characterID = eveapiObj.result.characterID
-		self.corporationName = eveapiObj.result.corporationName
-		self.corporationID = eveapiObj.result.corporationID
-		self.allianceName = eveapiObj.result.allianceName
-		self.allianceID = eveapiObj.result.allianceID
+		#print eveapiObj
+		self.name = eveapiObj.name
+		self.characterID = eveapiObj.characterID
+		self.corporationName = eveapiObj.corporationName
+		self.corporationID = eveapiObj.corporationID
+		self.allianceName = eveapiObj.allianceName
+		self.allianceID = eveapiObj.allianceID
 		
-		for row in eveapiObj.result.rowset[0]:
-			self.skills[row.Get(typeID)] = int(row.Get(level))
+		for row in eveapiObj.skills:
+			self.skills[row.typeID] = int(row.level)
 			#ignoring sp/published values
 			
 	def load_default(self,char_xml=default_character_xml):

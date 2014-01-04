@@ -29,22 +29,20 @@ class KeyInfo:
 		self.accessMask = 0
 		self.type = ""
 		self.expires = ""
-		fetch_keyInfo()
-		self.auth=None
-		
-	def fetch_keyInfo(keyID,vCode):
-		tmpauth = api.auth(keyID = self.keyID, vCode = self.vCode)
-		self.auth = tmpauth
+		self.auth=api.auth(keyID = self.keyID, vCode = self.vCode)
+		self.fetch_keyInfo()
+	def fetch_keyInfo(self):
+		apiauth = self.auth
 		try:
-			keyinfo = auth.account.APIKeyInfo()
+			apikeyinfo = apiauth.account.APIKeyInfo()
 		except eveapi.Error, e:	#regular eveapi errors
 			raise e
 		except Exception, e:	#bigger issues (socket errs, fires, earthquakes, floods, dogs and cats living together)
 			raise e
 		
-		self.accessMask = keyinfo.key.accessMask
-		self.expires = keyinfo.key.expires
-		self.type = keyinfo.key.type
+		self.accessMask = apikeyinfo.key.accessMask
+		self.expires = apikeyinfo.key.expires
+		self.type = apikeyinfo.key.type
 		
 def fetch_characters(key_obj):
 		#fetches /account/Characters.xml.aspx
@@ -52,7 +50,7 @@ def fetch_characters(key_obj):
 		#for auto-completing api.json data
 	list_of_characters = []
 	try:
-		characterAPI = key_obj.account.Characters()
+		characterAPI = key_obj.auth.account.Characters()
 	except eveapi.Error, e:	#regular eveapi errors
 		raise e
 	except Exception, e:	#bigger issues (socket errs, fires, earthquakes, floods, dogs and cats living together)
@@ -76,19 +74,24 @@ def fetch_characterSheet(key_obj,characterID,enableDump=1):
 	if key_obj.type != "Account":
 		raise KeyError("invalid keyType.  Requires 'Account'")
 	
-	Parsed_Character = Character()
+	Parsed_Character = eve_characters.Character()
 	try:
-		characterSheet = key_obj.char.CharacterSheet(characterID=characterID)
+		characterSheet = key_obj.auth.char.CharacterSheet(characterID=characterID)
 	except Exception as e:
 		raise e
 	
+	#print characterSheet.name
 	Parsed_Character.load_eveapi(characterSheet)
+	print "\t%s" % Parsed_Character
 	if enableDump:
-		API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx","%s_characterSheet.XML" % Parsed_Character.name,"characterID=" % characterID)
+		dump_filename = "%s_characterSheet.XML" % Parsed_Character.name
+		dump_apiArgs = "characterID=%s" % characterID
+		API_localDumper(key_obj,"/char/CharacterSheet.xml.aspx",dump_filename,dump_apiArgs)
 	
 	return Parsed_Character
 	
 def fetch_allCharacters(apiFile=api_file):
+	print "Fetching Characters"
 	character_dict = {}		#character_dict[characterID]=Character()
 	
 	api_todo = json.load(open(apiFile))
@@ -96,7 +99,7 @@ def fetch_allCharacters(apiFile=api_file):
 	for api_obj in api_todo:
 		#test api/connection
 		try:
-			api = keyInfo(api_obj["keyID"],api_obj["vCode"])
+			api = KeyInfo(api_obj["keyID"],api_obj["vCode"])
 		except eveapi.Error, e:	#regular eveapi errors
 			print "Invalid key combo: %s\t%s" % (api_obj["keyID"],api_obj["vCode"])
 			continue
@@ -107,7 +110,7 @@ def fetch_allCharacters(apiFile=api_file):
 			break
 		#update local API db
 		api_todo[characterIndx]["accessMask"] = api.accessMask
-		api_todo[characterIndx]["expiration"] = api.expiration
+		api_todo[characterIndx]["expiration"] = api.expires
 		
 		character_list = fetch_characters(api)
 		api_todo[characterIndx]["characters"] = character_list
@@ -132,7 +135,6 @@ def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	try:
 		opener = urllib2.build_opener()
 		header_hold = urllib2.urlopen(request).headers
-		headers.append(header_hold)
 		raw_zip = opener.open(request)
 		dump_zip_stream = raw_zip.read()
 	except urllib2.HTTPError as e:
@@ -150,9 +152,12 @@ def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	
 	dump_IOstream = StringIO.StringIO(dump_zip_stream)
 	zipper = gzip.GzipFile(fileobj=dump_IOstream)
+	xml_obj = minidom.parse(zipper)
 	
-	fileHandle = open("%s/%s" % (backup_path,fileName),'w')
-	fileHandle.write(zipper)	#dump XML raw to specified file
+	if not os.path.exists(backup_path):
+		os.makedirs(backup_path)
+	fileHandle = open(os.path.join(os.getcwdu(),backup_path,fileName),'w')
+	fileHandle.write(xml_obj.toxml())	#dump XML raw to specified file
 def main():
 	test=0
 	fetch_allCharacters()
