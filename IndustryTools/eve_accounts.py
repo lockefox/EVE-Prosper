@@ -114,9 +114,10 @@ def fetch_allCharacters(apiFile=api_file):
 		
 		character_list = fetch_characters(api)
 		api_todo[characterIndx]["characters"] = character_list
-		tmp_character_dict = {}
+		
 		for character_obj in character_list:
-			tmp_character_dict[character_obj["characterID"]] = fetch_characterSheet(api,character_obj["characterID"])
+			character_dict[character_obj["characterID"]] = fetch_characterSheet(api,character_obj["characterID"])
+		
 		
 		characterIndx+=1
 	update_apis = open(apiFile,'w')
@@ -125,6 +126,7 @@ def fetch_allCharacters(apiFile=api_file):
 def fetch_allCharacters_offline(all_character_dict, backupDump = backup_path):
 	test=1
 	files_to_parse = os.listdir(backupDump)
+	
 	return all_character_dict
 def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	api_query = "%s/%s?keyID=%s&vCode=%s" % (api_basepath,api_path,key_obj.keyID,key_obj.vCode)
@@ -163,6 +165,8 @@ def API_localDumper(key_obj,api_path,fileName,optional_args=""):
 	fileHandle.write(xml_obj.toxml())	#dump XML raw to specified file
 def main():
 	test=0
-	fetch_allCharacters()
+	eve_characters.init()
+	all_characters = fetch_allCharacters()
+	print all_characters[628592330].Industry
 if __name__ == "__main__":
 	main()

@@ -94,7 +94,7 @@ class Character:
 		self.allianceID = eveapiObj.allianceID
 		
 		for row in eveapiObj.skills:
-			self.skills[row.typeID] = int(row.level)
+			self.skills[str(row.typeID)] = int(row.level)
 			#ignoring sp/published values
 			
 	def load_default(self,char_xml=default_character_xml):
@@ -117,8 +117,6 @@ class Character:
 
 
 def XML_prettify(elem):
-    """Return a pretty-printed XML string for the Element.
-    """
     rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")	
