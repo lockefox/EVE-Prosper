@@ -29,6 +29,7 @@ class BPO:
 		self.parentTypeID = 0
 		self.parentTypeName = ""
 		self.techLevel = 0
+		self.defaultRunsT2 = 10
 		self.base_materials = []
 		self.extra_materials = []
 		self.productionEfficiency = []
@@ -37,6 +38,7 @@ class BPO:
 		self.reverseEngineering = []
 		self.inventionMaterials = []
 		self.intermediateMaterials = {} #intermediateMaterials["job type"]={"typeID":typeID,"typeName":typeName..."parentBPOid":parentBPOid}
+		
 		
 	def load_xml(self,xmlObj):
 		test=1
@@ -80,12 +82,13 @@ class BPO:
 			final_materials[itemID] = math.round(((25-(5 * characterObj.Production_Efficiency)) * qty) * (materialMultiplier * implantModifier))
 			
 		return final_materials
-	def inventionMats(self,characterObj,decryptorID=0):
+	def inventionMats(self,characterObj,decryptorID=0,itemMetaLevel=0):
 		encryption_methods = (21790,91791,23087,23121)
 		invention_skill1 = 0
 		invention_skill2 = 0
 		encryption_skill = 0
 		invention_mats = {}
+		final_invention_mats = {}
 		
 		#load attributes for :math:
 		for inv_dict in self.inventionMaterials:
@@ -100,9 +103,23 @@ class BPO:
 						
 			if inv_dict["category"] == "item":
 				invention_mats[inv_dict["typeID"]] = inv_dict["quantity"]
-			
-	def productionTime(self,characterObj,PE,timeMultiplier=1,implantModifier=1):
 		
+		#datacore/decryptor multiplier
+		InventionMultiplier = self.baseInventionProbability * (1+0.01*characterObj.lookup(encryption_skill)) * \
+			(1+(characterObj.lookup(invention_skill1)+characterObj.lookup(invention_skill2))*(0.1/(5-itemMetaLevel)))
+		if decryptorID == 0:
+			InventionMultiplier = InventionMultiplier/self.defaultRunsT2
+		else:
+			InventionMultiplier = InventionMultiplier * decryptorInfo[decryptorID]["inventionPropabilityMultiplier"]
+			InventionMultiplier = InventionMultiplier/(self.defaultRunsT2+decryptorInfo[decryptorID]["inventionMaxRunModifier"])
+			invention_mats[decryptorID] = 1
+		
+		for typeID,qty in invention_mats.iteritems():
+			final_invention_mats[typeID] = qty * InventionMultiplier
+		
+		return final_invention_mats
+	def productionTime(self,characterObj,PE,timeMultiplier=1,implantModifier=1):
+		test =1
 def init():
 	tmpBPO_dict = {}
 	lookup_file = conf.get("EVE_BLUEPRINTS","lookup_file")
