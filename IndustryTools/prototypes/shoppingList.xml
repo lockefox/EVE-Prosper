@@ -70,13 +70,13 @@
 			<row typeName="Photonic Metamaterials" quantity="74800" typeID="33359"/>
 			<row typeName="Sylaramic Fibers" quantity="1068000" typeID="16678"/>
 			<row typeName="Isogen" quantity="1136060" typeID="37"/>
-			<row typeName="Megacyte" quantity="3720+" typeID="40"/>
-			<row typeName="Mexallon" quantity="365200+" typeID="36"/>
+			<row typeName="Megacyte" quantity="19340" typeID="40"/>
+			<row typeName="Mexallon" quantity="5174160" typeID="36"/>
 			<row typeName="Morphite" quantity="2680" typeID="11399"/>
-			<row typeName="Nocxium" quantity="70800+" typeID="38"/>
-			<row typeName="Pyerite" quantity="2666000+" typeID="35"/>
-			<row typeName="Tritanium" quantity="6663200+" typeID="34"/>
-			<row typeName="Zydrine" quantity="2360+" typeID="39"/>
+			<row typeName="Nocxium" quantity="282040" typeID="38"/>
+			<row typeName="Pyerite" quantity="16275240" typeID="35"/>
+			<row typeName="Tritanium" quantity="61731560" typeID="34"/>
+			<row typeName="Zydrine" quantity="21160" typeID="39"/>
 			<row typeName="Datacore - Gallentean Starship Engineering" quantity="247" typeID="20410"/>
 			<row typeName="Datacore - Mechanical Engineering" quantity="487" typeID="20424"/>
 			<row typeName="Datacore - Plasma Physics" quantity="240" typeID="20412"/>
