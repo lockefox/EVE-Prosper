@@ -49,6 +49,14 @@ class Character:
 			return skill_level
 		else:
 			raise TypeError
+			
+	def lookup(self,skillID):	#lookup by itemID
+		try:
+			skill_level = skills[skillID]
+		except KeyError as e:
+			raise e
+		return skill_level
+		
 	def dump_skills(self):
 		return self.skills
 	

@@ -11,7 +11,14 @@ import eve_accounts
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini","tmp_init.ini"])
 
-BPO_dict = {}
+BPO_dict_byBPO = {}
+BPO_dict_byProduct = {}
+
+decryptorInfo = {} #decryptorInfo[decryptorID]={"inventionPropabilityMultiplier":##,"inventionMEModifier":##...}
+	#####	1112:	inventionPropabilityMultiplier
+	#####	1113:	inventionMEModifier
+	#####	1114:	inventionPEModifier
+	#####	1124:	inventionMaxRunModifier
 
 class BPO:
 	def __init__(self):
@@ -73,13 +80,41 @@ class BPO:
 			final_materials[itemID] = math.round(((25-(5 * characterObj.Production_Efficiency)) * qty) * (materialMultiplier * implantModifier))
 			
 		return final_materials
-	def inventionMats(self,characterObj):
+	def inventionMats(self,characterObj,decryptorID=0):
+		encryption_methods = (21790,91791,23087,23121)
+		invention_skill1 = 0
+		invention_skill2 = 0
+		encryption_skill = 0
+		invention_mats = {}
 		
+		#load attributes for :math:
+		for inv_dict in self.inventionMaterials:
+			if inv_dict["category"] == "skill":
+				if inv_dict["typeID"] in encryption_methods:
+					encryption_skill = inv_dict["typeID"]
+				else:
+					if invention_skill1 == 0:
+						invention_skill1 = inv_dict["typeID"]
+					else:
+						invention_skill2 = inv_dict["typeID"]
+						
+			if inv_dict["category"] == "item":
+				invention_mats[inv_dict["typeID"]] = inv_dict["quantity"]
+			
 	def productionTime(self,characterObj,PE,timeMultiplier=1,implantModifier=1):
 		
 def init():
 	tmpBPO_dict = {}
+	lookup_file = conf.get("EVE_BLUEPRINTS","lookup_file")
+	try:
+		with open (lookup_file):
+			pass
+	except:
+		print "Loading BPO lookup data from SDE: %s" % conf.get("GLOBALS" ,"db_name") 
+		_SDE_loadBPOlookup(lookup_file)
 	bpo_file = conf.get("EVE_BLUEPRINTS" ,"BPO_list")
+	
+	_import_BPOlookup(lookup_file)
 	print "Loading BPO data into memory: %s" % bpo_file
 	try:	#parse as XML by default
 		parsed_XML = minidom.parse(bpo_file)
@@ -90,6 +125,65 @@ def init():
 		sys.exit(1)
 		
 	return tmpBPO_dict
+
+def _SDE_loadBPOlookup(lookup_file):
+	global decryptorInfo
+	JSON_out = {}
+	db_schema = conf.get("GLOBALS" ,"db_name")
+	db_IP = conf.get("GLOBALS" ,"db_host")
+	db_user = conf.get("GLOBALS" ,"db_user")
+	db_pw = conf.get("GLOBALS" ,"db_pw")
+	db_port = conf.getint("GLOBALS" ,"db_port")
+	
+	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)		
+	db_cursor = db.cursor()
+	
+	try:
+		db_cursor.execute(''' SELECT conv.typeID, 
+			conv.typeName,
+			GROUP_CONCAT(IF(attr.attributeID = 1112, COALESCE(attr.valueInt, attr.valueFloat,0), NULL)) as `inventionPropabilityMultiplier`,
+			GROUP_CONCAT(IF(attr.attributeID = 1113, COALESCE(attr.valueInt, attr.valueFloat,0), NULL)) as `inventionMEModifier`,
+			GROUP_CONCAT(IF(attr.attributeID = 1114, COALESCE(attr.valueInt, attr.valueFloat,0), NULL)) as `inventionPEModifier`,
+			GROUP_CONCAT(IF(attr.attributeID = 1124, COALESCE(attr.valueInt, attr.valueFloat,0), NULL)) as `inventionMaxRunModifier`
+			FROM invTypes conv
+			LEFT JOIN dgmtypeattributes attr on attr.typeID = conv.typeID
+			WHERE conv.groupID IN (728,729,730,731)
+			AND attr.attributeID in (1112,1113,1114,1124)
+			GROUP BY conv.typeID''')
+	except MySQLdb.Error as e:
+		print "Unable to execute query on %s: %s" % (db_schema,e)
+		sys.exit(-1)	
+	decryptor_results = db_cursor.fetchall()
+	
+	for row in decryptor_results:
+		typeID   = row[0]
+		typeName = row[1]
+		probMod  = row[2]
+		MEmod    = row[3]
+		PEmod    = row[4]
+		runMod   = row[5]
+		
+		decryptorInfo[typeID] = {}
+		decryptorInfo[typeID]["typeID"]   = typeID
+		decryptorInfo[typeID]["typeName"] = typeName
+		decryptorInfo[typeID]["inventionPropabilityMultiplier"] = probMod
+		decryptorInfo[typeID]["inventionMEModifier"] = MEmod
+		decryptorInfo[typeID]["inventionPEModifier"] = PEmod
+		decryptorInfo[typeID]["inventionMaxRunModifier"] = runMod
+	JSON_out["decryptorInfo"] = decryptorInfo
+	JSON_dumper(JSON_out,lookup_file)
+	
+def JSON_dumper(json_object,filename):
+	json_str = json.dumps(json_object, indent=4, sort_keys=True)
+	file = open(filename,'w')
+	file.write(json_str)
+	
+def _import_BPOlookup(lookup_file):
+	global decryptorInfo
+	
+	json_object = json.load(open(lookup_file))
+	
+	decryptorInfo = json_object["decryptorInfo"]
 	
 def _BPO_loader_xml(parsed_XML):
 	tmpBPO_dict = {}
