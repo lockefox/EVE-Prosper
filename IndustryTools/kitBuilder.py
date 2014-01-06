@@ -10,3 +10,11 @@ import ConfigParser
 import eve_characters
 import eve_accounts
 import eve_blueprints
+
+
+def main():
+	test=1
+
+	
+if __name__ == "__main__":
+	main()
