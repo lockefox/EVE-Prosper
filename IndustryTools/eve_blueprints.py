@@ -24,8 +24,11 @@ class BPO:
 	def __init__(self):
 		self.typeName = ""
 		self.typeID = 0
+		self.groupID = 0
 		self.productTypeID = 0
 		self.productTypeName = ""
+		self.productGroupID = 0
+		self.productCategory = 0
 		self.parentTypeID = 0
 		self.parentTypeName = ""
 		self.techLevel = 0
@@ -41,7 +44,17 @@ class BPO:
 		
 		
 	def load_xml(self,xmlObj):
-		test=1
+		self.typeName = xmlObj.getAttributeNode("BPO_typeName").value
+		self.typeID   = xmlObj.getAttributeNode("BPO_typeID").value
+		self.groupID  = xmlObj.getAttributeNode("BPO_groupID").value
+		self.productTypeName = xmlObj.getAttributeNode("ITEM_typeName").value
+		self.productTypeID   = xmlObj.getAttributeNode("ITEM_typeID").value
+		self.productGroupID  = xmlObj.getAttributeNode("ITEM_groupID").value
+		self.productCategory = xmlObj.getAttributeNode("ITEM_categoryID").value
+		self.techLevel = xmlObj.getAttributeNode("techLevel").value
+		#BPO properties
+		self.researchMaterialTime = xmlObj.getElementsByTagName("researchMaterialTime")[0].firstChild.nodeValue
+		self.researchProductivityTime = xmlObj.getElementsByTagName("researchMaterialTime")[0].firstChild.nodeValue
 	def load_json(self,jsonObj):
 		test=1
 		
