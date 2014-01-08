@@ -54,7 +54,29 @@ class BPO:
 		self.techLevel = xmlObj.getAttributeNode("techLevel").value
 		#BPO properties
 		self.researchMaterialTime = xmlObj.getElementsByTagName("researchMaterialTime")[0].firstChild.nodeValue
-		self.researchProductivityTime = xmlObj.getElementsByTagName("researchMaterialTime")[0].firstChild.nodeValue
+		self.researchProductivityTime = xmlObj.getElementsByTagName("researchProductivityTime")[0].firstChild.nodeValue
+		self.researchCopyTime = xmlObj.getElementsByTagName("researchCopyTime")[0].firstChild.nodeValue
+		self.productionTime = xmlObj.getElementsByTagName("productionTime")[0].firstChild.nodeValue
+		self.productivityModifier = xmlObj.getElementsByTagName("productivityModifier")[0].firstChild.nodeValue
+		self.materialModifier = xmlObj.getElementsByTagName("materialModifier")[0].firstChild.nodeValue
+		self.wasteFactor = xmlObj.getElementsByTagName("wasteFactor")[0].firstChild.nodeValue
+		self.maxProductionLimit = xmlObj.getElementsByTagName("maxProductionLimit")[0].firstChild.nodeValue
+		self.baseInventionProbability = xmlObj.getElementsByTagName("baseInventionProbability")[0].firstChild.nodeValue
+		
+		#base materials
+		for material_row in xmlObj.getElementsByTagName("baseMaterials")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			base_materials.append(mats_properties)
+			
+		for material_row in xmlObj.getElementsByTagName("extraMaterials")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			extra_materials.append(mats_properties)
 	def load_json(self,jsonObj):
 		test=1
 		
