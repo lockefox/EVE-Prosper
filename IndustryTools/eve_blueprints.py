@@ -43,7 +43,7 @@ class BPO:
 		self.intermediateMaterials = {} #intermediateMaterials["job type"]={"typeID":typeID,"typeName":typeName..."parentBPOid":parentBPOid}
 		
 		
-	def load_xml(self,xmlObj):
+	def load_xml(self,xmlObj):	#this is terrible.  There has to be a better way D:
 		self.typeName = xmlObj.getAttributeNode("BPO_typeName").value
 		self.typeID   = xmlObj.getAttributeNode("BPO_typeID").value
 		self.groupID  = xmlObj.getAttributeNode("BPO_groupID").value
@@ -63,20 +63,75 @@ class BPO:
 		self.maxProductionLimit = xmlObj.getElementsByTagName("maxProductionLimit")[0].firstChild.nodeValue
 		self.baseInventionProbability = xmlObj.getElementsByTagName("baseInventionProbability")[0].firstChild.nodeValue
 		
-		#base materials
+		#base materials-----Less terrible...
 		for material_row in xmlObj.getElementsByTagName("baseMaterials")[0].getElementsByTagName("item"):
 			mats_properties = {}
 			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
 				mats_properties[attrName] = attrValue
 			
 			base_materials.append(mats_properties)
-			
+		
+		#extra materials
 		for material_row in xmlObj.getElementsByTagName("extraMaterials")[0].getElementsByTagName("item"):
 			mats_properties = {}
 			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
 				mats_properties[attrName] = attrValue
 			
 			extra_materials.append(mats_properties)
+		
+		for material_row in xmlObj.getElementsByTagName("productionEfficiency")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			productionEfficiency.append(mats_properties)
+			
+		for material_row in xmlObj.getElementsByTagName("materialEffciency")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			materialEffciency.append(mats_properties)
+			
+		for material_row in xmlObj.getElementsByTagName("copying")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			copying.append(mats_properties)
+		
+		for material_row in xmlObj.getElementsByTagName("reverseEngineering")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			for attrName, attrValue in material_row.attributes.items():	#fetch all attributes
+				mats_properties[attrName] = attrValue
+			
+			reverseEngineering.append(mats_properties)
+		
+		for material_row in xmlObj.getElementsByTagName("inventionMaterials")[0].getElementsByTagName("skill"):
+			mats_properties = {}
+			mats_properties["category"] = "skill"
+			for attrName, attrValue in material_row.attributes.items():
+				mats_properties[attrName] = attrValue
+				
+			inventionMaterials.append(mats_properties)
+		
+		for material_row in xmlObj.getElementsByTagName("inventionMaterials")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			mats_properties["category"] = "item"
+			for attrName, attrValue in material_row.attributes.items():
+				mats_properties[attrName] = attrValue
+				
+			inventionMaterials.append(mats_properties)
+		
+		for material_row in xmlObj.getElementsByTagName("inventionMaterials")[0].getElementsByTagName("item"):
+			mats_properties = {}
+			mats_properties["category"] = "attribute"
+			for attrName, attrValue in material_row.attributes.items():
+				mats_properties[attrName] = attrValue
+				
+			inventionMaterials.append(mats_properties)
+			
+			
 	def load_json(self,jsonObj):
 		test=1
 		
