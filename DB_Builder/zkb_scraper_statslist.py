@@ -49,7 +49,7 @@ alliances = {}
 characters = {}
 
 faction_filter = 0
-
+chracter_filter = 0
 
 def init():
 	
@@ -72,10 +72,10 @@ def init():
 	#time.sleep(10)
 	
 def parseargs():
-	global zkb_query_str, faction_filter
+	global zkb_query_str, faction_filter, character_filter
 	
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","faction=","csv","items=","startdate=","please"])
+		opts, args = getopt.getopt(sys.argv[1:],"rh:s:",["system=","region=","faction=","csv","items=","startdate=","character=","please"])
 	except getopt.GetoptError:
 		print "invalid arguments"
 		#help()
@@ -107,6 +107,10 @@ def parseargs():
 		elif opt == "--faction":
 			zkb_query_str = "%sfactionID/%s/" % (zkb_query_str,arg)
 			faction_filter = arg
+		
+		elif opt == "--character":
+			zkb_query_str = "%scharacterID/%s/" % (zkb_query_str,arg)
+			character_filter = arg
 		elif opt == "--please":
 			print "WARNING: --please can cause zkb bans.  Ignoring throtling info"
 			time.sleep(5)
