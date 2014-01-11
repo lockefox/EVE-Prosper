@@ -116,7 +116,7 @@ def parseargs():
 			zkb_query_str = "%scharacterID/%s/" % (zkb_query_str,arg)
 			character_filter = arg
 		elif opt == "--groups":
-			zkb_query_str = "groupID/%s/" % (zkb_query_str,arg)
+			zkb_query_str = "%sgroupID/%s/" % (zkb_query_str,arg)
 		elif opt == "--shiptype":
 			shiptype_filter = arg
 		elif opt == "--please":
@@ -498,11 +498,14 @@ def kill_crawler_charRecord(start_killID,queryStr,progress):
 			valid_kills.append(kill)
 			progress["kills_parsed"] += 1
 			
-			
+		#dump to file (to avoid rescrape)	
+	raw_zkb = open("raw_zkb.json",'w')
+	raw_zkb.write(json.dumps(valid_kills,indent=4,sort_keys=True))
+	
 	return progress
 def kill_fetch(start_killID,queryStr):
 	zkb_addr = "%sapi/beforeKillID/%s/%s" % (zkb_base,start_killID,queryStr)
-	print zkb_addr
+	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
@@ -576,16 +579,13 @@ def kill_data_dump(kill_obj):
 			corporations[victim_corpID]["lossValue"] = 0
 
 
-def character_record_dump(valid_kill_list):
+def character_record_dump(valid_kill_list,dump_file="characterReport.csv"):
 	test=1
 	csv_table = []
 	
-	#dump to file (to avoid rescrape)	
-	raw_zkb = open("raw_zkb.json",'w')
-	raw_zkb.write(json.dumps(valid_kill_list,indent=4,sort_keys=True))
-	
 	csv_table[0] = ("killID","solarSystemID","killTime","victim_characterID",
-		"victim_characterName","shipLost","reportedValue","involvedParties")
+		"victim_characterName","shipLost","reportedValue","involvedParties",
+		"attacker_ShipID","attacker_weaponID")
 	for kill in valid_kill_list:
 		csv_table_tmp = []
 		csv_table_tmp [0] = kill["killID"]
@@ -596,6 +596,16 @@ def character_record_dump(valid_kill_list):
 		csv_table_tmp [5] = kill["victim"]["shipTypeID"]
 		csv_table_tmp [6] = kill["zkb"]["totalValue"]
 		csv_table_tmp [7] = len(kill["attackers"])
+		
+		for killer in kill["attackers"]:
+			if killer["characterID"] == character_filter:
+				csv_table_tmp [8] = killer["shipTypeID"]
+				csv_table_tmp [9] = killer["weaponTypeID"]
+		
+	outfile = open(dump_file,'w')
+	for row in csv_table:
+		linestr = row.join(',')
+		outfile.write("%s\n" % linestr)
 	
 def crash_handler(tracker_obj):
 	try:
@@ -624,7 +634,7 @@ def main():
 	
 	skip_scrape = 0
 	if local_dump == 1:
-		validate = raw_input("Scrape local version instead of recreating fresh? (Y/N)"
+		validate = raw_input("Scrape local version instead of recreating fresh? (Y/N)")
 		if validate.upper()== 'Y':
 			skip_scrape = 1
 			valid_kills = json.load("raw_zkb.json")
@@ -641,7 +651,10 @@ def main():
 		print "time\tkillID\tdateProgress\tKillsParsed"
 		while progress["complete"] == 0:
 			progress = character_record_dump(progress["killID"],zkb_query_str,progress)
-		
+	
+	print "writing results"
+	character_record_dump(valid_kills)
+	
 	
 
 if __name__ == "__main__":
