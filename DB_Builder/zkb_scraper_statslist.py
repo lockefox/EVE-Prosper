@@ -444,7 +444,57 @@ def kill_crawler2(start_killID,queryStr,progress):
 		#add attacker info later
 			
 	return progress
+
+
+def kill_fetch(start_killID,queryStr):
+	zkb_addr = "%sapi/beforeKillID/%s/%s" % (zkb_base,start_killID,queryStr)
+	#print zkb_addr
+	request = urllib2.Request(zkb_addr)
+	request.add_header('Accept-Encoding','gzip')
+	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
+	headers=[]
+	log_filehandle.write("%s:\tQuerying %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), zkb_addr))
+	for tries in range (0,5):
+		time.sleep(call_sleep_default*tries)
+		try:
+			opener = urllib2.build_opener()
+			header_hold = urllib2.urlopen(request).headers
+			headers.append(header_hold)
+			raw_zip = opener.open(request)
+			dump_zip_stream = raw_zip.read()
+		except urllib2.HTTPError as e:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
+			print "retry %s: %s" %(zkb_addr,tries+1)
+			continue
+		except urllib2.URLError as er:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), er))
+			print "URLError.  Retry %s: %s" %(zkb_addr,tries+1)
+			continue
+		except socket.error as err:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), err))
+			print "Socket Error.  Retry %s: %s" %(zkb_addr,tries+1)
+			
+		try:
+			dump_IOstream = StringIO.StringIO(dump_zip_stream)
+			zipper = gzip.GzipFile(fileobj=dump_IOstream)
+			JSON_obj = json.load(zipper)
+		except ValueError as errr:
+			log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), errr))
+			print "Empty response.  Retry %s: %s" %(zkb_addr,tries+1)
+			
+		else:
+			break
+	else:
+		print "unable to open %s after %s tries" % (zkb_addr,tries+1)
+		print headers
+		sys.exit(4)
 	
+	if please_force==0:
+		snooze_setter(header_hold)
+	else:
+		time.sleep(1)
+	
+	return JSON_obj
 def kill_data_dump(kill_obj):
 	global corporations,alliances,characters
 	victim_corpID = kill_obj["victim"]["corporationID"]
