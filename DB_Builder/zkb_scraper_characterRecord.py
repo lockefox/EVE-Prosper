@@ -609,7 +609,7 @@ def crash_handler(tracker_obj):
 	crash_handle.write(json.dumps(tracker_obj))
 	crash_handle.close()
 def main():
-	global crash_obj
+	global crash_obj,valid_kills
 	init()
 	parseargs()
 	
@@ -627,7 +627,8 @@ def main():
 		validate = raw_input("Scrape local version instead of recreating fresh? (Y/N)"
 		if validate.upper()== 'Y':
 			skip_scrape = 1
-	
+			valid_kills = json.load("raw_zkb.json")
+			
 	if skip_scrape == 0:
 		print "-----Scraping zKB.  This may take a while-----"
 		#print faction_filter
