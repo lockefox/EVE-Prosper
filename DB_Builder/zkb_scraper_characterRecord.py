@@ -47,6 +47,7 @@ zkb_query_str = conf.get("ZKB","default_args")
 corporations = {} #corporations[id]={kills:##,losses:##,members:[id,id,]}
 alliances = {}
 characters = {}
+valid_kills = []
 
 faction_filter = 0
 chracter_filter = 0
@@ -115,7 +116,7 @@ def parseargs():
 			zkb_query_str = "%scharacterID/%s/" % (zkb_query_str,arg)
 			character_filter = arg
 		elif opt == "--groups":
-			zkb_query_str = "groupID/%s/" % (zkb_query_str,arg)
+			zkb_query_str = "%sgroupID/%s/" % (zkb_query_str,arg)
 		elif opt == "--shiptype":
 			shiptype_filter = arg
 		elif opt == "--please":
@@ -453,15 +454,31 @@ def kill_crawler2(start_killID,queryStr,progress):
 	return progress
 
 def kill_crawler_charRecord(start_killID,queryStr,progress):
-	valid_kills = [] #join valid kills into one big query return
+	global valid_kills #join valid kills into one big query return
 		
 	
 	JSON_obj = kill_fetch(start_killID,queryStr)
 	
+	if len(JSON_obj)==0:
+		progress["complete"] = 1
+		
+	next_killID=start_killID
+	earliest_killID=[time.gmtime(),next_killID]
+	
 	for kill in JSON_obj:
 		validKillFound=0
-		if kill["victim"]["characterID"] == chracter_filter:
-			continue
+		if date_killed < earliest_killID[0]:
+			earliest_killID=[date_killed,kill["killID"]]
+			progress["killID"]=kill["killID"]
+			progress["earlyDate"] = kill["killTime"]
+			
+		if date_killed<start_date_test:		#Only process to desired date
+			progress["complete"] = 1
+			break
+		
+
+		#if kill["victim"]["characterID"] == chracter_filter:
+		#	continue
 			
 		for attacker in kill["attackers"]:
 			if attacker["characterID"] == chracter_filter:
@@ -479,11 +496,16 @@ def kill_crawler_charRecord(start_killID,queryStr,progress):
 					
 		if validKillFound == 1:
 			valid_kills.append(kill)
-		
+			progress["kills_parsed"] += 1
+			
+		#dump to file (to avoid rescrape)	
+	raw_zkb = open("raw_zkb.json",'w')
+	raw_zkb.write(json.dumps(valid_kills,indent=4,sort_keys=True))
+	
 	return progress
 def kill_fetch(start_killID,queryStr):
 	zkb_addr = "%sapi/beforeKillID/%s/%s" % (zkb_base,start_killID,queryStr)
-	print zkb_addr
+	#print zkb_addr
 	request = urllib2.Request(zkb_addr)
 	request.add_header('Accept-Encoding','gzip')
 	request.add_header('User-Agent',User_Agent)	#Don't forget request headders
@@ -557,16 +579,13 @@ def kill_data_dump(kill_obj):
 			corporations[victim_corpID]["lossValue"] = 0
 
 
-def character_record_dump(valid_kill_list):
+def character_record_dump(valid_kill_list,dump_file="characterReport.csv"):
 	test=1
 	csv_table = []
 	
-	#dump to file (to avoid rescrape)	
-	raw_zkb = open("raw_zkb.json",'w')
-	raw_zkb.write(json.dumps(valid_kill_list,indent=4,sort_keys=True))
-	
 	csv_table[0] = ("killID","solarSystemID","killTime","victim_characterID",
-		"victim_characterName","shipLost","reportedValue","involvedParties")
+		"victim_characterName","shipLost","reportedValue","involvedParties",
+		"attacker_ShipID","attacker_weaponID")
 	for kill in valid_kill_list:
 		csv_table_tmp = []
 		csv_table_tmp [0] = kill["killID"]
@@ -577,6 +596,16 @@ def character_record_dump(valid_kill_list):
 		csv_table_tmp [5] = kill["victim"]["shipTypeID"]
 		csv_table_tmp [6] = kill["zkb"]["totalValue"]
 		csv_table_tmp [7] = len(kill["attackers"])
+		
+		for killer in kill["attackers"]:
+			if killer["characterID"] == character_filter:
+				csv_table_tmp [8] = killer["shipTypeID"]
+				csv_table_tmp [9] = killer["weaponTypeID"]
+		
+	outfile = open(dump_file,'w')
+	for row in csv_table:
+		linestr = row.join(',')
+		outfile.write("%s\n" % linestr)
 	
 def crash_handler(tracker_obj):
 	try:
@@ -590,31 +619,43 @@ def crash_handler(tracker_obj):
 	crash_handle.write(json.dumps(tracker_obj))
 	crash_handle.close()
 def main():
-	global crash_obj
+	global crash_obj,valid_kills
 	init()
 	parseargs()
 	
-	#crash_recover()
+	local_dump = 0
+	try:
+		with open("raw_zkb.json"):
+			print "local raw_zkb.json dump available"
+			local_dump = 1
+			pass
+	except IOError:
+		print "no local raw_zkb.json dump found"
 	
-	print "-----Scraping zKB.  This may take a while-----"
-	#print faction_filter
-	initial_killID = feed_primer()
-	progress = {}
-	progress["killID"] = initial_killID
-	progress["kills_parsed"] = 0
-	progress["complete"] = 0
-	progress["earlyDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-	print "time\tkillID\tdateProgress\tKillsParsed"
-	#while progress["complete"] ==0:
-	#	time.sleep(call_sleep)
-	#	progress = kill_crawler2(progress["killID"],zkb_query_str,progress)
-	#	print "%s\t%s\t%s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),progress["killID"],progress["earlyDate"],progress["kills_parsed"])
-	#print "---------"
-	#outfile = open("corp_results.csv",'w')
-	#outfile.write( "ScrapeDate,%s,ScrapeTarget,%s\n" % (time.strftime("%Y-%m-%d", time.localtime()),start_date))
-	#outfile.write( "corpID,corpName,losses,activeMemberCount,lossValue\n")
-	#for corpID,info in corporations.iteritems():
-	#	outfile.write( "%s,%s,%s,%s,%s\n" % (corpID,info["corpName"],info["losses"],len(info["members"]),info["lossValue"]))
-	#outfile.close()
+	skip_scrape = 0
+	if local_dump == 1:
+		validate = raw_input("Scrape local version instead of recreating fresh? (Y/N)")
+		if validate.upper()== 'Y':
+			skip_scrape = 1
+			valid_kills = json.load("raw_zkb.json")
+			
+	if skip_scrape == 0:
+		print "-----Scraping zKB.  This may take a while-----"
+		#print faction_filter
+		initial_killID = feed_primer()
+		progress = {}
+		progress["killID"] = initial_killID
+		progress["kills_parsed"] = 0
+		progress["complete"] = 0
+		progress["earlyDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+		print "time\tkillID\tdateProgress\tKillsParsed"
+		while progress["complete"] == 0:
+			progress = character_record_dump(progress["killID"],zkb_query_str,progress)
+	
+	print "writing results"
+	character_record_dump(valid_kills)
+	
+	
+
 if __name__ == "__main__":
 	main()
