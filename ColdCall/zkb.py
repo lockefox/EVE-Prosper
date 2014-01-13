@@ -68,6 +68,22 @@ class Query(object):
 	def fetch(self):
 		return fetchResults(self)
 		
+	def parseQueryArgs(self,queryArgs):	#Would prefer to also do internal validation
+		arg_list = queryArgs.split('/')
+		arg_obj = {}
+		previous_item = ""
+		for item in arg_list:
+			if item in valid_modifiers:
+				self.queryElements[item] = True
+				continue
+			split_list = item.split(',')
+			if item.isdigit():
+				queryElements[previous_item]=item
+			elif len(split_list)>1:
+				queryElements[previous_item]=item
+				
+			previous_item = item
+			
 	def orderDirection(self,dir):
 		dirLower = dir.lower()
 		if dirLower not in ("asc","desc"):
@@ -271,8 +287,7 @@ def earliestKillID(kill_obj):
 			
 	return earliest_ID
 
-def fetchResults(queryObj):
-	joined_json = []
+def fetchResults(queryObj,joined_json = []):
 	query_complete = False
 	beforeKill = fetchLatestKillID(queryObj.startDate)
 	standard_return_len = 0
@@ -285,7 +300,7 @@ def fetchResults(queryObj):
 		except Exception, E:
 			print "Fatal exception, going down in flames"
 			print E
-			_dump_results(str(queryObj),joined_json)
+			_dump_results(queryObj,joined_json)
 			sys.exit(3)
 			
 		beforeKill = earliestKillID(tmp_JSON)
@@ -309,7 +324,7 @@ def fetchResults(queryObj):
 			for kill in tmp_JSON:
 				joined_json.append(kill)
 		
-		_dump_results(str(queryObj),joined_json)
+		_dump_results(queryObj,joined_json)
 	return joined_json
 	
 def fetchResult(zkb_url):	
@@ -431,9 +446,10 @@ def _politeSnooze(http_header):
 	if (conn_reqs_used+1)==conn_allowance:
 		time.sleep(conn_sleep_time)
 
-def _dump_results(query,results_json):
+def _dump_results(queryObj,results_json):
 	dump_obj = []
-	dump_obj.append(query)
+	dump_obj.append(str(queryObj))
+	dump_obj.append(queryObj.startDate)
 	for kill in results_json:
 		dump_obj.append(kill)
 
@@ -441,9 +457,23 @@ def _dump_results(query,results_json):
 	dump = open(result_dumpfile,'w')
 	dump.write(json.dumps(dump_obj,indent=4))
 	dump.close()
+
+def _crash_recovery():
+	print "recovering from file"
+	dump_obj = json.load(open(result_dumpfile))
+	query_address = dump_obj.pop(0)
+	query_startdate = dump_obj.pop(0)
+	
+	zkb_args = query_address.split(base_query)
+	
+	crashQuery = Query(query_startdate,zkb_args)
+	
+	fetchResults(crashQuery,dump_obj)
 	
 def main():
 	newQuery2 = Query("2013-12-20","api-only/corporationID/1894214152/")
+	
+	#_crash_recovery()
 	
 	#newQuery.api_only
 	#newQuery.characterID(628592330)
