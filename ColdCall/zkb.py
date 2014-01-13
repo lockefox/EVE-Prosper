@@ -1,6 +1,6 @@
 #!/Python27/python.exe
 
-import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, time, json, socket
+import sys, gzip, StringIO, sys, math, os, getopt, time, json, socket
 import urllib2
 import MySQLdb
 import ConfigParser
