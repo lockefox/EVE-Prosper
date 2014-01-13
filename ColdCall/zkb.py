@@ -1,9 +1,10 @@
 #!/Python27/python.exe
 
-import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, datetime, time, json, socket
+import sys, gzip, StringIO, csv, sys, math, os, getopt, subprocess, math, time, json, socket
 import urllib2
 import MySQLdb
 import ConfigParser
+from datetime import datetime
 
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini", "init_local.ini"])
@@ -15,7 +16,7 @@ retry_limit = int(conf.get("ZKB","retry_limit"))
 default_sleep = int(conf.get("ZKB","default_sleep"))
 User_Agent = conf.get("GLOBALS","user_agent")
 
-sleepTime = query_limt/(24*60*60)
+sleepTime = query_limit/(24*60*60)
 
 valid_modifiers = (
 	"kills",
@@ -47,11 +48,13 @@ class QueryException(Exception):
 			
 class Query(object):
 	__initialized = False
-	def __init__ (self, queryArgs=""):
+	def __init__ (self, startDate, queryArgs=""):
 		self.address = base_query
 		self.queryArgs = queryArgs
 		self.queryElements = {}
 		self.IDcount = 0
+		self.startDate = startDate
+		self.startDatetime = datetime.strptime(self.startDate,"%Y-%m-%d")
 		if queryArgs != "":
 			self.IDcount +=2
 			#do load into queryElements
@@ -240,12 +243,6 @@ class Query(object):
 				query_modifiers = "%s%s/%s/" % (query_modifiers,key,value)
 				
 		return "%s%s" % (self.address,query_modifiers)
-
-def fetchLatestKillID ():
-	singleton_query = Query("api-only/solo/kills/limit/1/")
-	kill_obj = fetchResults(singleton_query,1)
-	
-	return kill_obj[0]["killID"]
 	
 def latestKillID(kill_obj):
 	earliest_time = datetime.strptime("1970-01-01 00:00:00","%Y-%m-%d %H:%M:%S")	#epoch 0
@@ -268,9 +265,33 @@ def earliestKillID(kill_obj):
 			earliest_ID = kill["killID"]
 			
 	return earliest_ID
+
+def fetchResults(queryObj):
+	joined_json = []
+	query_complete = False
+	beforeKill = fetchLatestKillID(queryObj.startDate)
+	while query_complete == False:
+		queryObj.beforeKillID(beforeKill)
+		print "fetching: %s" % queryObj
+		tmp_JSON = fetchResult(str(queryObj))
+		beforeKill = earliestKillID(tmp_JSON)
+
+		lastKillIndex = len(tmp_JSON)-1
+		if datetime.strptime(tmp_JSON[lastKillIndex]["killTime"],"%Y-%m-%d %H:%M:%S") < queryObj.startDatetime:
+			query_complete = True
+			for kill in tmp_JSON:
+				if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > queryObj.startDatetime:
+					joined_json.append(kill)
+				else:
+					continue
+		else:
+			for kill in tmp_JSON:
+				joined_json.append(kill)
 	
-def fetchResults(queryObj,scrapeHeader=0):
-	zkb_url = str(queryObj)
+	return len(joined_json)
+	
+def fetchResult(zkb_url):	
+	global sleepTime
 	
 	request = urllib2.Request(zkb_url)
 	request.add_header('Accept-Encoding','gzip')
@@ -279,24 +300,46 @@ def fetchResults(queryObj,scrapeHeader=0):
 	#log query
 	
 	for tries in range (0,retry_limit):
-		time.sleep(sleepTime*(tries+1))
+		snooze_routine = 0
+		time.sleep(sleepTime)			#default wait between queries
+		time.sleep(default_sleep*tries)	#wait in case of retry
+		
 		try:
 			opener = urllib2.build_opener()
-			header_hold = urllib2.urlopen(request).headers
+			http_header = urllib2.urlopen(request).headers
 			raw_zip = opener.open(request)
 			dump_zip_stream = raw_zip.read()
 		except urllib2.HTTPError as e:
 			#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), e))
-			print "retry %s: %s" %(zkb_addr,tries+1)
+			print "retry %s: %s" %(zkb_url,tries+1)
 			continue
 		except urllib2.URLError as er:
 			#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), er))
-			print "URLError.  Retry %s: %s" %(zkb_addr,tries+1)
+			print "URLError.  Retry %s: %s" %(zkb_url,tries+1)
 			continue
 		except socket.error as err:
 			#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), err))
-			print "Socket Error.  Retry %s: %s" %(zkb_addr,tries+1)
-		_snooze(header_hold)
+			print "Socket Error.  Retry %s: %s" %(zkb_url,tries+1)
+		
+		try:
+			conn_allowance = int(http_header["X-Bin-Attempts-Allowed"])
+			conn_reqs_used = int(http_header["X-Bin-Requests"])	
+			conn_sleep_time= int(header["X-Bin-Seconds-Between-Request"])
+		except KeyError as E:
+			snooze_routine +=1
+			try:
+				query_limit  = int(http_header["X-Bin-Max-Requests"])
+				request_used = int(http_header["X-Bin-Request-Count"])
+			except KeyError as EE:
+				snooze_routine +=1
+		
+		#adjust sleep time
+		if snooze_routine == 0:
+			_politeSnooze(http_header)
+		elif snooze_routine == 1:
+			_snooze(http_header)
+		else:
+			sleepTime = default_sleep
 		
 		try:
 			dump_IOstream = StringIO.StringIO(dump_zip_stream)
@@ -304,15 +347,21 @@ def fetchResults(queryObj,scrapeHeader=0):
 			JSON_obj = json.load(zipper)
 		except ValueError as errr:
 			#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), errr))
-			print "Empty response.  Retry %s: %s" %(zkb_addr,tries+1)
+			print "Empty response.  Retry %s: %s" %(zkb_url,tries+1)
 			
 		else:
 			break
 	else:
-		print header_hold
+		print http_header
 		sys.exit(2)
 		
 	return JSON_obj
+
+def fetchLatestKillID (start_date):
+	singleton_query = Query(start_date,"api-only/solo/kills/limit/1/")
+	kill_obj = fetchResult(str(singleton_query))
+	
+	return kill_obj[0]["killID"]
 	
 def _snooze(http_header,multiplier=1):
 	global query_limit, sleepTime
@@ -324,15 +373,15 @@ def _snooze(http_header,multiplier=1):
 		sleepTime = query_limit/(24*60*60)*multiplier
 		return sleepTime
 	sleepTime = 0
-	if request_used/max_request <= 0.5:
+	if request_used/query_limit <= 0.5:
 		return sleepTime
-	elif request_used/max_request > 0.9:
+	elif request_used/query_limit > 0.9:
 		sleepTime = query_limit/(24*60*60)*multiplier*2
 		return sleepTime	
-	elif request_used/max_request > 0.75:
+	elif request_used/query_limit > 0.75:
 		sleepTime = query_limit/(24*60*60)*multiplier
 		return sleepTime
-	elif request_used/max_request > 0.5:
+	elif request_used/query_limit > 0.5:
 		sleepTime = query_limit/(24*60*60)*multiplier*0.5
 		return sleepTime
 	else:
@@ -348,8 +397,7 @@ def _snoozeSetter(http_header):
 		print "WARNING: http_header key 'X-Bin-Max-Requests' not found"
 		query_limit = int(conf.get("ZKB","query_limit"))
 		snooze_timer = query_limit/(24*60*60)	#requests per day
-		
-	
+			
 def _politeSnooze(http_header):
 	global snooze_timer
 	call_sleep = 0
@@ -361,15 +409,16 @@ def _politeSnooze(http_header):
 		time.sleep(conn_sleep_time)
 
 def main():
-	newQuery = Query()
-	newQuery2 = Query("api-only/characterID/628592330/losses/")
+	newQuery2 = Query("2013-10-01","api-only/corporationID/1894214152/")
 	
-	newQuery.api_only
-	newQuery.characterID(628592330)
-	newQuery.losses
+	#newQuery.api_only
+	#newQuery.characterID(628592330)
+	#newQuery.losses
 	
-	print newQuery
 	print newQuery2
+	
+	test_return = newQuery2.fetch()
+	print test_return
 	
 if __name__ == "__main__":
 	main()	
