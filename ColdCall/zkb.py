@@ -45,7 +45,9 @@ class Query(object):
 		self.queryArgs = queryArgs
 		self.queryElements = {}
 		self.IDcount = 0
-		
+		if queryArgs != "":
+			self.IDcount +=2
+			#do load into queryElements
 		self.__initialized == True
 	def orderDirection(self,dir):
 		dirLower = dir.lower()
@@ -101,78 +103,78 @@ class Query(object):
 		return date_str
 	
 	def limit (self,limit):
-		if singletonValidator(limit):
+		if self.singletonValidator(limit):
 			self.queryElements["limit"] = limit
 		else:
 			raise QueryException(-5)
 			
 	def page (self,page):
-		if singletonValidator(page):
+		if self.singletonValidator(page):
 			self.queryElements["page"] = page
 		else:
 			raise QueryException(-5)
 	
 	def year (self,year):
-		if singletonValidator(year):
-			self.queryValidator["year"] = year
+		if self.singletonValidator(year):
+			self.queryElements["year"] = year
 		else:
 			raise QueryException(-5)
 			
 	def month(self,month):
-		if singletonValidator(month):
-			self.queryValidator["month"] = month
+		if self.singletonValidator(month):
+			self.queryElements["month"] = month
 		else:
 			raise QueryException(-5)
 			
 	def week (self,week):
-		if singletonValidator(week):
-			self.queryValidator["week"] = week
+		if self.singletonValidator(week):
+			self.queryElements["week"] = week
 		else:
 			raise QueryException(-5)
 			
 	def beforeKillID (self,killID):
 		self.IDcount +=1	
-		self.queryValidator["beforeKillID"] = idValidator(killID)
+		self.queryElements["beforeKillID"] = self.idValidator(killID)
 		
 	def afterKillID (self,killID):
 		self.IDcount +=1	
-		self.queryValidator["afterKillID"] = idValidator(killID)
+		self.queryElements["afterKillID"] = self.idValidator(killID)
 		
 	def pastSeconds (self,seconds):
 		self.IDcount +=1	
-		self.queryValidator["pastSeconds"] = idValidator(seconds)
+		self.queryElements["pastSeconds"] = self.idValidator(seconds)
 		
 	def characterID (self,characterID):
-		self.IDcount +=1	
-		self.queryValidator["characterID"] = idValidator(characterID)
+		self.IDcount +=2	
+		self.queryElements["characterID"] = self.idValidator(characterID)
 		
 	def corpoartionID (self,corporationID):
-		self.IDcount +=1	
-		self.queryValidator["corpoartionID"] = idValidator(corporationID)
+		self.IDcount +=2	
+		self.queryElements["corpoartionID"] = self.idValidator(corporationID)
 		
 	def allianceID (self,allianceID):
-		self.IDcount +=1	
-		self.queryValidator["allianceID"] = idValidator(allianceID)
+		self.IDcount +=2	
+		self.queryElements["allianceID"] = self.idValidator(allianceID)
 		
 	def factionID (self,factionID):
 		self.IDcount +=1	
-		self.queryValidator["factionID"] = idValidator(factionID)
+		self.queryElements["factionID"] = self.idValidator(factionID)
 		
 	def shipTypeID (self,shipTypeID):
 		self.IDcount +=1	
-		self.queryValidator["shipTypeID"] = idValidator(shipTypeID)
+		self.queryElements["shipTypeID"] = self.idValidator(shipTypeID)
 		
 	def groupID (self,groupID):
 		self.IDcount +=1	
-		self.queryValidator["groupID"] = idValidator(groupID)
+		self.queryElements["groupID"] = self.idValidator(groupID)
 		
 	def solarSystemID (self,solarSystemID):
 		self.IDcount +=1
-		self.queryValidator["solarSystemID"] = idValidator(solarSystemID)
+		self.queryElements["solarSystemID"] = self.idValidator(solarSystemID)
 		
 	def regionID (self,regionID):
 		self.IDcount +=1
-		self.queryValidator["regionID"] = idValidator(regionID)
+		self.queryElements["regionID"] = self.idValidator(regionID)
 		
 	def singletonValidator (self,value):
 		valid = False
@@ -189,17 +191,17 @@ class Query(object):
 			tmp_list = value.split(',')
 			valid_list = True
 			for individual in tmp_list:
-				if singletonValidator(individual) == False:
+				if self.singletonValidator(individual) == False:
 					raise QueryException(-5)
 					
 			returnstr = value
-		elif isistance(value,int):
+		elif isinstance(value,int):
 			returnstr = str(value)
 			
 		elif type(value) is list:
 			valid_list = True
 			for individual in value:
-				if singletonValidator(individual) == False:
+				if self.singletonValidator(individual) == False:
 					raise QueryException(-5)
 					
 			returnstr = ','.join(str(x) for x in value)
@@ -207,7 +209,6 @@ class Query(object):
 		
 	def __getattr__ (self,name):	#for modifiers
 		mod_str = name.replace('_','-')
-		print mod_str
 		if mod_str not in valid_modifiers:
 			raise QueryException(-2)
 		
@@ -218,7 +219,7 @@ class Query(object):
 		self.queryElements[str(mod_str)] = True
 		
 	def __str__ (self):
-		if IDcount < 2:
+		if self.IDcount < 2:
 			raise QueryException(-1)
 		query_modifiers = self.queryArgs
 		for key,value in self.queryElements.iteritems():
