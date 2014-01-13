@@ -41,7 +41,6 @@ class QueryException(Exception):
 class Query():
 	def __init__ (self):
 		self.address = base_query
-		self.queryMods = ""
 		self.queryElements = {}
 		self.IDcount = 0
 	def orderDirection(self,dir):
@@ -158,4 +157,11 @@ class Query():
 	def __str__ (self):
 		if IDcount < 2:
 			raise QueryException(-1)
-		
+		query_modifiers = ""
+		for key,value in self.queryElements.iteritems():
+			if value == True:
+				query_modifiers = "%s/%s" % (key,query_modifiers)	#fetch modifiers must be first
+			else:
+				query_modifiers = "%s%s/%s/" % (query_modifiers,key,value)
+				
+		return "%s%s" % (self.address,query_modifiers)
