@@ -15,8 +15,13 @@ subquery_limit = int(conf.get("ZKB","subquery_limit"))
 retry_limit = int(conf.get("ZKB","retry_limit"))
 default_sleep = int(conf.get("ZKB","default_sleep"))
 User_Agent = conf.get("GLOBALS","user_agent")
+logfile = conf.get("ZKB","logfile")
+result_dumpfile = conf.get("ZKB","result_dumpfile")
 
 sleepTime = query_limit/(24*60*60)
+
+log = open (logfile, 'a+')
+
 
 valid_modifiers = (
 	"kills",
@@ -270,13 +275,25 @@ def fetchResults(queryObj):
 	joined_json = []
 	query_complete = False
 	beforeKill = fetchLatestKillID(queryObj.startDate)
+	standard_return_len = 0
 	while query_complete == False:
 		queryObj.beforeKillID(beforeKill)
 		print "fetching: %s" % queryObj
-		tmp_JSON = fetchResult(str(queryObj))
+		
+		try:
+			tmp_JSON = fetchResult(str(queryObj))
+		except Exception, E:
+			print "Fatal exception, going down in flames"
+			print E
+			_dump_results(str(queryObj),joined_json)
+			sys.exit(3)
+			
 		beforeKill = earliestKillID(tmp_JSON)
-
+		
 		lastKillIndex = len(tmp_JSON)-1
+		if len(tmp_JSON) > standard_return_len:
+			standard_return_len = len(tmp_JSON)
+			
 		if datetime.strptime(tmp_JSON[lastKillIndex]["killTime"],"%Y-%m-%d %H:%M:%S") < queryObj.startDatetime:
 			query_complete = True
 			for kill in tmp_JSON:
@@ -284,11 +301,16 @@ def fetchResults(queryObj):
 					joined_json.append(kill)
 				else:
 					continue
+		elif len(tmp_JSON) < standard_return_len:
+			query_complete = True
+			for kill in tmp_JSON:
+				joined_json.append(kill)
 		else:
 			for kill in tmp_JSON:
 				joined_json.append(kill)
-	
-	return len(joined_json)
+		
+		_dump_results(str(queryObj),joined_json)
+	return joined_json
 	
 def fetchResult(zkb_url):	
 	global sleepTime
@@ -362,6 +384,7 @@ def fetchLatestKillID (start_date):
 	kill_obj = fetchResult(str(singleton_query))
 	
 	return kill_obj[0]["killID"]
+
 	
 def _snooze(http_header,multiplier=1):
 	global query_limit, sleepTime
@@ -408,8 +431,19 @@ def _politeSnooze(http_header):
 	if (conn_reqs_used+1)==conn_allowance:
 		time.sleep(conn_sleep_time)
 
+def _dump_results(query,results_json):
+	dump_obj = []
+	dump_obj.append(query)
+	for kill in results_json:
+		dump_obj.append(kill)
+
+	
+	dump = open(result_dumpfile,'w')
+	dump.write(json.dumps(dump_obj,indent=4))
+	dump.close()
+	
 def main():
-	newQuery2 = Query("2013-10-01","api-only/corporationID/1894214152/")
+	newQuery2 = Query("2013-12-20","api-only/corporationID/1894214152/")
 	
 	#newQuery.api_only
 	#newQuery.characterID(628592330)
@@ -418,7 +452,7 @@ def main():
 	print newQuery2
 	
 	test_return = newQuery2.fetch()
-	print test_return
+	print len(test_return)
 	
 if __name__ == "__main__":
 	main()	
