@@ -458,7 +458,7 @@ def _dump_results(queryObj,results_json):
 	dump.write(json.dumps(dump_obj,indent=4))
 	dump.close()
 
-def _crash_recovery():
+def crash_recovery():
 	print "recovering from file"
 	dump_obj = json.load(open(result_dumpfile))
 	query_address = dump_obj.pop(0)
@@ -468,7 +468,7 @@ def _crash_recovery():
 	
 	crashQuery = Query(query_startdate,zkb_args)
 	
-	fetchResults(crashQuery,dump_obj)
+	fetchResults(crashQuery,dump_obj)	#this isn't perfect.  Would prefer higher level control
 	
 def main():
 	newQuery2 = Query("2013-12-20","api-only/corporationID/1894214152/")
