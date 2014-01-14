@@ -289,41 +289,45 @@ def earliestKillID(kill_obj):
 
 def fetchResults(queryObj,joined_json = []):
 	query_complete = False
-	beforeKill = fetchLatestKillID(queryObj.startDate)
-	standard_return_len = 0
-	while query_complete == False:
+	
+	try:	#only start at latest killID if not already assigned
+		beforeKill = queryObj.queryElements["beforeKillID"]
+	except KeyError as E:
+		beforeKill = fetchLatestKillID(queryObj.startDate)
 		queryObj.beforeKillID(beforeKill)
+	
+	while query_complete == False:
+		
 		print "fetching: %s" % queryObj
 		
 		try:
-			tmp_JSON = fetchResult(str(queryObj))
+			tmp_JSON = fetchResult(str(queryObj))	#fetch single query result
 		except Exception, E:
 			print "Fatal exception, going down in flames"
 			print E
-			_dump_results(queryObj,joined_json)
+			_dump_results(queryObj,joined_json)	#major failure, dump for restart
 			sys.exit(3)
 			
 		beforeKill = earliestKillID(tmp_JSON)
 		
-		lastKillIndex = len(tmp_JSON)-1
-		if len(tmp_JSON) > standard_return_len:
-			standard_return_len = len(tmp_JSON)
+		if len(tmp_JSON) == 0:	#if return is empty (and valid) complete
+			query_complete = True
+			continue
 			
+		lastKillIndex = len(tmp_JSON)-1
+		
+		#if 
 		if datetime.strptime(tmp_JSON[lastKillIndex]["killTime"],"%Y-%m-%d %H:%M:%S") < queryObj.startDatetime:
 			query_complete = True
 			for kill in tmp_JSON:
 				if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > queryObj.startDatetime:
-					joined_json.append(kill)
+					joined_json.append(kill)	#dump all valid entries into object
 				else:
 					continue
-		elif len(tmp_JSON) < standard_return_len:
-			query_complete = True
+		else:	#dump all into return object
 			for kill in tmp_JSON:
 				joined_json.append(kill)
-		else:
-			for kill in tmp_JSON:
-				joined_json.append(kill)
-		
+		queryObj.beforeKillID(beforeKill)	#reset the queryObj before dumping
 		_dump_results(queryObj,joined_json)
 	return joined_json
 	
