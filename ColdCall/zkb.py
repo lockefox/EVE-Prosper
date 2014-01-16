@@ -350,16 +350,11 @@ def fetchResults(queryObj,joined_json = []):
 			query_complete = True
 			continue
 			
-		if datetime.strptime(tmp_JSON[lastKillIndex]["killTime"],"%Y-%m-%d %H:%M:%S") < queryObj.startDatetime:
-			query_complete = True
-			for kill in tmp_JSON:
-				if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > queryObj.startDatetime:
-					joined_json.append(kill)	#dump all valid entries into object
-				else:
-					continue
-		else:	#dump all into return object
-			for kill in tmp_JSON:
-				joined_json.append(kill)
+		for kill in tmp_JSON:
+			if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > queryObj.startDatetime:
+				joined_json.append(kill)	#dump all valid entries into object
+			else:
+				query_complete = True
 				
 		queryObj.beforeKillID(beforeKill)	#reset the queryObj before dumping
 		_dump_results(queryObj,joined_json)
