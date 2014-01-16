@@ -262,6 +262,7 @@ class Query(object):
 		
 		query_complete = False
 		while query_complete == False:
+			result_JSON = []
 			try:
 				single_query_JSON = fetchResult(str(self))
 			except Exception, E:
@@ -269,10 +270,20 @@ class Query(object):
 				print E
 				_dump_results(self,query_results_JSON)	#major failure, dump for restart
 				sys.exit(3)
-			for kill in query_results_JSON:
+			for kill in single_query_JSON:
 				query_results_JSON.append(kill)
 			
-			yield single_query_JSON
+			if len(single_query_JSON) == 0L
+				query_complete = True
+				continue
+			
+			for kill in single_query_JSON:
+				if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > self.startDatetime:
+					result_JSON.append(kill)
+				else:
+					query_complete = True
+					
+			yield result_JSON
 			
 	def __str__ (self):
 		if self.IDcount < 2:
