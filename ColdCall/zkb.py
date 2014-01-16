@@ -270,19 +270,23 @@ class Query(object):
 				print E
 				_dump_results(self,query_results_JSON)	#major failure, dump for restart
 				sys.exit(3)
-			for kill in single_query_JSON:
-				query_results_JSON.append(kill)
 			
-			if len(single_query_JSON) == 0L
+			beforeKill = earliestKillID(single_query_JSON)
+			
+			if len(single_query_JSON) == 0
 				query_complete = True
 				continue
 			
 			for kill in single_query_JSON:
 				if datetime.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S") > self.startDatetime:
 					result_JSON.append(kill)
+					query_results_JSON.append(kill)
 				else:
 					query_complete = True
 					
+			self.beforeKillID(beforeKill)
+			_dump_results(self,query_results_JSON)
+			
 			yield result_JSON
 			
 	def __str__ (self):
@@ -346,9 +350,6 @@ def fetchResults(queryObj,joined_json = []):
 			query_complete = True
 			continue
 			
-		lastKillIndex = len(tmp_JSON)-1
-		
-		#if 
 		if datetime.strptime(tmp_JSON[lastKillIndex]["killTime"],"%Y-%m-%d %H:%M:%S") < queryObj.startDatetime:
 			query_complete = True
 			for kill in tmp_JSON:
@@ -359,6 +360,7 @@ def fetchResults(queryObj,joined_json = []):
 		else:	#dump all into return object
 			for kill in tmp_JSON:
 				joined_json.append(kill)
+				
 		queryObj.beforeKillID(beforeKill)	#reset the queryObj before dumping
 		_dump_results(queryObj,joined_json)
 	return joined_json
