@@ -300,7 +300,7 @@ def kill_crawler(start_killID,group,groupName,progress):
 		crash_obj["progress"][group]=parsed_kills[0]
 		crash_handler(crash_obj)
 		#print "-------"
-	parsed_kills[3]=date_str
+		parsed_kills[3]=date_str
 	return parsed_kills
 	
 def crash_recover():

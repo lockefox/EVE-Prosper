@@ -22,7 +22,6 @@ sleepTime = query_limit/(24*60*60)
 
 log = open (logfile, 'a+')
 
-
 valid_modifiers = (
 	"kills",
 	"losses",
@@ -90,6 +89,7 @@ class Query(object):
 			raise QueryException(-3)
 		
 		self.queryElements["orderDirection"] = dirLower
+		
 	def startTime(self,datevalue):
 		validTime = False
 		try:
@@ -253,6 +253,27 @@ class Query(object):
 		
 		self.queryElements[str(mod_str)] = True
 		
+	def __iter__ (self):
+		query_results_JSON = []
+		try:
+			self.queryElements["beforeKillID"]
+		except KeyError, E:
+			self.queryElements["beforeKillID"] = fetchLatestKillID(self.startDate)
+		
+		query_complete = False
+		while query_complete == False:
+			try:
+				single_query_JSON = fetchResult(str(self))
+			except Exception, E:
+				print "Fatal exception, going down in flames"
+				print E
+				_dump_results(self,query_results_JSON)	#major failure, dump for restart
+				sys.exit(3)
+			for kill in query_results_JSON:
+				query_results_JSON.append(kill)
+			
+			yield single_query_JSON
+			
 	def __str__ (self):
 		if self.IDcount < 2:
 			raise QueryException(-1)
@@ -403,7 +424,6 @@ def fetchLatestKillID (start_date):
 	kill_obj = fetchResult(str(singleton_query))
 	
 	return kill_obj[0]["killID"]
-
 	
 def _snooze(http_header,multiplier=1):
 	global query_limit, sleepTime
