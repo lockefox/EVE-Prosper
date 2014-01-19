@@ -5,7 +5,12 @@ import urllib2
 import MySQLdb
 import ConfigParser
 from datetime import datetime
-import stomp	#for live connections later
+
+try:
+	import stomp	#for live connections later
+	CANSTOMP = True
+except ImportError:
+	CANSTOMP = False
 
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini", "init_local.ini"])
