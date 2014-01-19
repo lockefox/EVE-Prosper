@@ -466,7 +466,9 @@ def kill_crawler_charRecord(start_killID,queryStr,progress):
 	earliest_killID=[time.gmtime(),next_killID]
 	
 	for kill in JSON_obj:
-		validKillFound=0
+		validKillFound=1
+		date_killed = time.strptime(kill["killTime"],"%Y-%m-%d %H:%M:%S")
+		
 		if date_killed < earliest_killID[0]:
 			earliest_killID=[date_killed,kill["killID"]]
 			progress["killID"]=kill["killID"]
@@ -480,19 +482,19 @@ def kill_crawler_charRecord(start_killID,queryStr,progress):
 		#if kill["victim"]["characterID"] == chracter_filter:
 		#	continue
 			
-		for attacker in kill["attackers"]:
-			if attacker["characterID"] == chracter_filter:
-				if shiptype_filter == 0:
-					validKillFound = 1
-					break
-				elif attacker["shipTypeID"] == shiptype_filter:
-					validKillFound = 1
-					break
-				elif attacker["weaponTypeID"] == shiptype_filter:
-					validKillFound = 1
-					break
-				else:
-					continue
+		#for attacker in kill["attackers"]:
+		#	if attacker["characterID"] == chracter_filter:
+		#		if shiptype_filter == 0:
+		#			validKillFound = 1
+		#			break
+		#		elif attacker["shipTypeID"] == shiptype_filter:
+		#			validKillFound = 1
+		#			break
+		#		elif attacker["weaponTypeID"] == shiptype_filter:
+		#			validKillFound = 1
+		#			break
+		#		else:
+		#			continue
 					
 		if validKillFound == 1:
 			valid_kills.append(kill)
@@ -582,29 +584,39 @@ def kill_data_dump(kill_obj):
 def character_record_dump(valid_kill_list,dump_file="characterReport.csv"):
 	test=1
 	csv_table = []
-	
-	csv_table[0] = ("killID","solarSystemID","killTime","victim_characterID",
+	csv_table.append(("killID","solarSystemID","killTime","victim_characterID",
 		"victim_characterName","shipLost","reportedValue","involvedParties",
-		"attacker_ShipID","attacker_weaponID")
+		"attacker_ShipID","attacker_weaponID"))
+	#csv_table[0] = ("killID","solarSystemID","killTime","victim_characterID",
+	#	"victim_characterName","shipLost","reportedValue","involvedParties",
+	#	"attacker_ShipID","attacker_weaponID")
 	for kill in valid_kill_list:
 		csv_table_tmp = []
-		csv_table_tmp [0] = kill["killID"]
-		csv_table_tmp [1] = kill["solarSystemID"]
-		csv_table_tmp [2] = kill["killTime"]
-		csv_table_tmp [3] = kill["victim"]["characterID"]
-		csv_table_tmp [4] = kill["victim"]["characterName"]
-		csv_table_tmp [5] = kill["victim"]["shipTypeID"]
-		csv_table_tmp [6] = kill["zkb"]["totalValue"]
-		csv_table_tmp [7] = len(kill["attackers"])
+		csv_table_tmp.append(kill["killID"])
+		csv_table_tmp.append(kill["solarSystemID"])
+		csv_table_tmp.append(kill["killTime"])
+		csv_table_tmp.append(kill["victim"]["characterID"])
+		csv_table_tmp.append(kill["victim"]["characterName"])
+		csv_table_tmp.append(kill["victim"]["shipTypeID"])
+		try:
+			csv_table_tmp.append(kill["zkb"]["totalValue"])
+		except KeyError, e:
+			csv_table_tmp.append(0)
+		csv_table_tmp.append(len(kill["attackers"]))
 		
 		for killer in kill["attackers"]:
-			if killer["characterID"] == character_filter:
-				csv_table_tmp [8] = killer["shipTypeID"]
-				csv_table_tmp [9] = killer["weaponTypeID"]
-		
+			if int(killer["characterID"]) == int(character_filter):
+				csv_table_tmp.append(killer["shipTypeID"])
+				csv_table_tmp.append(killer["weaponTypeID"])
+		csv_table.append(csv_table_tmp)
 	outfile = open(dump_file,'w')
 	for row in csv_table:
-		linestr = row.join(',')
+		row_str = map(str,row)
+		try:
+			linestr = ','.join(str(v) for v in row)
+		except Exception,e:
+			print row
+			print e
 		outfile.write("%s\n" % linestr)
 	
 def crash_handler(tracker_obj):
@@ -637,7 +649,7 @@ def main():
 		validate = raw_input("Scrape local version instead of recreating fresh? (Y/N)")
 		if validate.upper()== 'Y':
 			skip_scrape = 1
-			valid_kills = json.load("raw_zkb.json")
+			valid_kills = json.load(open("raw_zkb.json"))
 			
 	if skip_scrape == 0:
 		print "-----Scraping zKB.  This may take a while-----"
@@ -650,8 +662,8 @@ def main():
 		progress["earlyDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 		print "time\tkillID\tdateProgress\tKillsParsed"
 		while progress["complete"] == 0:
-			progress = character_record_dump(progress["killID"],zkb_query_str,progress)
-	
+			progress = kill_crawler_charRecord(progress["killID"],zkb_query_str,progress)
+			print "%s\t%s\t%s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),progress["killID"],progress["earlyDate"],progress["kills_parsed"])
 	print "writing results"
 	character_record_dump(valid_kills)
 	
