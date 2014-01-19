@@ -5,6 +5,7 @@ import urllib2
 import MySQLdb
 import ConfigParser
 from datetime import datetime
+import stomp	#for live connections later
 
 conf = ConfigParser.ConfigParser()
 conf.read(["init.ini", "init_local.ini"])
@@ -273,7 +274,7 @@ class Query(object):
 			
 			beforeKill = earliestKillID(single_query_JSON)
 			
-			if len(single_query_JSON) == 0
+			if len(single_query_JSON) == 0:
 				query_complete = True
 				continue
 			
