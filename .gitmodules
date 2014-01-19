@@ -4,3 +4,6 @@
 [submodule "ColdCall/stomp.py"]
 	path = ColdCall/stomp.py
 	url = https://github.com/jasonrbriggs/stomp.py.git
+[submodule "ColdCall/eveapi"]
+	path = ColdCall/eveapi
+	url = https://github.com/ntt/eveapi.git
