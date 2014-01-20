@@ -79,10 +79,13 @@ def main():
 	
 	print query_AR
 	progress = 0
+	kills_obj = []
+	latest_date = ""
 	for zkb_return in query_AR:
-		print progress
-		
+		print "%s: %s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),latest_date,progress)	
 		for kill in zkb_return:
+			kills_obj.append(kill)
+			
 			participants_sql = "INSERT INTO %s (killID,solarSystemID,kill_time,isVictim,shipTypeID,damage,\
 				characterID,corporationID,allianceID,factionID,finalBlow,weaponTypeID) " % db_participants
 			
@@ -171,6 +174,7 @@ def main():
 		#fits_SQL = fits_SQL.rstrip(',')
 		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
 		progress += len(zkb_return)	
+		latest_date = killTime
 	dumpfile = open("dump_coldcall.json",'w')
 	dumpfile.write(json.dumps(kills_obj,indent=4))
 	
