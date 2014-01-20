@@ -63,21 +63,32 @@ def db_init():
 			sys.exit(2)
 		print "%s.%s table:\tCREATED" % (db_schema,db_fits)
 	else:
-		print "%s.%s table:\t\t\tGOOD" % (db_schema,db_fits)
+		print "%s.%s table:\t\tGOOD" % (db_schema,db_fits)
 	
 def main():
 	db_init()
 	
 	query_length = int(conf.get("COLDCALL","query_length"))
-	today = datetime.utcnow() - timedelta(days=query_length)
-	query_start = today 
+	query_start = datetime.utcnow() - timedelta(days=query_length)
 	query_start_str = query_start.strftime("%Y-%m-%d")
-	print query_start_str
+
 	query_AR = zkb.Query(query_start_str)
 	query_AR.factionID(500004)	#gallente Faction
+	query_AR.api_only
+	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))
 	
-	kills_obj = query_AR.fetch()
-	
+	print query_AR
+	for zkb_return in query_AR:
+		print len(zkb_return)
+		for kill in zkb_return:
+			participants_sql = "INSERT INTO %s (killID,solarSystemID,kill_time,isVictim,shipTypeID,damage,\
+				characterID,corporationID,allianceID,factionID,finalBlow,weaponTypeID,fit_json)" % db_participants
+			
+			fit_sql = "INSERT INTO %s (killID,characterID,corporationID,allianceID,factionID,shipTypeID,\
+				typeID,flag,qtyDropped,qtyDestroyed,singleton)" % db_fits
+			
+			
+			
 	dumpfile = open("dump_coldcall.json",'w')
 	dumpfile.write(json.dumps(kills_obj,indent=4))
 	
