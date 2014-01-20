@@ -5,6 +5,7 @@ import urllib2
 import MySQLdb
 import ConfigParser
 from datetime import datetime, timedelta
+from dateutil import relativedelta
 
 from eveapi import eveapi
 import zkb
@@ -32,6 +33,9 @@ query_start = datetime.utcnow() - timedelta(days=query_length)
 query_start_str = query_start.strftime("%Y-%m-%d")
 full_scrape=1
 report=1
+
+corp_length_ceiling = int(conf.get("COLDCALL","corp_length_ceiling")
+character_kills_ceiling = int(conf.get("COLDCALL","character_kills_ceiling")
 
 def db_init():
 	global cursor,db
@@ -174,8 +178,122 @@ def load_SQL (queryObj):
 		return kills_obj
 		
 def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
-	test = 1
+	api = eveapi.EVEAPIConnection()
 	
+	NPC_corps = []
+	query_command = open(sqlFile,'r').read()
+	cursor.execute("SELECT corporationID FROM crpnpccorporations")
+	for row in cursor.fetchall():
+		NPC_corps.append(int(row[0]))
+		
+	cursor.execute(query_command)
+	results = cursor.fetchall()
+	
+	report_data = []
+	report_header = ("characterName",
+		"characterID",
+		"current corp",
+		"kills",
+		"losses",
+		"latest activity",
+		"zkb address",
+		"total solo",
+		"total kills",
+		"total losses",
+		"birthday",
+		"estimated age (mo)",
+		"total age (mo)")
+	report_data.append(report_header)
+	
+	for character_entry in results:
+		#report_line = []
+		character_id = character_entry[0]
+		losses = character_entry[1]
+		kills = character_entry[2]
+		latest_activity = character_entry[3]
+		
+		character_info = api.eve.CharacterInfo(characterID=character_id)
+		
+		character_name = character_info.characterName
+		corporation_name = character_info.corporation
+		corp_history = character_info.employmentHistory
+		
+		#parse corp history to estimate character age
+		total_age = 0
+		estimated_age = 0
+		earliest_corp_date = datetime.strptime(character_info.corporationDate,"%Y-%m-%d %H:%M:%S")
+		previous_corp_date = earliest_corp_date
+		for corpinfo in corp_history:
+			join_date = datetime.strptime(corpinfo.startDate,"%Y-%m-%d %H:%M:%S")
+			corp_id = int(corpinfo.corporationID)
+			
+			if corp_id in NPC_corps:
+				previous_corp_date = join_date
+				if join_date < previous_corp_date:
+					earliest_corp_date = join_date
+				continue
+			else:
+				delta = previous_corp_date - join_date
+				if join_date < previous_corp_date:
+					earliest_corp_date = join_date
+				previous_corp_date = join_date
+				if delta.days > corp_length_ceiling: #6mo corp life?  Assume inactive
+					estimated_age+=corp_length_ceiling 
+					continue
+				estimated_age += delta.days
+				
+		total_time = datetime.utcnow() - earliest_corp_date
+		total_age = math.round(total_time.days/30)	#months
+		estimated_age = math.round(estimated_age/30) #months
+		birthday = earliest_corp_date.strftime("%Y-%m-%d")
+		
+		#Fetch individual kill stats
+		query_length = datetime.utcnow() - relativedelta(years=1)
+		characterQuery = zkb.Query(query_length.strftime("%Y-%m-%d"))
+		characterQuery.api_only
+		characterQuery.characterID(character_id)
+		
+		total_kills = 0
+		total_losses = 0
+		for zkbreturn in characterQuery:
+			print "%s: fetching kills for %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(),character_name)
+			for kill in zkbreturn:
+				if int(kill["victim"]["characterID"]) == int(characterID):
+					total_losses += 1
+				else:
+					total_kills +=1
+			
+		characterSoloQuery = zkb.Query(query_length.strftime("%Y-%m-%d"))
+		characterSoloQuery.api_only
+		characterQuery.characterID(character_id)
+		characterQuery.solo
+		characterQuery.kills
+		
+		solo_kills = 0
+		for zkbsolo in characterSoloQuery:
+			solo_kills += len(zkbsolo)
+			
+		report_line = (
+			character_name,
+			characterID,
+			corporation_name,
+			kills,
+			losses,
+			latest_activity,
+			"https://zkillboard.com/character/%s/" % characterID,
+			solo_kills,
+			total_kills,
+			total_losses,
+			birthday,
+			estimated_age,
+			toatl_age)
+		report_data.append(report_line)
+	
+	result_file = open(outFile,'w')	
+	for row in report_data
+		row_str = ','.join(str(item) for item in row)
+		result_file.write("%s\n" % row_str)
+		
 def parseargs():
 	global full_scrape,report,query_start_str
 	try:
@@ -208,11 +326,13 @@ def main():
 	parseargs()
 
 	if full_scrape == 1:
+
 		query_AR = zkb.Query(query_start_str)
 		query_AR.factionID(500004)	#gallente Faction
 		query_AR.api_only
 		query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
 		
+		print "Fetching data from %s" % query_AR
 		kills_obj = load_SQL(query_AR)
 	
 		dumpfile = open("dump_coldcall.json",'w')
