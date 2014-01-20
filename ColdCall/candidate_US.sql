@@ -15,4 +15,5 @@ AND kills.corporationID = 1000181
 AND kills.kill_time > NOW() - INTERVAL 20 DAY
 GROUP BY kills.characterID
 HAVING losses > 5 OR kills > 5
+AND latestActivity > NOW() - INTERVAL 7 DAY
 ORDER BY losses DESC 
