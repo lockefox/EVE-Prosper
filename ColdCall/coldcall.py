@@ -64,24 +64,13 @@ def db_init():
 		print "%s.%s table:\tCREATED" % (db_schema,db_fits)
 	else:
 		print "%s.%s table:\t\tGOOD" % (db_schema,db_fits)
-	
-def main():
-	db_init()
-	
-	query_length = int(conf.get("COLDCALL","query_length"))
-	query_start = datetime.utcnow() - timedelta(days=query_length)
-	query_start_str = query_start.strftime("%Y-%m-%d")
 
-	query_AR = zkb.Query(query_start_str)
-	query_AR.factionID(500004)	#gallente Faction
-	query_AR.api_only
-	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
+def load_SQL (queryObj):
 	
-	print query_AR
 	progress = 0
 	kills_obj = []
 	latest_date = ""
-	for zkb_return in query_AR:
+	for zkb_return in queryObj:
 		print "%s: %s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),latest_date,progress)	
 		for kill in zkb_return:
 			kills_obj.append(kill)
@@ -175,6 +164,23 @@ def main():
 		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
 		progress += len(zkb_return)	
 		latest_date = killTime
+		
+		return kills_obj
+def main():
+	db_init()
+	
+	query_length = int(conf.get("COLDCALL","query_length"))
+	query_start = datetime.utcnow() - timedelta(days=query_length)
+	query_start_str = query_start.strftime("%Y-%m-%d")
+
+	query_AR = zkb.Query(query_start_str)
+	query_AR.factionID(500004)	#gallente Faction
+	query_AR.api_only
+	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
+	
+	kills_obj = load_SQL(query_AR)
+	
+	
 	dumpfile = open("dump_coldcall.json",'w')
 	dumpfile.write(json.dumps(kills_obj,indent=4))
 	
