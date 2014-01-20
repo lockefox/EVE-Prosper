@@ -27,6 +27,12 @@ db_port = int(conf.get("GLOBALS","db_port"))
 db_participants = conf.get("COLDCALL","db_participants")
 db_fits = conf.get("COLDCALL","db_fits")
 
+query_length = int(conf.get("COLDCALL","query_length"))
+query_start = datetime.utcnow() - timedelta(days=query_length)
+query_start_str = query_start.strftime("%Y-%m-%d")
+full_scrape=1
+report=1
+
 def db_init():
 	global cursor,db
 	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
@@ -166,23 +172,54 @@ def load_SQL (queryObj):
 		latest_date = killTime
 		
 		return kills_obj
+		
+def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
+	test = 1
+	
+def parseargs():
+	global full_scrape,report,query_start_str
+	try:
+		opts, args = getopt.getopt(sys.argv[1:],"q:h",["scrape_only","report_only","quick"])
+	except getopt.GetoptError:
+		print "invalid arguments"
+		#help()
+		sys.exit(2)
+		
+	for opt,arg in opts:
+		if opt == "--scrape_only":		
+			report=0
+			full_scrape=1
+		elif opt == "--report_only":
+			report=1
+			full_scrape=0
+		elif opt == "--quick":		#refreshes DB if out of date, then runs report
+			cursor.execute("SELECT DATE(kill_time) FROM %s ORDER BY DATE(kill_time) DESC LIMIT 1" % db_participants)
+			query_start_str = cursor.fetchone()[0]
+
+			if str(query_start_str) == str(datetime.utcnow().strftime("%Y-%m-%d")):
+				full_scrape = 0
+				print "DB up to date, skipping scrape"
+			else:
+				full_scrape = 1
+			report = 1
+			
 def main():
 	db_init()
-	
-	query_length = int(conf.get("COLDCALL","query_length"))
-	query_start = datetime.utcnow() - timedelta(days=query_length)
-	query_start_str = query_start.strftime("%Y-%m-%d")
+	parseargs()
 
-	query_AR = zkb.Query(query_start_str)
-	query_AR.factionID(500004)	#gallente Faction
-	query_AR.api_only
-	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
+	if full_scrape == 1:
+		query_AR = zkb.Query(query_start_str)
+		query_AR.factionID(500004)	#gallente Faction
+		query_AR.api_only
+		query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
+		
+		kills_obj = load_SQL(query_AR)
 	
-	kills_obj = load_SQL(query_AR)
+		dumpfile = open("dump_coldcall.json",'w')
+		dumpfile.write(json.dumps(kills_obj,indent=4))
 	
-	
-	dumpfile = open("dump_coldcall.json",'w')
-	dumpfile.write(json.dumps(kills_obj,indent=4))
+	if report == 1:
+		buildReport()
 	
 if __name__ == "__main__":
 	main()
