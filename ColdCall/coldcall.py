@@ -5,7 +5,6 @@ import urllib2
 import MySQLdb
 import ConfigParser
 from datetime import datetime, timedelta
-from dateutil import relativedelta
 
 from eveapi import eveapi
 import zkb
@@ -34,8 +33,8 @@ query_start_str = query_start.strftime("%Y-%m-%d")
 full_scrape=1
 report=1
 
-corp_length_ceiling = int(conf.get("COLDCALL","corp_length_ceiling")
-character_kills_ceiling = int(conf.get("COLDCALL","character_kills_ceiling")
+corp_length_ceiling = int(conf.get("COLDCALL","corp_length_ceiling"))
+character_kills_ceiling = int(conf.get("COLDCALL","character_kills_ceiling"))
 
 def db_init():
 	global cursor,db
@@ -256,7 +255,7 @@ def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 		total_kills = 0
 		total_losses = 0
 		for zkbreturn in characterQuery:
-			print "%s: fetching kills for %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(),character_name)
+			print "%s: fetching kills for %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),character_name)
 			for kill in zkbreturn:
 				if int(kill["victim"]["characterID"]) == int(characterID):
 					total_losses += 1
@@ -290,7 +289,7 @@ def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 		report_data.append(report_line)
 	
 	result_file = open(outFile,'w')	
-	for row in report_data
+	for row in report_data:
 		row_str = ','.join(str(item) for item in row)
 		result_file.write("%s\n" % row_str)
 		
