@@ -75,20 +75,102 @@ def main():
 	query_AR = zkb.Query(query_start_str)
 	query_AR.factionID(500004)	#gallente Faction
 	query_AR.api_only
-	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))
+	query_AR.beforeKillID(zkb.fetchLatestKillID(query_start_str))	#preload latest killID
 	
 	print query_AR
+	progress = 0
 	for zkb_return in query_AR:
-		print len(zkb_return)
+		print progress
+		
 		for kill in zkb_return:
 			participants_sql = "INSERT INTO %s (killID,solarSystemID,kill_time,isVictim,shipTypeID,damage,\
-				characterID,corporationID,allianceID,factionID,finalBlow,weaponTypeID,fit_json)" % db_participants
+				characterID,corporationID,allianceID,factionID,finalBlow,weaponTypeID) " % db_participants
 			
 			fit_sql = "INSERT INTO %s (killID,characterID,corporationID,allianceID,factionID,shipTypeID,\
-				typeID,flag,qtyDropped,qtyDestroyed,singleton)" % db_fits
+				typeID,flag,qtyDropped,qtyDestroyed,singleton) " % db_fits
+				
+			killID = kill["killID"]
+			solarSystemID = kill["solarSystemID"]
+			killTime = kill["killTime"]
 			
+			#Dump victim info first
+			victim_info = (
+				killID,
+				solarSystemID,
+				"'%s'" % killTime,
+				1,	#isVictim
+				kill["victim"]["shipTypeID"],
+				kill["victim"]["damageTaken"],
+				kill["victim"]["characterID"],
+				kill["victim"]["corporationID"],
+				kill["victim"]["allianceID"],
+				kill["victim"]["factionID"],
+				"NULL",	#finalBlow
+				"NULL",	#weaponTypeID
+				)	#json.dumps(kill["items"]))	#stringify fit for storage (without fit db)
+				
+			info_str = ','.join(str(item) for item in victim_info)	#join only works on str
+			info_str = info_str.rstrip(',')	#strip trailing comma
+			victim_participants = "VALUES (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID" % info_str
+
+			cursor.execute("%s%s" % (participants_sql,victim_participants))
+			db.commit()
 			
+			#Dump killer info
+			killers_SQL = "%s VALUES " % participants_sql
+			for killer in kill["attackers"]:
+				killer_info = (
+					killID,
+					solarSystemID,
+					"'%s'" % killTime,
+					0,	#isVictim
+					killer["shipTypeID"],
+					killer["damageDone"],
+					killer["characterID"],
+					killer["corporationID"],
+					killer["allianceID"],
+					killer["factionID"],
+					killer["finalBlow"],
+					killer["weaponTypeID"],
+				)
+				
+				killer_str = ','.join(str(item) for item in killer_info)
+				killer_str = killer_str.rstrip(',')
+				killers_SQL = "%s\n (%s)," % (killers_SQL,killer_str)
+				
+			killers_SQL = killers_SQL.rstrip(',')
+			killers_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID" % killers_SQL
 			
+			cursor.execute(killers_SQL)
+			db.commit()
+			
+		#Dump fits
+		fits_SQL = "%s VALUES " % fit_sql
+		for item in kill["items"]:
+			fit_info = (
+				killID,
+				kill["victim"]["characterID"],
+				kill["victim"]["corporationID"],
+				kill["victim"]["allianceID"],
+				kill["victim"]["factionID"],
+				kill["victim"]["shipTypeID"],
+				item["typeID"],
+				item["flag"],
+				item["qtyDropped"],
+				item["qtyDestroyed"],
+				item["singleton"])
+			
+			fit_str = ','.join(str(value) for value in fit_info)
+			fit_str = fit_str.rstrip(',')
+			#fits_SQL = "%s\n (%s)," % (fits_SQL,fit_str)
+			
+			#would prefer not to have to do it item-by-item, but :update:
+			fit_str = "%s (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped=qtyDropped + %s, qtyDestroyed = qtyDestroyed + %s"\
+				% (fits_SQL,fit_str,item["qtyDropped"],item["qtyDestroyed"])
+			
+		#fits_SQL = fits_SQL.rstrip(',')
+		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
+		progress += len(zkb_return)	
 	dumpfile = open("dump_coldcall.json",'w')
 	dumpfile.write(json.dumps(kills_obj,indent=4))
 	

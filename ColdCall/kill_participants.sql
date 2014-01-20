@@ -10,8 +10,8 @@ CREATE TABLE `kill_participants` (
 	`corporationID` int(16) NOT NULL,
 	`allianceID` int(16) DEFAULT NULL,
 	`factionID` int(16) DEFAULT NULL,
-	`finalBlow` tinyint(1) NOT NULL,
+	`finalBlow` tinyint(1) DEFAULT NULL,
 	`weaponTypeID` int(8) DEFAULT NULL,
-	`fit_json` mediumtext DEFAULT NULL,
+	-- `fit_json` mediumtext DEFAULT NULL,
 	PRIMARY KEY(killID,characterID))
 ENGINE=InnoDB DEFAULT CHARSET=latin1
