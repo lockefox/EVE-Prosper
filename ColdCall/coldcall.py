@@ -312,7 +312,7 @@ def parseargs():
 		elif opt == "--quick":		#refreshes DB if out of date, then runs report
 			cursor.execute("SELECT DATE(kill_time) FROM %s ORDER BY DATE(kill_time) DESC LIMIT 1" % db_participants)
 			query_start_str = cursor.fetchone()[0]
-
+			query_start_str = "%s" % query_start_str	#typecasting is weird?
 			if str(query_start_str) == str(datetime.utcnow().strftime("%Y-%m-%d")):
 				full_scrape = 0
 				print "DB up to date, skipping scrape"
@@ -325,7 +325,7 @@ def main():
 	parseargs()
 
 	if full_scrape == 1:
-
+		#print query_start_str
 		query_AR = zkb.Query(query_start_str)
 		query_AR.factionID(500004)	#gallente Faction
 		query_AR.api_only
