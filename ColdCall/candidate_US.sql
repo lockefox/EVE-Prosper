@@ -12,8 +12,8 @@ AND ((TIME(kills.kill_time) > '01:00' AND TIME(kills.kill_time) < '05:00')
 		AND TIME(kills.kill_time) > '18:00'))
 	OR (WEEKDAY(kills.kill_time) = 0 AND (TIME(kills.kill_time) < '05:00')))
 AND kills.corporationID = 1000181
-AND kills.kill_time > NOW() - INTERVAL 20 DAY
+AND kills.kill_time > NOW() - INTERVAL 30 DAY
 GROUP BY kills.characterID
-HAVING losses > 5 OR kills > 5
-AND latestActivity > NOW() - INTERVAL 7 DAY
+HAVING (losses + kills) > 5
+AND latestActivity > NOW() - INTERVAL 14 DAY
 ORDER BY losses DESC 
