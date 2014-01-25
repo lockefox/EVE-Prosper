@@ -174,7 +174,7 @@ def load_SQL (queryObj):
 		progress += len(zkb_return)	
 		latest_date = killTime
 		
-		return kills_obj
+	return kills_obj
 		
 def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 	api = eveapi.EVEAPIConnection()
