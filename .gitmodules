@@ -1,9 +1,9 @@
 [submodule "IndustryTools/eveapi"]
 	path = IndustryTools/eveapi
 	url = https://github.com/ntt/eveapi.git
-[submodule "ColdCall/stomp.py"]
-	path = ColdCall/stomp.py
+[submodule "KillReporter/stomp.py"]
+	path = KillReporter/stomp.py
 	url = https://github.com/jasonrbriggs/stomp.py.git
-[submodule "ColdCall/eveapi"]
-	path = ColdCall/eveapi
+[submodule "KillReporter/eveapi"]
+	path = KillReporter/eveapi
 	url = https://github.com/ntt/eveapi.git
