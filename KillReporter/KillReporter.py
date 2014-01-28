@@ -225,7 +225,7 @@ def load_SQL(queryObj):
 		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
 		progress += len(zkb_return)	
 		latest_date = killTime
-		sys.exit()
+		
 	return kills_obj
 
 def main():
