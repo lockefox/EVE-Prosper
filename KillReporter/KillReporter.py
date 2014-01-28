@@ -1,4 +1,5 @@
 #!/Python27/python.exe
+# encoding: utf-8
 
 import sys, gzip, StringIO, sys, math, os, getopt, time, json, socket
 import urllib2
@@ -111,10 +112,10 @@ def load_SQL(queryObj):
 			except KeyError:
 				victim_faction = "NULL"
 				
-			victim_name.replace('\'','\\\'')	#replace (') to avoid SQL errors
-			victim_corp.replace('\'','\\\'')
-			victim_alliance.replace('\'','\\\'')
-			victim_faction.replace('\'','\\\'')
+			victim_name = victim_name.replace('\'','\\\'')	#replace (') to avoid SQL errors
+			victim_corp = victim_corp.replace('\'','\\\'')
+			victim_alliance = victim_alliance.replace('\'','\\\'')
+			victim_faction = victim_faction.replace('\'','\\\'')
 			
 			try:
 				points = kill["zkb"]["points"]
@@ -130,13 +131,13 @@ def load_SQL(queryObj):
 				kill["victim"]["shipTypeID"],
 				kill["victim"]["damageTaken"],
 				kill["victim"]["characterID"],
-				victim_name,
+				"'%s'" % victim_name,
 				kill["victim"]["corporationID"],
-				victim_corp,
+				"'%s'" % victim_corp,
 				kill["victim"]["allianceID"],
-				victim_alliance,
+				"'%s'" % victim_alliance,
 				kill["victim"]["factionID"],
-				victim_faction,
+				"'%s'" % victim_faction,
 				"NULL",	#finalBlow
 				"NULL",	#weaponTypeID
 				points,
@@ -146,9 +147,57 @@ def load_SQL(queryObj):
 			info_str = ','.join(str(item) for item in victim_info)	#join only works on str
 			info_str = info_str.rstrip(',')	#strip trailing comma
 			victim_participants = "VALUES (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID" % info_str
-
+			#print "%s%s" % (participants_sql,victim_participants)
 			cursor.execute("%s%s" % (participants_sql,victim_participants))
 			db.commit()
+			
+			killers_SQL = "%s VALUES " % participants_sql
+			for killer in kill["attackers"]:
+				killer_name = str(killer["characterName"])
+				killer_corp = str(killer["corporationName"])
+				killer_alliance = str(killer["allianceName"])
+				try:
+					killer_faction = str(killer["factionName"])
+				except KeyError:
+					killer_faction = "NULL"
+
+				killer_name = killer_name.replace("'",'\'\'')	#replace (') to avoid SQL errors
+				killer_corp = killer_corp.replace("'",'\'\'')
+				killer_alliance = killer_alliance.replace("'",'\'\'')
+				killer_faction = killer_faction.replace("'",'\'\'')
+
+				killer_info = (
+					killID,
+					solarSystemID,
+					"'%s'" % killTime,
+					0,	#isVictim
+					killer["shipTypeID"],
+					killer["damageDone"],
+					killer["characterID"],
+					"'%s'" % killer_name,
+					killer["corporationID"],
+					"'%s'" % killer_corp,
+					killer["allianceID"],
+					"'%s'" % killer_alliance,
+					killer["factionID"],
+					"'%s'" % killer_faction,
+					killer["finalBlow"],
+					killer["weaponTypeID"],
+					"NULL",
+					"NULL",
+				)
+				
+				killer_str = ','.join(str(item) for item in killer_info)
+				killer_str = killer_str.rstrip(',')
+				killers_SQL = "%s\n (%s)," % (killers_SQL,killer_str)
+				
+			killers_SQL = killers_SQL.rstrip(',')
+			#print killers_SQL
+			killers_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID" % killers_SQL
+			
+			cursor.execute(killers_SQL)
+			db.commit()
+		sys.exit(1)
 def main():
 	db_init()
 	
