@@ -9,6 +9,25 @@ from datetime import datetime, timedelta
 from eveapi import eveapi
 import zkb
 
+conf = ConfigParser.ConfigParser()
+conf.read(["init.ini", "init_local.ini"])
+
+cursor = None
+db = None
+
+db_schema = conf.get("GLOBALS","db_name")
+db_IP = conf.get("GLOBALS","db_host")
+db_user = conf.get("GLOBALS","db_user")
+db_pw = conf.get("GLOBALS","db_pw")
+db_port = int(conf.get("GLOBALS","db_port"))
+
+db_participants = conf.get("KILL_REPORTER","db_participants")
+db_fits = conf.get("KILL_REPORTER","db_fits")
+
+#query_length = int(conf.get("COLDCALL","query_length"))
+#query_start = datetime.utcnow() - timedelta(days=query_length)
+#query_start_str = query_start.strftime("%Y-%m-%d")
+
 def db_init():
 	global cursor,db
 	db = MySQLdb.connect(host=db_IP, user=db_user, passwd=db_pw, port=db_port, db=db_schema)
