@@ -156,7 +156,7 @@ def main():
 	latestKillID = zkb.fetchLatestKillID("2014-01-26")
 	BR5R_Query = zkb.Query("2014-01-26")
 	BR5R_Query.api_only
-	BR5R_Query.systemID(30002157)
+	BR5R_Query.solarSystemID(30002157)
 	BR5R_Query.losses
 	BR5R_Query.beforeKillID(latestKillID)
 	
