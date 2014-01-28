@@ -112,10 +112,10 @@ def load_SQL(queryObj):
 			except KeyError:
 				victim_faction = "NULL"
 				
-			victim_name = victim_name.replace('\'','\\\'')	#replace (') to avoid SQL errors
-			victim_corp = victim_corp.replace('\'','\\\'')
-			victim_alliance = victim_alliance.replace('\'','\\\'')
-			victim_faction = victim_faction.replace('\'','\\\'')
+			victim_name = victim_name.replace("'",'\'\'')	#replace (') to avoid SQL errors
+			victim_corp = victim_corp.replace("'",'\'\'')
+			victim_alliance = victim_alliance.replace("'",'\'\'')
+			victim_faction = victim_faction.replace("'",'\'\'')
 			
 			try:
 				points = kill["zkb"]["points"]
@@ -197,7 +197,37 @@ def load_SQL(queryObj):
 			
 			cursor.execute(killers_SQL)
 			db.commit()
-		sys.exit(1)
+			
+		fits_SQL = "%s VALUES " % fit_sql
+		for item in kill["items"]:
+			fit_info = (
+				killID,
+				kill["victim"]["characterID"],
+				kill["victim"]["corporationID"],
+				kill["victim"]["allianceID"],
+				kill["victim"]["factionID"],
+				kill["victim"]["shipTypeID"],
+				item["typeID"],
+				item["flag"],
+				item["qtyDropped"],
+				item["qtyDestroyed"],
+				item["singleton"])
+			
+			fit_str = ','.join(str(value) for value in fit_info)
+			fit_str = fit_str.rstrip(',')
+			#fits_SQL = "%s\n (%s)," % (fits_SQL,fit_str)
+			
+			#would prefer not to have to do it item-by-item, but :update:
+			fit_str = "%s (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped=qtyDropped + %s, qtyDestroyed = qtyDestroyed + %s"\
+				% (fits_SQL,fit_str,item["qtyDropped"],item["qtyDestroyed"])
+			
+		#fits_SQL = fits_SQL.rstrip(',')
+		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
+		progress += len(zkb_return)	
+		latest_date = killTime
+		sys.exit()
+	return kills_obj
+
 def main():
 	db_init()
 	
