@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `kill_fits`;
-CREATE TABLE `kill_fits`(
+DROP TABLE IF EXISTS `KR_fits`;
+CREATE TABLE `KR_fits`(
 	`killID` int(32) NOT NULL,
 	`characterID` int(16) NOT NULL,
 	`corporationID` int(16) NOT NULL,

@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `kill_participants2`;
-CREATE TABLE `kill_participants2` (
+DROP TABLE IF EXISTS `KR_participants`;
+CREATE TABLE `KR_participants` (
 	`killID` int(32) NOT NULL,
 	`solarSystemID` int(16) NOT NULL,
 	`kill_time` datetime NOT NULL,
