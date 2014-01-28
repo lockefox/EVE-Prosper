@@ -66,7 +66,77 @@ def db_init():
 	else:
 		print "%s.%s table:\t\tGOOD" % (db_schema,db_fits)
 		
+def load_SQL(queryObj):
+	progress = 0
+	kills_obj = []
+	latest_date = ""
+	for zkb_return in queryObj:
+		print "%s: %s\t%s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),latest_date,progress)	
+		for kill in zkb_return:
+			kills_obj.append(kill)
+			participants_cols = (
+				"killID",
+				"solarSystemID",
+				"kill_time",
+				"isVictim",
+				"shipTypeID",
+				"damage",
+				"characterID",
+				"characterName",
+				"corporationID",
+				"corporationName",
+				"allianceID",
+				"allianceName",
+				"factionID",
+				"factionName",
+				"finalBlow",
+				"weaponTypeID",
+				"points",
+				"totalValue")
+				
+			participants_sql = "INSERT INTO %s (%s) " % (db_participants,','.join(participants_cols))
+			
+			fit_sql = "INSERT INTO %s (killID,characterID,corporationID,allianceID,factionID,shipTypeID,\
+				typeID,flag,qtyDropped,qtyDestroyed,singleton) " % db_fits
+				
+			killID = kill["killID"]
+			solarSystemID = kill["solarSystemID"]
+			killTime = kill["killTime"]
+			
+			victim_info = (
+				killID,
+				solarSystemID,
+				"'%s'" % killTime,
+				1,	#isVictim
+				kill["victim"]["shipTypeID"],
+				kill["victim"]["damageTaken"],
+				kill["victim"]["characterID"],
+				kill["victim"]["corporationID"],
+				kill["victim"]["allianceID"],
+				kill["victim"]["factionID"],
+				"NULL",	#finalBlow
+				"NULL",	#weaponTypeID
+				)	#json.dumps(kill["items"]))	#stringify fit for storage (without fit db)
+				
+			info_str = ','.join(str(item) for item in victim_info)	#join only works on str
+			info_str = info_str.rstrip(',')	#strip trailing comma
+			victim_participants = "VALUES (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID" % info_str
+
+			cursor.execute("%s%s" % (participants_sql,victim_participants))
+			db.commit()
 def main():
+	db_init()
+	
+	#build query
+	latestKillID = fetchLatestKillID("2014-01-26")
+	BR5R_Query = Query("2014-01-26")
+	BR5R_Query.api_only
+	BR5R_Query.systemID(30002157)
+	BR5R_Query.losses
+	BR5R_Query.beforeKillID(latestKillID)
+	
+	print "Fetching: %s" % BR5R_Query
+	kills_obj = load_SQL(BR5R_Query)
 	
 
 if __name__ == "__main__":
