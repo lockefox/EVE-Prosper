@@ -103,6 +103,25 @@ def load_SQL(queryObj):
 			solarSystemID = kill["solarSystemID"]
 			killTime = kill["killTime"]
 			
+			victim_name = kill["victim"]["characterName"]
+			victim_corp = kill["victim"]["corporationName"]
+			victim_alliance = kill["victim"]["allianceName"]
+			try:
+				victim_faction = kill["victim"]["factionName"]
+			except KeyError:
+				victim_faction = "NULL"
+				
+			victim_name.replace('\'','\\\'')	#replace (') to avoid SQL errors
+			victim_corp.replace('\'','\\\'')
+			victim_alliance.replace('\'','\\\'')
+			victim_faction.replace('\'','\\\'')
+			
+			try:
+				points = kill["zkb"]["points"]
+				totalValue = kill["zkb"]["totalValue"]
+			except KeyError:
+				points = "NULL"
+				totalValue = "NULL"
 			victim_info = (
 				killID,
 				solarSystemID,
@@ -111,11 +130,17 @@ def load_SQL(queryObj):
 				kill["victim"]["shipTypeID"],
 				kill["victim"]["damageTaken"],
 				kill["victim"]["characterID"],
+				victim_name,
 				kill["victim"]["corporationID"],
+				victim_corp,
 				kill["victim"]["allianceID"],
+				victim_alliance,
 				kill["victim"]["factionID"],
+				victim_faction,
 				"NULL",	#finalBlow
 				"NULL",	#weaponTypeID
+				points,
+				totalValue
 				)	#json.dumps(kill["items"]))	#stringify fit for storage (without fit db)
 				
 			info_str = ','.join(str(item) for item in victim_info)	#join only works on str
