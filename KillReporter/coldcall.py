@@ -174,7 +174,7 @@ def load_SQL (queryObj):
 		progress += len(zkb_return)	
 		latest_date = killTime
 		
-		return kills_obj
+	return kills_obj
 		
 def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 	api = eveapi.EVEAPIConnection()
@@ -220,10 +220,11 @@ def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 		#parse corp history to estimate character age
 		total_age = 0
 		estimated_age = 0
-		earliest_corp_date = datetime.strptime(character_info.corporationDate,"%Y-%m-%d %H:%M:%S")
+		print "%s:%s" % (character_id,datetime.fromtimestamp(character_info.corporationDate))
+		earliest_corp_date = datetime.fromtimestamp(character_info.corporationDate)
 		previous_corp_date = earliest_corp_date
 		for corpinfo in corp_history:
-			join_date = datetime.strptime(corpinfo.startDate,"%Y-%m-%d %H:%M:%S")
+			join_date = datetime.fromtimestamp(corpinfo.startDate)
 			corp_id = int(corpinfo.corporationID)
 			
 			if corp_id in NPC_corps:
@@ -242,31 +243,31 @@ def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 				estimated_age += delta.days
 				
 		total_time = datetime.utcnow() - earliest_corp_date
-		total_age = math.round(total_time.days/30)	#months
-		estimated_age = math.round(estimated_age/30) #months
+		total_age = round(total_time.days/30)	#months
+		estimated_age = round(estimated_age/30) #months
 		birthday = earliest_corp_date.strftime("%Y-%m-%d")
 		
 		#Fetch individual kill stats
-		query_length = datetime.utcnow() - relativedelta(years=1)
+		query_length = datetime.utcnow() - timedelta(weeks=52)
 		characterQuery = zkb.Query(query_length.strftime("%Y-%m-%d"))
 		characterQuery.api_only
-		characterQuery.characterID(character_id)
+		characterQuery.characterID(int(character_id))
 		
 		total_kills = 0
 		total_losses = 0
 		for zkbreturn in characterQuery:
 			print "%s: fetching kills for %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),character_name)
 			for kill in zkbreturn:
-				if int(kill["victim"]["characterID"]) == int(characterID):
+				if int(kill["victim"]["characterID"]) == int(character_id):
 					total_losses += 1
 				else:
 					total_kills +=1
 			
 		characterSoloQuery = zkb.Query(query_length.strftime("%Y-%m-%d"))
 		characterSoloQuery.api_only
-		characterQuery.characterID(character_id)
-		characterQuery.solo
-		characterQuery.kills
+		characterSoloQuery.characterID(int(character_id))
+		characterSoloQuery.solo
+		characterSoloQuery.kills
 		
 		solo_kills = 0
 		for zkbsolo in characterSoloQuery:
@@ -274,18 +275,18 @@ def buildReport(sqlFile = "candidate_US.sql", outFile = "candidates.csv"):
 			
 		report_line = (
 			character_name,
-			characterID,
+			character_id,
 			corporation_name,
 			kills,
 			losses,
 			latest_activity,
-			"https://zkillboard.com/character/%s/" % characterID,
+			"https://zkillboard.com/character/%s/" % character_id,
 			solo_kills,
 			total_kills,
 			total_losses,
 			birthday,
 			estimated_age,
-			toatl_age)
+			total_age)
 		report_data.append(report_line)
 	
 	result_file = open(outFile,'w')	
