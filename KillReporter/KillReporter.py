@@ -153,7 +153,7 @@ def main():
 	db_init()
 	
 	#build query
-	latestKillID = fetchLatestKillID("2014-01-26")
+	skb.latestKillID = fetchLatestKillID("2014-01-26")
 	BR5R_Query = Query("2014-01-26")
 	BR5R_Query.api_only
 	BR5R_Query.systemID(30002157)
