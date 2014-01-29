@@ -99,13 +99,13 @@ class Query(object):
 	def startTime(self,datevalue):
 		validTime = False
 		try:
-			date = time.strptime(datevalue,"%Y-%m-%d")
+			date = datetime.strptime(datevalue,"%Y-%m-%d")
 		except ValueError as e:
 			try:
-				date = time.strptime(datevalue,"%Y-%m-%d %H:%M")
+				date = datetime.strptime(datevalue,"%Y-%m-%d %H:%M")
 			except ValueError as e2:
 				try:
-					date = time.strptime(datevalue,"%Y%m%d%H%M")
+					date = datetime.strptime(datevalue,"%Y%m%d%H%M")
 					validTime = True
 				except ValueError as e3:
 					raise e3
@@ -114,19 +114,19 @@ class Query(object):
 		if validTime:
 			date_str = datevalue
 		else:
-			date_str = dateConv(date)
+			date_str = self.dateConv(date)
 		self.queryElements["startTime"] = date_str
 
 	def endTime(self,datevalue):
 		validTime = False
 		try:
-			date = time.strptime(datevalue,"%Y-%m-%d")
+			date = datetime.strptime(datevalue,"%Y-%m-%d")
 		except ValueError as e:
 			try:
-				date = time.strptime(datevalue,"%Y-%m-%d %H:%M")
+				date = datetime.strptime(datevalue,"%Y-%m-%d %H:%M")
 			except ValueError as e2:
 				try:
-					date = time.strptime(datevalue,"%Y%m%d%H%M")
+					date = datetime.strptime(datevalue,"%Y%m%d%H%M")
 					validTime = True
 				except ValueError as e3:
 					raise e3
@@ -135,7 +135,7 @@ class Query(object):
 		if validTime:
 			date_str = datevalue
 		else:
-			date_str = dateConv(date)
+			date_str = self.dateConv(date)
 			
 		self.queryElements["endTime"] = date_str
 				

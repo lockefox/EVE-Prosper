@@ -232,15 +232,16 @@ def main():
 	db_init()
 	
 	#build query
-	latestKillID = zkb.fetchLatestKillID("2014-01-25")
-	BR5R_Query = zkb.Query("2014-01-25")
-	BR5R_Query.api_only
-	BR5R_Query.solarSystemID(30002157)
-	BR5R_Query.losses
-	BR5R_Query.beforeKillID(latestKillID)
+	latestKillID = zkb.fetchLatestKillID("2014-01-15")
+	HEDGP_Query = zkb.Query("2014-01-15")
+	HEDGP_Query.api_only
+	HEDGP_Query.solarSystemID(30001161)
+	HEDGP_Query.losses
+	HEDGP_Query.beforeKillID(latestKillID)
+	HEDGP_Query.endTime("2014-01-20")
 	
-	print "Fetching: %s" % BR5R_Query
-	kills_obj = load_SQL(BR5R_Query)
+	print "Fetching: %s" % HEDGP_Query
+	kills_obj = load_SQL(HEDGP_Query)
 	
 
 if __name__ == "__main__":
