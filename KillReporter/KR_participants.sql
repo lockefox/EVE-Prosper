@@ -17,7 +17,7 @@ CREATE TABLE `KR_participants` (
 	`finalBlow` tinyint(1) DEFAULT NULL,
 	`weaponTypeID` int(8) DEFAULT NULL,
 	`points` int(8) DEFAULT NULL,
-	`totalValue` decimal(13,2) DEFAULT NULL,
+	`totalValue` decimal(16,2) DEFAULT NULL,
 	-- `fit_json` mediumtext DEFAULT NULL,
 	PRIMARY KEY(killID,characterID))
 ENGINE=InnoDB DEFAULT CHARSET=latin1

@@ -232,8 +232,8 @@ def main():
 	db_init()
 	
 	#build query
-	latestKillID = zkb.fetchLatestKillID("2014-01-26")
-	BR5R_Query = zkb.Query("2014-01-26")
+	latestKillID = zkb.fetchLatestKillID("2014-01-25")
+	BR5R_Query = zkb.Query("2014-01-25")
 	BR5R_Query.api_only
 	BR5R_Query.solarSystemID(30002157)
 	BR5R_Query.losses
