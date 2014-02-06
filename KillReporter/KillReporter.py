@@ -103,15 +103,23 @@ def load_SQL(queryObj):
 			killID = kill["killID"]
 			solarSystemID = kill["solarSystemID"]
 			killTime = kill["killTime"]
-			
-			victim_name = kill["victim"]["characterName"]
-			victim_corp = kill["victim"]["corporationName"]
-			victim_alliance = kill["victim"]["allianceName"]
+			try:
+				victim_name = str(kill["victim"]["characterName"])
+			except UnicodeEncodeError, e:
+				victim_name = "DEFAULT CHARACTER NAME"
+			try:	
+				victim_corp = str(kill["victim"]["corporationName"])
+			except UnicodeEncodeError, e:
+				victim_corp = "DEFAULT CORP NAME"
+			try:
+				victim_alliance = str(kill["victim"]["allianceName"])
+			except UnicodeEncodeError, e:
+				victim_alliance = "DEFAULT ALLIANCE NAME"
 			try:
 				victim_faction = kill["victim"]["factionName"]
 			except KeyError:
 				victim_faction = "NULL"
-				
+
 			victim_name = victim_name.replace("'",'\'\'')	#replace (') to avoid SQL errors
 			victim_corp = victim_corp.replace("'",'\'\'')
 			victim_alliance = victim_alliance.replace("'",'\'\'')
@@ -153,9 +161,18 @@ def load_SQL(queryObj):
 			
 			killers_SQL = "%s VALUES " % participants_sql
 			for killer in kill["attackers"]:
-				killer_name = str(killer["characterName"])
-				killer_corp = str(killer["corporationName"])
-				killer_alliance = str(killer["allianceName"])
+				try:
+					killer_name = str(killer["characterName"])
+				except UnicodeEncodeError, e:
+					killer_name = "DEFAULT CHARACTER NAME"
+				try:
+					killer_corp = str(killer["corporationName"])
+				except UnicodeEncodeError, e:
+					killer_corp = "DEFAULT CORP NAME"
+				try:
+					killer_alliance = str(killer["allianceName"])
+				except UnicodeEncodeError, e:
+					killer_alliance = "DEFAULT ALLIANCE NAME"
 				try:
 					killer_faction = str(killer["factionName"])
 				except KeyError:
@@ -232,16 +249,27 @@ def main():
 	db_init()
 	
 	#build query
-	latestKillID = zkb.fetchLatestKillID("2014-01-15")
-	HEDGP_Query = zkb.Query("2014-01-15")
-	HEDGP_Query.api_only
-	HEDGP_Query.solarSystemID(30001161)
-	HEDGP_Query.losses
-	HEDGP_Query.beforeKillID(latestKillID)
-	HEDGP_Query.endTime("2014-01-20")
-	
-	print "Fetching: %s" % HEDGP_Query
-	kills_obj = load_SQL(HEDGP_Query)
+	kills_obj=[]
+	ship_groupIDs=json.load(open("toaster_shiplist.json"))
+	for groupID,shipType in ship_groupIDs["groupID"].iteritems():
+		print "%s: Fetching %s" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),shipType)
+		latestKillID = zkb.fetchLatestKillID("2014-01-15")
+		groupQuery = zkb.Query("2013-12-01")
+		groupQuery.groupID(int(groupID))
+		groupQuery.losses
+		groupQuery.api_only
+		groupQuery.beforeKillID(latestKillID)
+		tmp_kills_obj = load_SQL(groupQuery)
+		kills_obj.append(tmp_kills_obj)
+	#HEDGP_Query = zkb.Query("2014-01-15")
+	#HEDGP_Query.api_only
+	#HEDGP_Query.solarSystemID(30001161)
+	#HEDGP_Query.losses
+	#HEDGP_Query.beforeKillID(latestKillID)
+	#HEDGP_Query.endTime("2014-01-20")
+	#tmp_kills_obj = load_SQL(
+	#print "Fetching: %s" % HEDGP_Query
+	#kills_obj = load_SQL(HEDGP_Query)
 	
 
 if __name__ == "__main__":
