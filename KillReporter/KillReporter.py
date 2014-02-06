@@ -215,40 +215,40 @@ def load_SQL(queryObj):
 			cursor.execute(killers_SQL)
 			db.commit()
 			
-		fits_SQL = "%s VALUES " % fit_sql
-		for item in kill["items"]:
-			fit_info = (
-				killID,
-				kill["victim"]["characterID"],
-				kill["victim"]["corporationID"],
-				kill["victim"]["allianceID"],
-				kill["victim"]["factionID"],
-				kill["victim"]["shipTypeID"],
-				item["typeID"],
-				item["flag"],
-				item["qtyDropped"],
-				item["qtyDestroyed"],
-				item["singleton"])
-			
-			fit_str = ','.join(str(value) for value in fit_info)
-			fit_str = fit_str.rstrip(',')
-			#fits_SQL = "%s\n (%s)," % (fits_SQL,fit_str)
-			
-			#would prefer not to have to do it item-by-item, but :update:
-			fit_str = "%s (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped=qtyDropped + %s, qtyDestroyed = qtyDestroyed + %s"\
-				% (fits_SQL,fit_str,item["qtyDropped"],item["qtyDestroyed"])
-			
+			fits_SQL = "%s VALUES " % fit_sql
+			for item in kill["items"]:
+				fit_info = (
+					killID,
+					kill["victim"]["characterID"],
+					kill["victim"]["corporationID"],
+					kill["victim"]["allianceID"],
+					kill["victim"]["factionID"],
+					kill["victim"]["shipTypeID"],
+					item["typeID"],
+					item["flag"],
+					item["qtyDropped"],
+					item["qtyDestroyed"],
+					item["singleton"])
+				
+				fit_str = ','.join(str(value) for value in fit_info)
+				fit_str = fit_str.rstrip(',')
+				#fits_SQL = "%s\n (%s)," % (fits_SQL,fit_str)
+				
+				#would prefer not to have to do it item-by-item, but :update:
+				fit_str = "%s (%s) ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped=qtyDropped + %s, qtyDestroyed = qtyDestroyed + %s"\
+					% (fits_SQL,fit_str,item["qtyDropped"],item["qtyDestroyed"])
+				
 		#fits_SQL = fits_SQL.rstrip(',')
 		#fits_SQL = "%s ON DUPLICATE KEY UPDATE killID=killID, characterID=characterID, qtyDropped+=" % fits_SQL
+			latest_date = killTime
 		progress += len(zkb_return)	
-		latest_date = killTime
-		
 	return kills_obj
 
 def main():
 	db_init()
 	
 	#build query
+
 	kills_obj=[]
 	ship_groupIDs=json.load(open("toaster_shiplist.json"))
 	for groupID,shipType in ship_groupIDs["groupID"].iteritems():
@@ -270,7 +270,63 @@ def main():
 	#tmp_kills_obj = load_SQL(
 	#print "Fetching: %s" % HEDGP_Query
 	#kills_obj = load_SQL(HEDGP_Query)
-	
 
+
+	#
+	##latestKillID = zkb.fetchLatestKillID("2014-01-28")
+	#Carrou_Query = zkb.Query("2014-01-24")
+	#Carrou_Query.api_only
+	#Carrou_Query.solarSystemID(30002645)
+	#Carrou_Query.losses
+	#Carrou_Query.beforeKillID(36366614)
+	#Carrou_Query.endTime("2014-01-29")
+	#
+	#print "Fetching: %s" % Carrou_Query
+	#kills_obj = load_SQL(Carrou_Query)
+
+	#
+	##latestKillID = zkb.fetchLatestKillID("2014-01-28")
+	#GXK_Query = zkb.Query("2014-01-24")
+	#GXK_Query.api_only
+	#GXK_Query.solarSystemID(30002123)
+	#GXK_Query.losses
+	#GXK_Query.beforeKillID(36366614)
+	#GXK_Query.endTime("2014-01-29")
+    #
+	#print "Fetching: %s" % GXK_Query
+	#kills_obj = load_SQL(GXK_Query)
+	#
+	##latestKillID = zkb.fetchLatestKillID("2014-01-28")
+	#ING_Query = zkb.Query("2014-01-24")
+	#ING_Query.api_only
+	#ING_Query.solarSystemID(30002134)
+	#ING_Query.losses
+	#ING_Query.beforeKillID(36366614)
+	#ING_Query.endTime("2014-01-29")
+    #
+	#print "Fetching: %s" % ING_Query
+	#kills_obj = load_SQL(ING_Query)
+	#
+	##latestKillID = zkb.fetchLatestKillID("2014-01-28")
+	#KDF_Query = zkb.Query("2014-01-24")
+	#KDF_Query.api_only
+	#KDF_Query.solarSystemID(30001164)
+	#KDF_Query.losses
+	#KDF_Query.beforeKillID(36366614)
+	#KDF_Query.endTime("2014-01-29")
+    #
+	#print "Fetching: %s" % KDF_Query
+	#kills_obj = load_SQL(KDF_Query)
+	#
+	##latestKillID = zkb.fetchLatestKillID("2014-01-28")
+	#BR5RB_Query = zkb.Query("2014-01-24")
+	#BR5RB_Query.api_only
+	#BR5RB_Query.solarSystemID(30002157)
+	#BR5RB_Query.losses
+	#BR5RB_Query.beforeKillID(36366614)
+	#BR5RB_Query.endTime("2014-01-29")
+	#
+	#print "Fetching: %s" % BR5RB_Query
+	#kills_obj = load_SQL(BR5RB_Query)
 if __name__ == "__main__":
 	main()
