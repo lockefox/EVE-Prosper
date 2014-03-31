@@ -37,6 +37,8 @@ valid_modifiers = (
 	"no-attackers",
 	"api-only",
 	"xml")
+
+gzip_override=0
 	
 class QueryException(Exception):
 	def __init__ (self,code):
@@ -368,6 +370,7 @@ def fetchResults(queryObj,joined_json = []):
 	
 def fetchResult(zkb_url):	
 	global sleepTime
+	global gzip_override
 	
 	request = urllib2.Request(zkb_url)
 	request.add_header('Accept-Encoding','gzip')
@@ -416,16 +419,28 @@ def fetchResult(zkb_url):
 			_snooze(http_header)
 		else:
 			sleepTime = default_sleep
-		
-		try:
-			dump_IOstream = StringIO.StringIO(dump_zip_stream)
-			zipper = gzip.GzipFile(fileobj=dump_IOstream)
-			JSON_obj = json.load(zipper)
-		except ValueError as errr:
-			#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), errr))
-			print "Empty response.  Retry %s: %s" %(zkb_url,tries+1)
 			
-		else:
+		if gzip_override == 0:	#Hard override of gzip encoding
+			try:
+				dump_IOstream = StringIO.StringIO(dump_zip_stream)
+				zipper = gzip.GzipFile(fileobj=dump_IOstream)
+				JSON_obj = json.load(zipper)
+			except ValueError as errr:
+				#log_filehandle.write("%s: %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), errr))
+				print "Empty response.  Retry %s: %s" %(zkb_url,tries+1)
+			except IOError as errrr:
+				print "gzip header broken.  Disabling gzip and retry"
+				gzip_override = 1
+				fetchResult(zkb_url)
+			else:
+				break
+		else:	#If gzipencoding is broken, treat return as valid JSON
+			try:
+				JSON_obj = json.loads(dump_zip_stream)
+			except ValueError:	#if stream is grossly not-JSON
+				print "Unable to read return.  enabling gzip again"
+				gzip_override = 0
+				fetchResult(zkb_url)
 			break
 	else:
 		print http_header
