@@ -176,7 +176,7 @@ class BPO:
 		self.ITEM_typeName = self.ITEM_properties["typeName"]
 		
 			#Fetch ME-affected materials
-		db_cursor.execute('''SElECT materialTypeID,quantity
+		db_cursor.execute('''SELECT materialTypeID,quantity
 			FROM invtypematerials
 			WHERE typeID=%s''' % self.ITEM_typeID)
 		for row in db_cursor.fetchall():
