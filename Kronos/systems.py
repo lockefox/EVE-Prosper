@@ -17,7 +17,7 @@ class System:
 		
 		##TODO: modifier controllers.  Will see how much info/control is given
 
-		self.jobHoursMod_
+		self.jobHoursObj = JobHours()
 		self.FWmod = 0.0
 		
 class JobHours(System):
@@ -30,6 +30,7 @@ class JobHours(System):
 		self.jobHoursMod_re  = 0.0
 		
 		#TODO: link parent/child
+		self.fetchModifiers()
 	def __call__(self,jobKey):	#obj_JobHours(1=mfg) return job mod for mfg
 		#TODO: automate off SDE?
 		if isinstance(jobKey, (int, long)):
@@ -79,5 +80,5 @@ class Station(System):	#Stations are children to systems
 		#Reliant on modifier API/SDE
 	def __init__(self):
 		self.tax = 0.0
-		self.facilityReduction = 0.0
+		self.facilityModifier = 0.0
 		pass
