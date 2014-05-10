@@ -1,6 +1,7 @@
 import MySQLdb
 import ConfigParser
 
+###TODO: single config parser on import?
 conf = ConfigParser.ConfigParser()
 conf.read(["init_tmp.ini","init.ini"])
 
@@ -21,7 +22,7 @@ class Blueprint:
 		self.techLevel = 0
 		self.defaultRunsT2 = 10
 		self.base_materials = []
-		self.extra_materials = []
+		##self.extra_materials = [] #NOT NEEDED IN KRONOS
 		self.productionEfficiency = []
 		self.materialEffciency = []
 		self.copying = []
