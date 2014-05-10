@@ -7,3 +7,6 @@
 [submodule "KillReporter/eveapi"]
 	path = KillReporter/eveapi
 	url = https://github.com/ntt/eveapi.git
+[submodule "Kronos/eveapi"]
+	path = Kronos/eveapi
+	url = https://github.com/ntt/eveapi.git

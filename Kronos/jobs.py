@@ -24,9 +24,7 @@ class Job:
 	#
 	#Job returns:
 	#	- Bill of Materials
-	#	- Estimated cost of job
+	#	- Estimated cost of job (per unit?)
 	def __init__(self):
-		
-		
 		pass
 		

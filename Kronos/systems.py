@@ -74,11 +74,15 @@ class JobHours(System):
 		
 	def fetchModifiers(self):
 		pass	#TODO: need to figure out API/local config
-		
+
+
 class Station(System):	#Stations are children to systems
 		#This ~should~ allow dynamic control of job cost modifiers?
 		#Reliant on modifier API/SDE
 	def __init__(self):
 		self.tax = 0.0
-		self.facilityModifier = 0.0
+		#TODO: break out bonuses by job type
+		self.costModifier = 1.0
+		self.materialModifier = 1.0
+		self.timeModifier = 1.0
 		pass
