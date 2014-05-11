@@ -14,7 +14,7 @@ default_characterObj = None #todo: slurp in default character once only
 
 class Character():
 	def __init__(self):
-		self.skills = skill_list_default
+		self.skills = skill_list_default	#skills={typeID:level,typeID:level}
 		self.name = ""
 		self.characterID = 0
 		self.corporationName = ""
@@ -42,4 +42,5 @@ class Character():
 		else:
 			raise TypeError
 			
-			
+	def dump(self):
+		return self.skills		
