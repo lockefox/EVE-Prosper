@@ -36,4 +36,5 @@ class Blueprint:
 	def __int__(self):
 		return self.typeID
 		
-	
+	def billOfMaterials(self,characterObj,ME,materialModifier=1,implantModifier=1):
+		

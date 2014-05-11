@@ -21,14 +21,14 @@ class System:
 		self.FWmod = 0.0
 		
 class JobHours(System):
-	def __init__(self):
+	def __init__(self,systemID):
 		self.jobHoursMod_mfg = 0.0
 		self.jobHoursMod_cpy = 0.0
 		self.jobHoursMod_inv = 0.0
 		self.jobHoursMod_me  = 0.0
 		self.jobHoursMod_te  = 0.0
 		self.jobHoursMod_re  = 0.0
-		
+		self.sytemID = systemID
 		#TODO: link parent/child
 		self.fetchModifiers()
 	def __call__(self,jobKey):	#obj_JobHours(1=mfg) return job mod for mfg
